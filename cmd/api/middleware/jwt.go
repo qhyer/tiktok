@@ -1,0 +1,43 @@
+package middleware
+
+import (
+	"context"
+	"github.com/cloudwego/hertz/pkg/app"
+	"net/http"
+	"tiktok/cmd/api/handler"
+	"tiktok/cmd/api/util"
+)
+
+func JWT() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		tokenStr := c.PostForm("token")
+		if tokenStr == "" {
+			tokenStr = c.Query("token")
+		}
+
+		// token不能为空
+		if tokenStr == "" {
+			c.JSON(http.StatusForbidden, handler.Response{
+				StatusCode: 403,
+				StatusMsg:  "token cannot be empty",
+			})
+			c.Abort()
+			return
+		}
+
+		claims, err := util.ParseToken(tokenStr)
+		if err != nil {
+			c.JSON(http.StatusForbidden, handler.Response{
+				StatusCode: 403,
+				StatusMsg:  err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		userID := claims.UserID
+
+		// 请求中加入userID
+		c.Set("UserID", userID)
+
+	}
+}
