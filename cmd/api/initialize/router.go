@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"tiktok/cmd/api/handler"
 	"tiktok/cmd/api/middleware"
 )
 
@@ -12,7 +13,7 @@ func Router() {
 	apiRouter := h.Group("/douyin/")
 
 	// TODO: 用户注册和登录接口
-	apiRouter.POST("/user/login/")
+	apiRouter.POST("/user/register/", handler.Register)
 
 	// 需要鉴权的接口路由
 	authRouter := h.Group("/")

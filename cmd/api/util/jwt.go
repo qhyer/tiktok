@@ -9,12 +9,12 @@ import (
 )
 
 type UserClaims struct {
-	UserID uint64
+	UserID int64
 	jwt.RegisteredClaims
 }
 
 // GenerateToken 生成 token
-func GenerateToken(userID uint64) (string, error) {
+func GenerateToken(userID int64) (string, error) {
 	// 获取签名密钥
 	signingKey := []byte(global.Config.JWTConfig.SigningKey)
 	// 生成token

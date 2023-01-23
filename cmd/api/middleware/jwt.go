@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"tiktok/cmd/api/handler"
 	"tiktok/cmd/api/util"
+	"tiktok/pkg/errno"
 )
 
 func JWT() app.HandlerFunc {
@@ -18,7 +19,7 @@ func JWT() app.HandlerFunc {
 		// token不能为空
 		if tokenStr == "" {
 			c.JSON(http.StatusForbidden, handler.Response{
-				StatusCode: 403,
+				StatusCode: errno.ParamErrCode,
 				StatusMsg:  "token cannot be empty",
 			})
 			c.Abort()
@@ -28,7 +29,7 @@ func JWT() app.HandlerFunc {
 		claims, err := util.ParseToken(tokenStr)
 		if err != nil {
 			c.JSON(http.StatusForbidden, handler.Response{
-				StatusCode: 403,
+				StatusCode: errno.ParamErrCode,
 				StatusMsg:  err.Error(),
 			})
 			c.Abort()
