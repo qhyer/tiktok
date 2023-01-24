@@ -22,9 +22,9 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserSrv"
 	handlerType := (*user.UserSrv)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"Register":        kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
-		"Login":           kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
-		"GetUserInfoById": kitex.NewMethodInfo(getUserInfoByIdHandler, newGetUserInfoByIdArgs, newGetUserInfoByIdResult, false),
+		"Register":             kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
+		"Login":                kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
+		"GetUserInfoByUserIds": kitex.NewMethodInfo(getUserInfoByUserIdsHandler, newGetUserInfoByUserIdsArgs, newGetUserInfoByUserIdsResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "user",
@@ -330,7 +330,7 @@ func (p *LoginResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func getUserInfoByIdHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+func getUserInfoByUserIdsHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
@@ -338,64 +338,64 @@ func getUserInfoByIdHandler(ctx context.Context, handler interface{}, arg, resul
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(user.UserSrv).GetUserInfoById(ctx, req)
+		resp, err := handler.(user.UserSrv).GetUserInfoByUserIds(ctx, req)
 		if err != nil {
 			return err
 		}
 		if err := st.SendMsg(resp); err != nil {
 			return err
 		}
-	case *GetUserInfoByIdArgs:
-		success, err := handler.(user.UserSrv).GetUserInfoById(ctx, s.Req)
+	case *GetUserInfoByUserIdsArgs:
+		success, err := handler.(user.UserSrv).GetUserInfoByUserIds(ctx, s.Req)
 		if err != nil {
 			return err
 		}
-		realResult := result.(*GetUserInfoByIdResult)
+		realResult := result.(*GetUserInfoByUserIdsResult)
 		realResult.Success = success
 	}
 	return nil
 }
-func newGetUserInfoByIdArgs() interface{} {
-	return &GetUserInfoByIdArgs{}
+func newGetUserInfoByUserIdsArgs() interface{} {
+	return &GetUserInfoByUserIdsArgs{}
 }
 
-func newGetUserInfoByIdResult() interface{} {
-	return &GetUserInfoByIdResult{}
+func newGetUserInfoByUserIdsResult() interface{} {
+	return &GetUserInfoByUserIdsResult{}
 }
 
-type GetUserInfoByIdArgs struct {
+type GetUserInfoByUserIdsArgs struct {
 	Req *user.DouyinUserInfoRequest
 }
 
-func (p *GetUserInfoByIdArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *GetUserInfoByUserIdsArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
 		p.Req = new(user.DouyinUserInfoRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
 
-func (p *GetUserInfoByIdArgs) FastWrite(buf []byte) (n int) {
+func (p *GetUserInfoByUserIdsArgs) FastWrite(buf []byte) (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.FastWrite(buf)
 }
 
-func (p *GetUserInfoByIdArgs) Size() (n int) {
+func (p *GetUserInfoByUserIdsArgs) Size() (n int) {
 	if !p.IsSetReq() {
 		return 0
 	}
 	return p.Req.Size()
 }
 
-func (p *GetUserInfoByIdArgs) Marshal(out []byte) ([]byte, error) {
+func (p *GetUserInfoByUserIdsArgs) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetReq() {
-		return out, fmt.Errorf("No req in GetUserInfoByIdArgs")
+		return out, fmt.Errorf("No req in GetUserInfoByUserIdsArgs")
 	}
 	return proto.Marshal(p.Req)
 }
 
-func (p *GetUserInfoByIdArgs) Unmarshal(in []byte) error {
+func (p *GetUserInfoByUserIdsArgs) Unmarshal(in []byte) error {
 	msg := new(user.DouyinUserInfoRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
@@ -404,54 +404,54 @@ func (p *GetUserInfoByIdArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var GetUserInfoByIdArgs_Req_DEFAULT *user.DouyinUserInfoRequest
+var GetUserInfoByUserIdsArgs_Req_DEFAULT *user.DouyinUserInfoRequest
 
-func (p *GetUserInfoByIdArgs) GetReq() *user.DouyinUserInfoRequest {
+func (p *GetUserInfoByUserIdsArgs) GetReq() *user.DouyinUserInfoRequest {
 	if !p.IsSetReq() {
-		return GetUserInfoByIdArgs_Req_DEFAULT
+		return GetUserInfoByUserIdsArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-func (p *GetUserInfoByIdArgs) IsSetReq() bool {
+func (p *GetUserInfoByUserIdsArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-type GetUserInfoByIdResult struct {
+type GetUserInfoByUserIdsResult struct {
 	Success *user.DouyinUserInfoResponse
 }
 
-var GetUserInfoByIdResult_Success_DEFAULT *user.DouyinUserInfoResponse
+var GetUserInfoByUserIdsResult_Success_DEFAULT *user.DouyinUserInfoResponse
 
-func (p *GetUserInfoByIdResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+func (p *GetUserInfoByUserIdsResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
 		p.Success = new(user.DouyinUserInfoResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
 
-func (p *GetUserInfoByIdResult) FastWrite(buf []byte) (n int) {
+func (p *GetUserInfoByUserIdsResult) FastWrite(buf []byte) (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.FastWrite(buf)
 }
 
-func (p *GetUserInfoByIdResult) Size() (n int) {
+func (p *GetUserInfoByUserIdsResult) Size() (n int) {
 	if !p.IsSetSuccess() {
 		return 0
 	}
 	return p.Success.Size()
 }
 
-func (p *GetUserInfoByIdResult) Marshal(out []byte) ([]byte, error) {
+func (p *GetUserInfoByUserIdsResult) Marshal(out []byte) ([]byte, error) {
 	if !p.IsSetSuccess() {
-		return out, fmt.Errorf("No req in GetUserInfoByIdResult")
+		return out, fmt.Errorf("No req in GetUserInfoByUserIdsResult")
 	}
 	return proto.Marshal(p.Success)
 }
 
-func (p *GetUserInfoByIdResult) Unmarshal(in []byte) error {
+func (p *GetUserInfoByUserIdsResult) Unmarshal(in []byte) error {
 	msg := new(user.DouyinUserInfoResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
@@ -460,18 +460,18 @@ func (p *GetUserInfoByIdResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *GetUserInfoByIdResult) GetSuccess() *user.DouyinUserInfoResponse {
+func (p *GetUserInfoByUserIdsResult) GetSuccess() *user.DouyinUserInfoResponse {
 	if !p.IsSetSuccess() {
-		return GetUserInfoByIdResult_Success_DEFAULT
+		return GetUserInfoByUserIdsResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-func (p *GetUserInfoByIdResult) SetSuccess(x interface{}) {
+func (p *GetUserInfoByUserIdsResult) SetSuccess(x interface{}) {
 	p.Success = x.(*user.DouyinUserInfoResponse)
 }
 
-func (p *GetUserInfoByIdResult) IsSetSuccess() bool {
+func (p *GetUserInfoByUserIdsResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
@@ -505,11 +505,11 @@ func (p *kClient) Login(ctx context.Context, Req *user.DouyinUserLoginRequest) (
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) GetUserInfoById(ctx context.Context, Req *user.DouyinUserInfoRequest) (r *user.DouyinUserInfoResponse, err error) {
-	var _args GetUserInfoByIdArgs
+func (p *kClient) GetUserInfoByUserIds(ctx context.Context, Req *user.DouyinUserInfoRequest) (r *user.DouyinUserInfoResponse, err error) {
+	var _args GetUserInfoByUserIdsArgs
 	_args.Req = Req
-	var _result GetUserInfoByIdResult
-	if err = p.c.Call(ctx, "GetUserInfoById", &_args, &_result); err != nil {
+	var _result GetUserInfoByUserIdsResult
+	if err = p.c.Call(ctx, "GetUserInfoByUserIds", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

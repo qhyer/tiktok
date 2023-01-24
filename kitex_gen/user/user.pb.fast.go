@@ -195,7 +195,16 @@ ReadFieldError:
 }
 
 func (x *DouyinUserInfoRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	offset, err = fastpb.ReadList(buf, _type,
+		func(buf []byte, _type int8) (n int, err error) {
+			var v int64
+			v, offset, err = fastpb.ReadInt64(buf, _type)
+			if err != nil {
+				return offset, err
+			}
+			x.UserIds = append(x.UserIds, v)
+			return offset, err
+		})
 	return offset, err
 }
 
@@ -246,7 +255,7 @@ func (x *DouyinUserInfoResponse) fastReadField3(buf []byte, _type int8) (offset 
 	if err != nil {
 		return offset, err
 	}
-	x.User = &v
+	x.User = append(x.User, &v)
 	return offset, nil
 }
 
@@ -444,10 +453,15 @@ func (x *DouyinUserInfoRequest) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *DouyinUserInfoRequest) fastWriteField1(buf []byte) (offset int) {
-	if x.UserId == 0 {
+	if len(x.UserIds) == 0 {
 		return offset
 	}
-	offset += fastpb.WriteInt64(buf[offset:], 1, x.UserId)
+	offset += fastpb.WriteListPacked(buf[offset:], 1, len(x.UserIds),
+		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
+			offset := 0
+			offset += fastpb.WriteInt64(buf[offset:], numTagOrKey, x.UserIds[numIdxOrVal])
+			return offset
+		})
 	return offset
 }
 
@@ -481,7 +495,9 @@ func (x *DouyinUserInfoResponse) fastWriteField3(buf []byte) (offset int) {
 	if x.User == nil {
 		return offset
 	}
-	offset += fastpb.WriteMessage(buf[offset:], 3, x.User)
+	for i := range x.User {
+		offset += fastpb.WriteMessage(buf[offset:], 3, x.User[i])
+	}
 	return offset
 }
 
@@ -664,10 +680,15 @@ func (x *DouyinUserInfoRequest) Size() (n int) {
 }
 
 func (x *DouyinUserInfoRequest) sizeField1() (n int) {
-	if x.UserId == 0 {
+	if len(x.UserIds) == 0 {
 		return n
 	}
-	n += fastpb.SizeInt64(1, x.UserId)
+	n += fastpb.SizeListPacked(1, len(x.UserIds),
+		func(numTagOrKey, numIdxOrVal int32) int {
+			n := 0
+			n += fastpb.SizeInt64(numTagOrKey, x.UserIds[numIdxOrVal])
+			return n
+		})
 	return n
 }
 
@@ -701,7 +722,9 @@ func (x *DouyinUserInfoResponse) sizeField3() (n int) {
 	if x.User == nil {
 		return n
 	}
-	n += fastpb.SizeMessage(3, x.User)
+	for i := range x.User {
+		n += fastpb.SizeMessage(3, x.User[i])
+	}
 	return n
 }
 
@@ -780,7 +803,7 @@ var fieldIDToName_DouyinUserLoginResponse = map[int32]string{
 }
 
 var fieldIDToName_DouyinUserInfoRequest = map[int32]string{
-	1: "UserId",
+	1: "UserIds",
 }
 
 var fieldIDToName_DouyinUserInfoResponse = map[int32]string{
