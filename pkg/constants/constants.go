@@ -1,18 +1,10 @@
 package constants
 
 const (
-	NoteTableName           = "note"
 	UserTableName           = "user"
-	SecretKey               = "secret key"
-	IdentityKey             = "id"
-	Total                   = "total"
-	Notes                   = "notes"
-	NoteID                  = "note_id"
-	ApiServiceName          = "demoapi"
-	NoteServiceName         = "demonote"
-	UserServiceName         = "demouser"
-	MySQLDefaultDSN         = "gorm:gorm@tcp(localhost:9910)/gorm?charset=utf8&parseTime=True&loc=Local"
+	ApiServiceName          = "api"
+	UserServiceName         = "user"
+	MySQLDefaultDSN         = "root:DFNFoTdxTfPY3B7X@tcp(localhost:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	EtcdAddress             = "127.0.0.1:2379"
 	CPURateLimit    float64 = 80.0
-	DefaultLimit            = 10
 )

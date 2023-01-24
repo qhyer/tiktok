@@ -10,7 +10,7 @@ import (
 func Viper() {
 	// 设置配置文件类型和路径
 	viper.SetConfigType("yaml")
-	viper.SetConfigFile("./config/config.yaml")
+	viper.SetConfigFile("./config/config.yml")
 	// 读取配置文件
 	err := viper.ReadInConfig()
 	if err != nil {
