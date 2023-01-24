@@ -33,7 +33,7 @@ func (s *CheckUserService) CheckUser(req *user.DouyinUserLoginRequest) (int64, e
 	if !CheckPasswordHash(req.Password, u.Password) {
 		return 0, errno.AuthorizationFailedErr
 	}
-	return int64(u.ID), nil
+	return int64(u.Id), nil
 }
 
 func CheckPasswordHash(password, hash string) bool {

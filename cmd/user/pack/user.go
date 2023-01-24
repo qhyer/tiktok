@@ -11,11 +11,11 @@ func User(u *db.User) *user.User {
 		return nil
 	}
 
-	followCount := int64(u.FollowCount)
-	followerCount := int64(u.FollowerCount)
+	followCount := u.FollowCount
+	followerCount := u.FollowerCount
 
 	return &user.User{
-		Id:            int64(u.Id),
+		Id:            u.Id,
 		Name:          u.UserName,
 		FollowCount:   &followCount,
 		FollowerCount: &followerCount,
