@@ -10,7 +10,8 @@ const (
 	ServiceErrCode             = 10001
 	ParamErrCode               = 10002
 	UserAlreadyExistErrCode    = 10003
-	AuthorizationFailedErrCode = 10004
+	UserNotExistErrCode        = 10004
+	AuthorizationFailedErrCode = 10005
 )
 
 type ErrNo struct {
@@ -36,6 +37,7 @@ var (
 	ServiceErr             = NewErrNo(ServiceErrCode, "Service is unable to start successfully")
 	ParamErr               = NewErrNo(ParamErrCode, "Wrong Parameter has been given")
 	UserAlreadyExistErr    = NewErrNo(UserAlreadyExistErrCode, "User already exists")
+	UserNotExistErr        = NewErrNo(UserNotExistErrCode, "User not exists")
 	AuthorizationFailedErr = NewErrNo(AuthorizationFailedErrCode, "Authorization failed")
 )
 

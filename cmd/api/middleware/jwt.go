@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"net/http"
 	"tiktok/cmd/api/handler"
 	"tiktok/cmd/api/util"
 	"tiktok/pkg/errno"
@@ -18,20 +17,14 @@ func JWT() app.HandlerFunc {
 
 		// token不能为空
 		if tokenStr == "" {
-			c.JSON(http.StatusForbidden, handler.Response{
-				StatusCode: errno.ParamErrCode,
-				StatusMsg:  "token cannot be empty",
-			})
+			handler.SendResponse(c, errno.ParamErr)
 			c.Abort()
 			return
 		}
 
 		claims, err := util.ParseToken(tokenStr)
 		if err != nil {
-			c.JSON(http.StatusForbidden, handler.Response{
-				StatusCode: errno.ParamErrCode,
-				StatusMsg:  err.Error(),
-			})
+			handler.SendResponse(c, errno.AuthorizationFailedErr)
 			c.Abort()
 			return
 		}

@@ -22,12 +22,12 @@ type RegisterResponse struct {
 	Token    string `json:"token"`
 }
 
-func Register(_ context.Context, ctx *app.RequestContext) {
+func Register(_ context.Context, c *app.RequestContext) {
 	var req RegisterParam
 	// 参数校验
-	err := ctx.BindAndValidate(&req)
+	err := c.BindAndValidate(&req)
 	if err != nil {
-		SendResponse(ctx, err)
+		SendResponse(c, err)
 		return
 	}
 	// rpc通信
@@ -36,16 +36,16 @@ func Register(_ context.Context, ctx *app.RequestContext) {
 		Password: req.Password,
 	})
 	if err != nil {
-		SendResponse(ctx, err)
+		SendResponse(c, err)
 		return
 	}
 	// 根据传回的userId生成token
 	token, err := util.GenerateToken(registerResponse.UserId)
 	if err != nil {
-		SendResponse(ctx, err)
+		SendResponse(c, err)
 		return
 	}
-	ctx.JSON(http.StatusOK, RegisterResponse{
+	c.JSON(http.StatusOK, RegisterResponse{
 		Response: Response{
 			StatusCode: errno.Success.ErrCode,
 			StatusMsg:  errno.Success.ErrMsg,
