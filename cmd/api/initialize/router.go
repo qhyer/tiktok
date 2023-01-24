@@ -12,14 +12,16 @@ func Router() {
 	// 接口路由
 	apiRouter := h.Group("/douyin/")
 
-	// TODO: 用户注册和登录接口
+	// 用户接口
+	apiRouter.GET("/user/", handler.GetUserInfo)
 	apiRouter.POST("/user/register/", handler.Register)
+	apiRouter.POST("/user/login/", handler.Login)
 
 	// 需要鉴权的接口路由
 	authRouter := h.Group("/")
 	// 中间件鉴权
 	authRouter.Use(middleware.JWT())
-	// TODO: 其余接口路由
+	// TODO 其余接口路由
 
 	h.Spin()
 }
