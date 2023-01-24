@@ -35,7 +35,7 @@ func Router() {
 	apiRouter.POST("/user/login/", handler.Login)
 
 	// 需要鉴权的接口路由
-	authRouter := h.Group("/")
+	authRouter := apiRouter.Group("/")
 	// 中间件鉴权
 	authRouter.Use(middleware.JWT())
 

@@ -17,9 +17,10 @@ type RegisterParam struct {
 }
 
 type RegisterResponse struct {
-	Response Response
-	UserId   int64  `json:"user_id"`
-	Token    string `json:"token"`
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	UserId     int64  `json:"user_id"`
+	Token      string `json:"token"`
 }
 
 func Register(_ context.Context, c *app.RequestContext) {
@@ -46,12 +47,10 @@ func Register(_ context.Context, c *app.RequestContext) {
 		return
 	}
 	c.JSON(http.StatusOK, RegisterResponse{
-		Response: Response{
-			StatusCode: errno.Success.ErrCode,
-			StatusMsg:  errno.Success.ErrMsg,
-		},
-		UserId: registerResponse.UserId,
-		Token:  token,
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserId:     registerResponse.UserId,
+		Token:      token,
 	})
 }
 
@@ -62,9 +61,10 @@ type LoginParam struct {
 }
 
 type LoginResponse struct {
-	Response Response
-	UserId   int64  `json:"user_id"`
-	Token    string `json:"token"`
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	UserId     int64  `json:"user_id"`
+	Token      string `json:"token"`
 }
 
 func Login(_ context.Context, c *app.RequestContext) {
@@ -91,12 +91,10 @@ func Login(_ context.Context, c *app.RequestContext) {
 		return
 	}
 	c.JSON(http.StatusOK, LoginResponse{
-		Response: Response{
-			StatusCode: errno.Success.ErrCode,
-			StatusMsg:  errno.Success.ErrMsg,
-		},
-		UserId: loginResponse.UserId,
-		Token:  token,
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserId:     loginResponse.UserId,
+		Token:      token,
 	})
 }
 
@@ -114,8 +112,9 @@ type User struct {
 }
 
 type GetUserInfoResponse struct {
-	Response Response
-	User     User
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	User       User   `json:"user"`
 }
 
 func GetUserInfo(_ context.Context, c *app.RequestContext) {
@@ -146,10 +145,8 @@ func GetUserInfo(_ context.Context, c *app.RequestContext) {
 	isFollow := false
 
 	c.JSON(http.StatusOK, GetUserInfoResponse{
-		Response: Response{
-			StatusCode: errno.Success.ErrCode,
-			StatusMsg:  errno.Success.ErrMsg,
-		},
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
 		User: User{
 			Id:            usr.Id,
 			Name:          usr.Name,

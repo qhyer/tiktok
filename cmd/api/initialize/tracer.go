@@ -5,6 +5,6 @@ import (
 	"tiktok/pkg/tracer"
 )
 
-func InitJaeger() {
+func Jaeger() {
 	tracer.InitJaeger(constants.ApiServiceName)
 }
