@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"tiktok/cmd/user/dal/db"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
@@ -30,6 +31,7 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 
 	passWord, err := HashPassword(req.Password)
 	if err != nil {
+		klog.Errorf("hash password failed %v", err)
 		return 0, err
 	}
 
@@ -38,11 +40,13 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 		Password: passWord,
 	}})
 	if err != nil {
+		klog.Errorf("db create user failed %v", err)
 		return 0, err
 	}
 
 	users, err = db.QueryUser(s.ctx, req.Username)
 	if err != nil {
+		klog.Errorf("db query user failed %v", err)
 		return 0, err
 	}
 	if len(users) == 0 {
@@ -50,7 +54,7 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 	}
 
 	usr := users[0]
-	return int64(usr.Id), nil
+	return usr.Id, nil
 }
 
 func HashPassword(password string) (string, error) {

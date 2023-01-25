@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"golang.org/x/crypto/bcrypt"
 	"tiktok/cmd/user/dal/db"
 	"tiktok/kitex_gen/user"
@@ -24,6 +25,7 @@ func (s *CheckUserService) CheckUser(req *user.DouyinUserLoginRequest) (int64, e
 	userName := req.Username
 	users, err := db.QueryUser(s.ctx, userName)
 	if err != nil {
+		klog.Warnf("db query user failed %v", err)
 		return 0, err
 	}
 	if len(users) == 0 {
@@ -33,7 +35,7 @@ func (s *CheckUserService) CheckUser(req *user.DouyinUserLoginRequest) (int64, e
 	if !CheckPasswordHash(req.Password, u.Password) {
 		return 0, errno.AuthorizationFailedErr
 	}
-	return int64(u.Id), nil
+	return u.Id, nil
 }
 
 func CheckPasswordHash(password, hash string) bool {

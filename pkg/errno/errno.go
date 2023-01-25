@@ -12,6 +12,7 @@ const (
 	UserAlreadyExistErrCode    = 10003
 	UserNotExistErrCode        = 10004
 	AuthorizationFailedErrCode = 10005
+	OSSUploadFailedErrCode     = 10006
 )
 
 type ErrNo struct {
@@ -39,6 +40,7 @@ var (
 	UserAlreadyExistErr    = NewErrNo(UserAlreadyExistErrCode, "User already exists")
 	UserNotExistErr        = NewErrNo(UserNotExistErrCode, "User not exists")
 	AuthorizationFailedErr = NewErrNo(AuthorizationFailedErrCode, "Authorization failed")
+	OSSUploadFailedErr     = NewErrNo(OSSUploadFailedErrCode, "Upload file to oss failed")
 )
 
 // ConvertErr convert error to Errno
