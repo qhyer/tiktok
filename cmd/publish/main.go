@@ -2,7 +2,7 @@ package main
 
 import (
 	"net"
-	dal "tiktok/cmd/publish/dal/db"
+	dal "tiktok/cmd/publish/dal"
 	"tiktok/cmd/publish/rpc"
 	publish "tiktok/kitex_gen/publish/publishsrv"
 	"tiktok/pkg/bound"

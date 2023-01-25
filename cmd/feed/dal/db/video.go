@@ -28,7 +28,7 @@ func (v *Video) TableName() string {
 
 // GetVideosByLatestTime get list of video
 func GetVideosByLatestTime(ctx context.Context, limit int, latestTime int64) ([]*Video, error) {
-	res := make([]*Video, 0)
+	res := make([]*Video, 0, limit)
 	if err := DB.WithContext(ctx).Limit(limit).Order("created_at desc").Find(&res, "created_at < ?", time.UnixMilli(latestTime)).Error; err != nil {
 		return nil, err
 	}

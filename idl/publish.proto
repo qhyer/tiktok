@@ -5,6 +5,7 @@ option go_package = "publish";
 message douyin_publish_action_request {
   bytes data = 1; // 视频数据
   string title = 2; // 视频标题
+  int64 user_id = 3; // 用户id
 }
 
 message douyin_publish_action_response {
@@ -14,6 +15,7 @@ message douyin_publish_action_response {
 
 message douyin_publish_list_request {
   int64 user_id = 1; // 用户id
+  int64 to_user_id = 2; // 对方id
 }
 
 message douyin_publish_list_response {

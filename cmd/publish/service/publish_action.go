@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"tiktok/cmd/publish/dal/db"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
@@ -50,7 +51,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	// 上传视频
 	videoFileName := fileName + ".mp4"
 	reader := bytes.NewReader(videoData)
-	videoInfo, err := minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, reader, int64(len(videoData)), minio.PutObjectOptions{
+	_, err = minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, reader, int64(len(videoData)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -73,7 +74,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// 上传封面
 	coverFileName := fileName + ".jpeg"
-	coverInfo, err := minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, reader, int64(len(coverData)), minio.PutObjectOptions{
+	_, err = minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, reader, int64(len(coverData)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -82,6 +83,18 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	}
 
 	// 在db插入结果
+	playUrl := constants.VideoBucketName + "/" + videoFileName
+	coverUrl := constants.CoverBucketName + "/" + coverFileName
+	err = db.CreateVideo(s.ctx, db.Video{
+		AuthorUserId: req.UserId,
+		PlayUrl:      playUrl,
+		CoverUrl:     coverUrl,
+		Title:        req.Title,
+	})
+	if err != nil {
+		klog.Fatalf("db create video failed %v", err)
+		return err
+	}
 
 	return nil
 }

@@ -58,7 +58,7 @@ func Feed(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	videoList := make([]Video, 0)
+	videoList := make([]Video, 0, len(feedResponse.VideoList))
 	for _, v := range feedResponse.VideoList {
 		videoList = append(videoList, Video{
 			Id: v.Id,

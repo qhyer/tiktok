@@ -30,13 +30,13 @@ func Video(video *db.Video, author *feed.User, isFavorite bool) *feed.Video {
 // Videos pack list of video
 func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, int64) {
 	var nextTime int64
-	videos := make([]*feed.Video, 0)
+	videos := make([]*feed.Video, 0, len(vs))
 
 	if len(vs) == 0 {
 		return videos, 0
 	}
 
-	authorUserIds := make([]int64, 0)
+	authorUserIds := make([]int64, 0, len(vs))
 
 	for _, v := range vs {
 		authorUserIds = append(authorUserIds, v.AuthorUserId)

@@ -26,6 +26,11 @@ func (v *Video) TableName() string {
 	return constants.VideoTableName
 }
 
+// CreateVideo create video
+func CreateVideo(ctx context.Context, video Video) error {
+	return DB.WithContext(ctx).Create(video).Error
+}
+
 // GetPublishedVideosByUserId get list of published video
 func GetPublishedVideosByUserId(ctx context.Context, userId int64) ([]*Video, error) {
 	res := make([]*Video, 0)
