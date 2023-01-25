@@ -32,6 +32,5 @@ func JWT() app.HandlerFunc {
 
 		// 请求中加入userID
 		c.Set("UserID", userID)
-
 	}
 }

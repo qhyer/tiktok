@@ -30,6 +30,9 @@ func Router() {
 	// 接口路由
 	apiRouter := h.Group("/douyin/")
 
+	// 视频流接口
+	apiRouter.GET("/feed/", handler.Feed)
+
 	// 用户接口
 	apiRouter.POST("/user/register/", handler.Register)
 	apiRouter.POST("/user/login/", handler.Login)
@@ -39,8 +42,8 @@ func Router() {
 	// 中间件鉴权
 	authRouter.Use(middleware.JWT())
 
-	authRouter.GET("/user/", handler.GetUserInfo)
 	// TODO 其余接口路由
+	authRouter.GET("/user/", handler.GetUserInfo)
 
 	h.Spin()
 }

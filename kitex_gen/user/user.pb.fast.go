@@ -181,6 +181,11 @@ func (x *DouyinUserInfoRequest) FastRead(buf []byte, _type int8, number int32) (
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 2:
+		offset, err = x.fastReadField2(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -195,6 +200,11 @@ ReadFieldError:
 }
 
 func (x *DouyinUserInfoRequest) fastReadField1(buf []byte, _type int8) (offset int, err error) {
+	x.UserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *DouyinUserInfoRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	offset, err = fastpb.ReadList(buf, _type,
 		func(buf []byte, _type int8) (n int, err error) {
 			var v int64
@@ -202,7 +212,7 @@ func (x *DouyinUserInfoRequest) fastReadField1(buf []byte, _type int8) (offset i
 			if err != nil {
 				return offset, err
 			}
-			x.UserIds = append(x.UserIds, v)
+			x.ToUserIds = append(x.ToUserIds, v)
 			return offset, err
 		})
 	return offset, err
@@ -449,17 +459,26 @@ func (x *DouyinUserInfoRequest) FastWrite(buf []byte) (offset int) {
 		return offset
 	}
 	offset += x.fastWriteField1(buf[offset:])
+	offset += x.fastWriteField2(buf[offset:])
 	return offset
 }
 
 func (x *DouyinUserInfoRequest) fastWriteField1(buf []byte) (offset int) {
-	if len(x.UserIds) == 0 {
+	if x.UserId == 0 {
 		return offset
 	}
-	offset += fastpb.WriteListPacked(buf[offset:], 1, len(x.UserIds),
+	offset += fastpb.WriteInt64(buf[offset:], 1, x.UserId)
+	return offset
+}
+
+func (x *DouyinUserInfoRequest) fastWriteField2(buf []byte) (offset int) {
+	if len(x.ToUserIds) == 0 {
+		return offset
+	}
+	offset += fastpb.WriteListPacked(buf[offset:], 2, len(x.ToUserIds),
 		func(buf []byte, numTagOrKey, numIdxOrVal int32) int {
 			offset := 0
-			offset += fastpb.WriteInt64(buf[offset:], numTagOrKey, x.UserIds[numIdxOrVal])
+			offset += fastpb.WriteInt64(buf[offset:], numTagOrKey, x.ToUserIds[numIdxOrVal])
 			return offset
 		})
 	return offset
@@ -676,17 +695,26 @@ func (x *DouyinUserInfoRequest) Size() (n int) {
 		return n
 	}
 	n += x.sizeField1()
+	n += x.sizeField2()
 	return n
 }
 
 func (x *DouyinUserInfoRequest) sizeField1() (n int) {
-	if len(x.UserIds) == 0 {
+	if x.UserId == 0 {
 		return n
 	}
-	n += fastpb.SizeListPacked(1, len(x.UserIds),
+	n += fastpb.SizeInt64(1, x.UserId)
+	return n
+}
+
+func (x *DouyinUserInfoRequest) sizeField2() (n int) {
+	if len(x.ToUserIds) == 0 {
+		return n
+	}
+	n += fastpb.SizeListPacked(2, len(x.ToUserIds),
 		func(numTagOrKey, numIdxOrVal int32) int {
 			n := 0
-			n += fastpb.SizeInt64(numTagOrKey, x.UserIds[numIdxOrVal])
+			n += fastpb.SizeInt64(numTagOrKey, x.ToUserIds[numIdxOrVal])
 			return n
 		})
 	return n
@@ -803,7 +831,8 @@ var fieldIDToName_DouyinUserLoginResponse = map[int32]string{
 }
 
 var fieldIDToName_DouyinUserInfoRequest = map[int32]string{
-	1: "UserIds",
+	1: "UserId",
+	2: "ToUserIds",
 }
 
 var fieldIDToName_DouyinUserInfoResponse = map[int32]string{

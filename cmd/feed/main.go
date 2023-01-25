@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"tiktok/cmd/feed/rpc"
 	"tiktok/cmd/user/dal"
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
@@ -20,6 +21,7 @@ import (
 func Init() {
 	tracer2.InitJaeger(constants.FeedServiceName)
 	dal.Init()
+	rpc.InitUserRpc()
 }
 
 func main() {

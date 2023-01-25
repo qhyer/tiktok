@@ -25,7 +25,8 @@ message douyin_user_login_response {
 }
 
 message douyin_user_info_request {
-  repeated int64 user_ids = 1; // 用户id
+  int64 user_id = 1; // 用户id
+  repeated int64 to_user_ids = 2; // 对方用户id
 }
 
 message douyin_user_info_response {

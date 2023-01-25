@@ -31,6 +31,7 @@ func Register(_ context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
+
 	// rpc通信
 	registerResponse, err := rpc.Register(context.Background(), &user.DouyinUserRegisterRequest{
 		Username: req.Username,
@@ -40,12 +41,14 @@ func Register(_ context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
+
 	// 根据传回的userId生成token
 	token, err := util.GenerateToken(registerResponse.UserId)
 	if err != nil {
 		SendResponse(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, RegisterResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
@@ -75,6 +78,7 @@ func Login(_ context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
+
 	// rpc通信
 	loginResponse, err := rpc.Login(context.Background(), &user.DouyinUserLoginRequest{
 		Username: req.Username,
@@ -84,12 +88,14 @@ func Login(_ context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
+
 	// 根据传回的userId生成token
 	token, err := util.GenerateToken(loginResponse.UserId)
 	if err != nil {
 		SendResponse(c, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, LoginResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
@@ -125,11 +131,14 @@ func GetUserInfo(_ context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
+	userId := c.GetInt64("UserID")
+
 	// rpc通信
 	var userIds []int64
 	userIds = append(userIds, req.UserId)
 	getUserInfoResponse, err := rpc.UserInfo(context.Background(), &user.DouyinUserInfoRequest{
-		UserIds: userIds,
+		UserId:    userId,
+		ToUserIds: userIds,
 	})
 	if err != nil {
 		SendResponse(c, err)
@@ -141,9 +150,6 @@ func GetUserInfo(_ context.Context, c *app.RequestContext) {
 	}
 	usr := getUserInfoResponse.User[0]
 
-	// TODO: 通过关系服务获取两人关系
-	isFollow := false
-
 	c.JSON(http.StatusOK, GetUserInfoResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
@@ -152,7 +158,7 @@ func GetUserInfo(_ context.Context, c *app.RequestContext) {
 			Name:          usr.Name,
 			FollowerCount: *usr.FollowerCount,
 			FollowCount:   *usr.FollowCount,
-			IsFollow:      isFollow,
+			IsFollow:      usr.IsFollow,
 		},
 	})
 }

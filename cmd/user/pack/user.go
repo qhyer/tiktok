@@ -19,7 +19,6 @@ func User(u *db.User) *user.User {
 		Name:          u.UserName,
 		FollowCount:   &followCount,
 		FollowerCount: &followerCount,
-		IsFollow:      false,
 	}
 }
 

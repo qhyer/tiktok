@@ -43,7 +43,7 @@ func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserLoginReques
 func (s *UserSrvImpl) GetUserInfoByUserIds(ctx context.Context, req *user.DouyinUserInfoRequest) (resp *user.DouyinUserInfoResponse, err error) {
 	resp = new(user.DouyinUserInfoResponse)
 
-	if len(req.UserIds) == 0 {
+	if len(req.ToUserIds) == 0 {
 		resp = pack.BuildUserInfoResp(errno.ParamErr)
 		return resp, nil
 	}

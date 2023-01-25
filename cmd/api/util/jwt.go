@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"tiktok/pkg/constants"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -12,14 +13,10 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
-const (
-	JWTSigningKey = "8QpXHd59YYhk5IMj"
-)
-
 // GenerateToken 生成 token
 func GenerateToken(userID int64) (string, error) {
 	// 获取签名密钥
-	signingKey := []byte(JWTSigningKey)
+	signingKey := []byte(constants.JWTSigningKey)
 	// 生成token
 	claims := UserClaims{
 		userID,
@@ -36,7 +33,7 @@ func GenerateToken(userID int64) (string, error) {
 // ParseToken 解析 token
 func ParseToken(tokenString string) (*UserClaims, error) {
 	// 获取签名密钥
-	signingKey := []byte(JWTSigningKey)
+	signingKey := []byte(constants.JWTSigningKey)
 	// 解析token
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return signingKey, nil
