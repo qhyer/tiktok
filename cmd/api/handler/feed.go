@@ -41,6 +41,7 @@ func Feed(_ context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
+
 	// 没有传参 把最后时间设为当前时间
 	if req.LatestTime == 0 {
 		req.LatestTime = time.Now().UnixMilli()

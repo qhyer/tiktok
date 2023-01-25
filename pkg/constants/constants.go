@@ -10,7 +10,6 @@ const (
 	MySQLDefaultDSN         = "root:DFNFoTdxTfPY3B7X@tcp(localhost:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	EtcdAddress             = "127.0.0.1:2379"
 	CPURateLimit    float64 = 80.0
-	VideoBaseUrl            = "https://tt-test.qhyer.com/assets/video/"
-	CoverBaseUrl            = "https://tt-test.qhyer.com/assets/cover/"
+	OSSBaseURL              = "https://tt-test.qhyer.com/assets/"
 	VideoQueryLimit         = 30
 )

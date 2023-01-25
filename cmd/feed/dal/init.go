@@ -1,6 +1,6 @@
 package dal
 
-import "tiktok/cmd/user/dal/db"
+import "tiktok/cmd/feed/dal/db"
 
 // Init init dal
 func Init() {

@@ -2,8 +2,8 @@ package main
 
 import (
 	"net"
+	"tiktok/cmd/feed/dal"
 	"tiktok/cmd/feed/rpc"
-	"tiktok/cmd/user/dal"
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
@@ -35,7 +35,7 @@ func main() {
 	}
 	Init()
 	svr := feed.NewServer(new(FeedSrvImpl),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.UserServiceName}), // server name
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.FeedServiceName}), // server name
 		server.WithMiddleware(middleware.CommonMiddleware),                                             // middleware
 		server.WithMiddleware(middleware.ServerMiddleware),
 		server.WithServiceAddr(addr), // address

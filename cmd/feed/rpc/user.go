@@ -40,28 +40,6 @@ func InitUserRpc() {
 	userClient = c
 }
 
-func Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (*user.DouyinUserRegisterResponse, error) {
-	resp, err := userClient.Register(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.StatusCode, *resp.StatusMsg)
-	}
-	return resp, nil
-}
-
-func Login(ctx context.Context, req *user.DouyinUserLoginRequest) (*user.DouyinUserLoginResponse, error) {
-	resp, err := userClient.Login(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.StatusCode, *resp.StatusMsg)
-	}
-	return resp, nil
-}
-
 func UserInfo(ctx context.Context, req *user.DouyinUserInfoRequest) (*user.DouyinUserInfoResponse, error) {
 	resp, err := userClient.GetUserInfoByUserIds(ctx, req)
 	if err != nil {

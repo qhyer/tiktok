@@ -2,9 +2,10 @@ package db
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"tiktok/pkg/constants"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type User struct {

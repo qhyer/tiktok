@@ -2,10 +2,11 @@ package pack
 
 import (
 	"context"
-	"tiktok/cmd/api/rpc"
 	"tiktok/cmd/feed/dal/db"
+	"tiktok/cmd/feed/rpc"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
+	"tiktok/pkg/constants"
 )
 
 // Video pack video
@@ -16,8 +17,8 @@ func Video(video *db.Video, author *feed.User, isFavorite bool) *feed.Video {
 
 	return &feed.Video{
 		Id:            video.Id,
-		PlayUrl:       video.PlayUrl,
-		CoverUrl:      video.CoverUrl,
+		PlayUrl:       constants.OSSBaseURL + video.PlayUrl,
+		CoverUrl:      constants.OSSBaseURL + video.CoverUrl,
 		FavoriteCount: video.FavoriteCount,
 		CommentCount:  video.CommentCount,
 		Title:         video.Title,
@@ -30,13 +31,18 @@ func Video(video *db.Video, author *feed.User, isFavorite bool) *feed.Video {
 func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, int64) {
 	var nextTime int64
 	videos := make([]*feed.Video, 0)
+
+	if len(vs) == 0 {
+		return videos, 0
+	}
+
 	authorUserIds := make([]int64, 0)
 
 	for _, v := range vs {
 		authorUserIds = append(authorUserIds, v.AuthorUserId)
 	}
 
-	// query author's userinfo
+	// 查询作者的用户信息
 	userInfoResponse, err := rpc.UserInfo(ctx, &user.DouyinUserInfoRequest{
 		UserId:    userId,
 		ToUserIds: authorUserIds,
@@ -56,13 +62,11 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, i
 		}
 	}
 
-	// TODO 查询用户是否给视频点赞 is user favorite video
+	// TODO 查询用户是否给视频点赞
 	userFavoriteMap := make(map[int64]bool, 0)
 
-	// find next time
-	if len(vs) > 0 {
-		nextTime = vs[len(videos)-1].CreatedAt.UnixMilli()
-	}
+	// 找到最后一个视频的创建时间
+	nextTime = vs[len(vs)-1].CreatedAt.UnixMilli()
 
 	// pack video
 	for _, v := range vs {
