@@ -26,10 +26,9 @@ func (v *Video) TableName() string {
 	return constants.VideoTableName
 }
 
-// MGetVideos multiple get list of video
-func MGetVideos(ctx context.Context, limit int, latestTime int64) ([]*Video, error) {
+// GetVideosByLatestTime get list of video
+func GetVideosByLatestTime(ctx context.Context, limit int, latestTime int64) ([]*Video, error) {
 	res := make([]*Video, 0)
-	// TODO
 	if err := DB.WithContext(ctx).Limit(limit).Order("created_at desc").Find(&res, "created_at < ?", time.UnixMilli(latestTime)).Error; err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ func NewFeedService(ctx context.Context) *FeedService {
 
 // Feed get list of video
 func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, error) {
-	vs, err := db.MGetVideos(s.ctx, constants.VideoQueryLimit, *req.LatestTime)
+	vs, err := db.GetVideosByLatestTime(s.ctx, constants.VideoQueryLimit, *req.LatestTime)
 	if err != nil {
 		return nil, 0, err
 	}
