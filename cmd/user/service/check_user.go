@@ -25,7 +25,7 @@ func (s *CheckUserService) CheckUser(req *user.DouyinUserLoginRequest) (int64, e
 	userName := req.Username
 	users, err := db.QueryUser(s.ctx, userName)
 	if err != nil {
-		klog.Warnf("db query user failed %v", err)
+		klog.CtxFatalf(s.ctx, "db query user failed %v", err)
 		return 0, err
 	}
 	if len(users) == 0 {

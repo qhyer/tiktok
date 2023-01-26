@@ -44,7 +44,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 		Creds: credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
 	})
 	if err != nil {
-		klog.Errorf("minio client init failed %v", err)
+		klog.CtxErrorf(s.ctx, "minio client init failed %v", err)
 	}
 
 	// 上传视频
@@ -54,7 +54,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
-		klog.Errorf("upload file to oss failed %v", err)
+		klog.CtxErrorf(s.ctx, "upload file to oss failed %v", err)
 		return errno.OSSUploadFailedErr
 	}
 
@@ -62,7 +62,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	reqParams := make(url.Values)
 	videoInfo, err := minioClient.PresignedGetObject(s.ctx, constants.VideoBucketName, videoFileName, constants.OSSDefaultExpiry, reqParams)
 	if err != nil {
-		klog.Errorf("pre sign get object failed %v", err)
+		klog.CtxErrorf(s.ctx, "pre sign get object failed %v", err)
 		return err
 	}
 	coverData, err := readFrameAsJpeg("http://" + constants.OSSEndPoint + videoInfo.RequestURI())
@@ -77,7 +77,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
-		klog.Errorf("upload file to oss failed %v", err)
+		klog.CtxErrorf(s.ctx, "upload file to oss failed %v", err)
 		return errno.OSSUploadFailedErr
 	}
 
@@ -89,7 +89,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 		Title:        req.Title,
 	})
 	if err != nil {
-		klog.Fatalf("db create video failed %v", err)
+		klog.CtxFatalf(s.ctx, "db create video failed %v", err)
 		return err
 	}
 

@@ -80,7 +80,7 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*publish.Video
 		Creds: credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
 	})
 	if err != nil {
-		klog.Errorf("minio client init failed %v", err)
+		klog.CtxErrorf(ctx, "minio client init failed %v", err)
 		return videos, err
 	}
 
@@ -91,12 +91,12 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*publish.Video
 		reqParams := make(url.Values)
 		videoInfo, err := minioClient.PresignedGetObject(ctx, constants.VideoBucketName, playUrl, constants.OSSDefaultExpiry, reqParams)
 		if err != nil {
-			klog.Errorf("pre sign get object failed %v", err)
+			klog.CtxErrorf(ctx, "pre sign get object failed %v", err)
 			continue
 		}
 		coverInfo, err := minioClient.PresignedGetObject(ctx, constants.CoverBucketName, coverUrl, constants.OSSDefaultExpiry, reqParams)
 		if err != nil {
-			klog.Errorf("pre sign get object failed %v", err)
+			klog.CtxErrorf(ctx, "pre sign get object failed %v", err)
 			continue
 		}
 		playUrl = constants.OSSBaseUrl + videoInfo.Path + "?" + videoInfo.RawQuery

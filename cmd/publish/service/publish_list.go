@@ -21,13 +21,13 @@ func NewPublishListService(ctx context.Context) *PublishListService {
 func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) ([]*publish.Video, error) {
 	vs, err := db.GetPublishedVideosByUserId(s.ctx, req.ToUserId)
 	if err != nil {
-		klog.Errorf("db get video failed %v", err)
+		klog.CtxFatalf(s.ctx, "db get video failed %v", err)
 		return nil, err
 	}
 
 	videos, err := pack.Videos(s.ctx, vs, req.UserId)
 	if err != nil {
-		klog.Errorf("pack video failed %v", err)
+		klog.CtxErrorf(s.ctx, "pack video failed %v", err)
 		return nil, err
 	}
 

@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
 	"tiktok/cmd/feed/dal/db"
 	"tiktok/cmd/feed/pack"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/constants"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type FeedService struct {
@@ -22,13 +23,13 @@ func NewFeedService(ctx context.Context) *FeedService {
 func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, error) {
 	vs, err := db.GetVideosByLatestTime(s.ctx, constants.VideoQueryLimit, *req.LatestTime)
 	if err != nil {
-		klog.Errorf("db get video failed %v", err)
+		klog.CtxFatalf(s.ctx, "db get video failed %v", err)
 		return nil, 0, err
 	}
 
 	videos, nextTime, err := pack.Videos(s.ctx, vs, req.UserId)
 	if err != nil {
-		klog.Errorf("pack video failed %v", err)
+		klog.CtxErrorf(s.ctx, "pack video failed %v", err)
 		return nil, 0, err
 	}
 

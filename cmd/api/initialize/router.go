@@ -38,6 +38,9 @@ func Router() {
 	apiRouter.POST("/user/login/", handler.Login)
 	apiRouter.GET("/user/", handler.GetUserInfo)
 
+	// 用户发布列表接口
+	apiRouter.GET("/publish/list/", handler.PublishList)
+
 	// 需要鉴权的接口路由
 	authRouter := apiRouter.Group("/")
 	// 中间件鉴权
@@ -46,7 +49,6 @@ func Router() {
 	// 投稿路由
 	publishRouter := authRouter.Group("/publish/")
 	publishRouter.POST("/action/", handler.PublishAction)
-	publishRouter.GET("/list/", handler.PublishList)
 
 	// TODO 其余接口路由
 	h.Spin()

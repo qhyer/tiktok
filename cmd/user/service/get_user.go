@@ -21,7 +21,7 @@ func NewMGetUserService(ctx context.Context) *MGetUserService {
 func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.User, error) {
 	modelUsers, err := db.MGetUsers(s.ctx, req.ToUserIds)
 	if err != nil {
-		klog.Errorf("db get multiple users failed %v", err)
+		klog.CtxFatalf(s.ctx, "db get multiple users failed %v", err)
 		return nil, err
 	}
 
