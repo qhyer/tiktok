@@ -25,7 +25,11 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 		return nil, err
 	}
 
-	videos := pack.Videos(s.ctx, vs, req.UserId)
+	videos, err := pack.Videos(s.ctx, vs, req.UserId)
+	if err != nil {
+		klog.Errorf("pack video failed %v", err)
+		return nil, err
+	}
 
 	return videos, nil
 }

@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 const (
 	JWTSigningKey = "8QpXHd59YYhk5IMj"
 
@@ -18,11 +20,11 @@ const (
 
 	CPURateLimit float64 = 80.0
 
-	OSSBaseURL         = "https://tt-test.qhyer.com/assets/"
 	VideoBucketName    = "video"
 	CoverBucketName    = "cover"
 	OSSEndPoint        = "127.0.0.1:9000"
-	OSSAccessKeyID     = ""
-	OSSSecretAccessKey = ""
-	OSSDefaultExpiry   = 3600
+	OSSBaseUrl         = "https://tt-test.qhyer.com/assets"
+	OSSAccessKeyID     = "tiktok"
+	OSSSecretAccessKey = "ZqRNq8vd;9KLjx=9"
+	OSSDefaultExpiry   = time.Hour
 )

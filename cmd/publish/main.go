@@ -2,7 +2,7 @@ package main
 
 import (
 	"net"
-	dal "tiktok/cmd/publish/dal"
+	"tiktok/cmd/publish/dal"
 	"tiktok/cmd/publish/rpc"
 	publish "tiktok/kitex_gen/publish/publishsrv"
 	"tiktok/pkg/bound"
@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8890")
+	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8891")
 	if err != nil {
 		panic(err)
 	}

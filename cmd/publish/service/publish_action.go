@@ -41,8 +41,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(constants.OSSEndPoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
-		Secure: true,
+		Creds: credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
 	})
 	if err != nil {
 		klog.Errorf("minio client init failed %v", err)
@@ -51,7 +50,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	// 上传视频
 	videoFileName := fileName + ".mp4"
 	reader := bytes.NewReader(videoData)
-	_, err = minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, reader, int64(len(videoData)), minio.PutObjectOptions{
+	videoUploadInfo, err := minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, reader, int64(len(videoData)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -61,20 +60,19 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// 获取封面
 	reqParams := make(url.Values)
-	videoFullUrl, err := minioClient.PresignedGetObject(s.ctx, constants.VideoBucketName, videoFileName, constants.OSSDefaultExpiry, reqParams)
+	videoInfo, err := minioClient.PresignedGetObject(s.ctx, constants.VideoBucketName, videoFileName, constants.OSSDefaultExpiry, reqParams)
 	if err != nil {
 		klog.Errorf("pre sign get object failed %v", err)
 		return err
 	}
-	coverData, err := readFrameAsJpeg(videoFullUrl.RequestURI())
-	klog.Infof("video url %v", videoFullUrl)
+	coverData, err := readFrameAsJpeg(videoInfo.RequestURI())
 	if err != nil {
 		return err
 	}
 
 	// 上传封面
 	coverFileName := fileName + ".jpeg"
-	_, err = minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, reader, int64(len(coverData)), minio.PutObjectOptions{
+	coverUploadInfo, err := minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, reader, int64(len(coverData)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -83,12 +81,10 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	}
 
 	// 在db插入结果
-	playUrl := constants.VideoBucketName + "/" + videoFileName
-	coverUrl := constants.CoverBucketName + "/" + coverFileName
 	err = db.CreateVideo(s.ctx, db.Video{
 		AuthorUserId: req.UserId,
-		PlayUrl:      playUrl,
-		CoverUrl:     coverUrl,
+		PlayUrl:      videoUploadInfo.Key,
+		CoverUrl:     coverUploadInfo.Key,
 		Title:        req.Title,
 	})
 	if err != nil {

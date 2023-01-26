@@ -46,7 +46,7 @@ func Router() {
 	// 投稿路由
 	publishRouter := authRouter.Group("/publish/")
 	publishRouter.POST("/action/", handler.PublishAction)
-	publishRouter.POST("/list/", handler.PublishList)
+	publishRouter.GET("/list/", handler.PublishList)
 
 	// TODO 其余接口路由
 	h.Spin()

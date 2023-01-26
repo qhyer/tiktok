@@ -2,6 +2,10 @@ package pack
 
 import (
 	"context"
+	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"net/url"
 	"tiktok/cmd/publish/dal/db"
 	"tiktok/cmd/publish/rpc"
 	"tiktok/kitex_gen/publish"
@@ -17,8 +21,8 @@ func Video(video *db.Video, author *publish.User, isFavorite bool) *publish.Vide
 
 	return &publish.Video{
 		Id:            video.Id,
-		PlayUrl:       constants.OSSBaseURL + video.PlayUrl,
-		CoverUrl:      constants.OSSBaseURL + video.CoverUrl,
+		PlayUrl:       video.PlayUrl,
+		CoverUrl:      video.CoverUrl,
 		FavoriteCount: video.FavoriteCount,
 		CommentCount:  video.CommentCount,
 		Title:         video.Title,
@@ -28,11 +32,11 @@ func Video(video *db.Video, author *publish.User, isFavorite bool) *publish.Vide
 }
 
 // Videos pack list of video
-func Videos(ctx context.Context, vs []*db.Video, userId int64) []*publish.Video {
+func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*publish.Video, error) {
 	videos := make([]*publish.Video, 0, len(vs))
 
 	if len(vs) == 0 {
-		return videos
+		return videos, nil
 	}
 
 	authorUserIds := make([]int64, 0, len(vs))
@@ -47,7 +51,7 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) []*publish.Video 
 		ToUserIds: authorUserIds,
 	})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	userInfoMap := make(map[int64]*publish.User, 0)
@@ -71,5 +75,35 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) []*publish.Video 
 		}
 	}
 
-	return videos
+	// Initialize minio client object.
+	minioClient, err := minio.New(constants.OSSEndPoint, &minio.Options{
+		Creds: credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
+	})
+	if err != nil {
+		klog.Errorf("minio client init failed %v", err)
+		return videos, err
+	}
+
+	// oss sign
+	for i, v := range videos {
+		playUrl := v.PlayUrl
+		coverUrl := v.CoverUrl
+		reqParams := make(url.Values)
+		videoInfo, err := minioClient.PresignedGetObject(ctx, constants.VideoBucketName, playUrl, constants.OSSDefaultExpiry, reqParams)
+		if err != nil {
+			klog.Errorf("pre sign get object failed %v", err)
+			continue
+		}
+		coverInfo, err := minioClient.PresignedGetObject(ctx, constants.CoverBucketName, coverUrl, constants.OSSDefaultExpiry, reqParams)
+		if err != nil {
+			klog.Errorf("pre sign get object failed %v", err)
+			continue
+		}
+		playUrl = constants.OSSBaseUrl + videoInfo.Path + "?" + videoInfo.RawQuery
+		coverUrl = constants.OSSBaseUrl + coverInfo.Path + "?" + coverInfo.RawQuery
+		videos[i].PlayUrl = playUrl
+		videos[i].CoverUrl = coverUrl
+	}
+
+	return videos, nil
 }

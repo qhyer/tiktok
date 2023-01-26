@@ -26,7 +26,11 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		return nil, 0, err
 	}
 
-	videos, nextTime := pack.Videos(s.ctx, vs, req.UserId)
+	videos, nextTime, err := pack.Videos(s.ctx, vs, req.UserId)
+	if err != nil {
+		klog.Errorf("pack video failed %v", err)
+		return nil, 0, err
+	}
 
 	return videos, nextTime, nil
 }
