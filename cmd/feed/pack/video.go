@@ -14,7 +14,7 @@ import (
 )
 
 // Video pack video
-func Video(video *db.Video, author *feed.User, isFavorite bool) *feed.Video {
+func Video(video *db.Video, author *user.User, isFavorite bool) *feed.Video {
 	if video == nil || author == nil {
 		return nil
 	}
@@ -55,9 +55,9 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, i
 		return nil, nextTime, err
 	}
 
-	userInfoMap := make(map[int64]*feed.User, 0)
+	userInfoMap := make(map[int64]*user.User, 0)
 	for _, us := range userInfoResponse.User {
-		userInfoMap[us.Id] = &feed.User{
+		userInfoMap[us.Id] = &user.User{
 			Id:            us.Id,
 			Name:          us.Name,
 			FollowCount:   us.FollowCount,
@@ -83,7 +83,7 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, i
 		Creds: credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
 	})
 	if err != nil {
-		klog.CtxErrorf(ctx, "minio client init failed %v", err)
+		klog.Errorf("minio client init failed %v", err)
 		return nil, nextTime, err
 	}
 
@@ -94,12 +94,12 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, i
 		reqParams := make(url.Values)
 		videoInfo, err := minioClient.PresignedGetObject(ctx, constants.VideoBucketName, playUrl, constants.OSSDefaultExpiry, reqParams)
 		if err != nil {
-			klog.CtxErrorf(ctx, "pre sign get object failed %v", err)
+			klog.Errorf("pre sign get object failed %v", err)
 			continue
 		}
 		coverInfo, err := minioClient.PresignedGetObject(ctx, constants.CoverBucketName, coverUrl, constants.OSSDefaultExpiry, reqParams)
 		if err != nil {
-			klog.CtxErrorf(ctx, "pre sign get object failed %v", err)
+			klog.Errorf("pre sign get object failed %v", err)
 			continue
 		}
 		playUrl = constants.OSSBaseUrl + videoInfo.Path + "?" + videoInfo.RawQuery

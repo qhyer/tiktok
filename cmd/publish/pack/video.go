@@ -8,18 +8,18 @@ import (
 	"net/url"
 	"tiktok/cmd/publish/dal/db"
 	"tiktok/cmd/publish/rpc"
-	"tiktok/kitex_gen/publish"
+	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
 )
 
 // Video pack video
-func Video(video *db.Video, author *publish.User, isFavorite bool) *publish.Video {
+func Video(video *db.Video, author *user.User, isFavorite bool) *feed.Video {
 	if video == nil || author == nil {
 		return nil
 	}
 
-	return &publish.Video{
+	return &feed.Video{
 		Id:            video.Id,
 		PlayUrl:       video.PlayUrl,
 		CoverUrl:      video.CoverUrl,
@@ -32,8 +32,8 @@ func Video(video *db.Video, author *publish.User, isFavorite bool) *publish.Vide
 }
 
 // Videos pack list of video
-func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*publish.Video, error) {
-	videos := make([]*publish.Video, 0, len(vs))
+func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, error) {
+	videos := make([]*feed.Video, 0, len(vs))
 
 	if len(vs) == 0 {
 		return videos, nil
@@ -54,9 +54,9 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*publish.Video
 		return nil, err
 	}
 
-	userInfoMap := make(map[int64]*publish.User, 0)
+	userInfoMap := make(map[int64]*user.User, 0)
 	for _, us := range userInfoResponse.User {
-		userInfoMap[us.Id] = &publish.User{
+		userInfoMap[us.Id] = &user.User{
 			Id:            us.Id,
 			Name:          us.Name,
 			FollowCount:   us.FollowCount,
