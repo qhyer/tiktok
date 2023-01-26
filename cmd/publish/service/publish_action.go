@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"net/url"
 	"os"
+	"strconv"
 	"tiktok/cmd/publish/dal/db"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/constants"
@@ -13,9 +16,9 @@ import (
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/satori/go.uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -33,11 +36,8 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	videoData := req.Data
 
 	// 生成文件名
-	ruid, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
-	fileName := string(time.Now().UnixMicro()) + ruid.String()
+	ruid := uuid.NewV4()
+	fileName := strconv.FormatInt(time.Now().UnixMicro(), 16) + ruid.String()
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(constants.OSSEndPoint, &minio.Options{
@@ -49,8 +49,8 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// 上传视频
 	videoFileName := fileName + ".mp4"
-	reader := bytes.NewReader(videoData)
-	videoUploadInfo, err := minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, reader, int64(len(videoData)), minio.PutObjectOptions{
+	videoReader := bytes.NewReader(videoData)
+	videoUploadInfo, err := minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, videoReader, int64(len(videoData)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -65,14 +65,15 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 		klog.Errorf("pre sign get object failed %v", err)
 		return err
 	}
-	coverData, err := readFrameAsJpeg(videoInfo.RequestURI())
+	coverData, err := readFrameAsJpeg("http://" + constants.OSSEndPoint + videoInfo.RequestURI())
 	if err != nil {
 		return err
 	}
 
 	// 上传封面
 	coverFileName := fileName + ".jpeg"
-	coverUploadInfo, err := minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, reader, int64(len(coverData)), minio.PutObjectOptions{
+	coverReader := bytes.NewReader(coverData)
+	coverUploadInfo, err := minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, coverReader, int64(len(coverData)), minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -96,14 +97,26 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 }
 
 func readFrameAsJpeg(inFileName string) ([]byte, error) {
-	buf := bytes.NewBuffer(nil)
+	reader := bytes.NewBuffer(nil)
 	err := ffmpeg.Input(inFileName).
 		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 1)}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
-		WithOutput(buf, os.Stdout).
+		WithOutput(reader, os.Stdout).
 		Run()
 	if err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), nil
+
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	err = jpeg.Encode(buf, img, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), err
 }

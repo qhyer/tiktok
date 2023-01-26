@@ -7,11 +7,15 @@ require (
 	github.com/cloudwego/hertz v0.5.1
 	github.com/cloudwego/kitex v0.4.4
 	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/google/uuid v1.3.0
+	github.com/h2non/filetype v1.1.3
 	github.com/kitex-contrib/registry-etcd v0.0.0-20221223084757-0d49e7162359
 	github.com/kitex-contrib/tracer-opentracing v0.0.3
 	github.com/minio/minio-go/v7 v7.0.47
 	github.com/opentracing/opentracing-go v1.2.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	golang.org/x/crypto v0.5.0
 	google.golang.org/protobuf v1.28.1
@@ -41,8 +45,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/pprof v0.0.0-20220608213341-c488b8fa1db3 // indirect
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/henrylee2cn/ameda v1.4.10 // indirect
 	github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 // indirect
 	github.com/jhump/protoreflect v1.8.2 // indirect
@@ -68,7 +70,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
-	github.com/u2takey/ffmpeg-go v0.4.1 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
