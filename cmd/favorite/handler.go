@@ -18,7 +18,7 @@ func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.Douy
 	err = service.NewFavoriteActionService(ctx).FavoriteAction(req)
 	if err != nil {
 		resp = pack.BuildFavoriteActionResp(err)
-		return resp, nil
+		return resp, err
 	}
 
 	resp = pack.BuildFavoriteActionResp(errno.Success)
@@ -32,7 +32,7 @@ func (s *FavoriteSrvImpl) FavoriteList(ctx context.Context, req *favorite.Douyin
 	videos, err := service.NewFavoriteListService(ctx).FavoriteList(req)
 	if err != nil {
 		resp = pack.BuildFavoriteListResp(err)
-		return resp, nil
+		return resp, err
 	}
 
 	resp = pack.BuildFavoriteListResp(errno.Success)

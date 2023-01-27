@@ -32,6 +32,16 @@ message douyin_get_videos_by_video_ids_and_current_user_id_response {
   repeated Video video_list = 3; // 视频列表
 }
 
+message douyin_is_video_ids_exist_request {
+  repeated int64 video_ids = 1; // 视频id
+}
+
+message douyin_is_video_ids_exist_response {
+  int32 status_code = 1; // 状态码，0-成功，其他值-失败
+  optional string status_msg = 2; // 返回状态描述
+  repeated bool is_exist = 3; // 视频id是否存在
+}
+
 message Video {
   int64 id = 1; // 视频唯一标识
   user.User author = 2; // 视频作者信息
@@ -46,4 +56,5 @@ message Video {
 service FeedSrv {
   rpc Feed (douyin_feed_request) returns (douyin_feed_response) {}
   rpc GetVideosByVideoIdsAndCurrentUserId (douyin_get_videos_by_video_ids_and_current_user_id_request) returns (douyin_get_videos_by_video_ids_and_current_user_id_response) {}
+  rpc IsVideoIdsExist (douyin_is_video_ids_exist_request) returns (douyin_is_video_ids_exist_response) {}
 }

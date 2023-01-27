@@ -41,3 +41,21 @@ func BuildGetVideosByVideoIdsAndCurrentUserIdResponse(err error) *feed.DouyinGet
 func getVideosByVideoIdsAndCurrentUserIdResponse(err errno.ErrNo) *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse {
 	return &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse{StatusCode: err.ErrCode, StatusMsg: &err.ErrMsg}
 }
+
+func BuildIsVideoIdsExistResponse(err error) *feed.DouyinIsVideoIdsExistResponse {
+	if err == nil {
+		return isVideoIdsExistResponse(errno.Success)
+	}
+
+	e := errno.ErrNo{}
+	if errors.As(err, &e) {
+		return isVideoIdsExistResponse(e)
+	}
+
+	s := errno.ServiceErr.WithMessage(err.Error())
+	return isVideoIdsExistResponse(s)
+}
+
+func isVideoIdsExistResponse(err errno.ErrNo) *feed.DouyinIsVideoIdsExistResponse {
+	return &feed.DouyinIsVideoIdsExistResponse{StatusCode: err.ErrCode, StatusMsg: &err.ErrMsg}
+}

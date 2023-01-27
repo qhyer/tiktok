@@ -2,14 +2,12 @@ package service
 
 import (
 	"context"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"tiktok/cmd/favorite/dal/db"
 	"tiktok/cmd/favorite/pack"
 	"tiktok/cmd/favorite/rpc"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
-	"tiktok/pkg/errno"
-
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type FavoriteListService struct {
@@ -42,7 +40,7 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 		UserId:   userId,
 		VideoIds: videoIds,
 	})
-	if err != nil || feedResponse.StatusCode != errno.SuccessCode {
+	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", err)
 		return nil, err
 	}

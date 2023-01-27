@@ -33,3 +33,26 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 
 	return videos, nil
 }
+
+// IsVideoIdsExist check is video id exist
+func (s *GetVideoService) IsVideoIdsExist(req *feed.DouyinIsVideoIdsExistRequest) ([]bool, error) {
+	vs, err := db.MGetVideosByVideoIds(s.ctx, req.VideoIds)
+	if err != nil {
+		klog.CtxFatalf(s.ctx, "db get video failed %v", err)
+		return nil, err
+	}
+
+	// add id to map
+	idMap := make(map[int64]bool, 0)
+	for _, v := range vs {
+		idMap[v.Id] = true
+	}
+
+	// check is video id exist
+	res := make([]bool, 0)
+	for _, v := range req.VideoIds {
+		res = append(res, idMap[v])
+	}
+
+	return res, nil
+}

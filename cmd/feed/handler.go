@@ -18,7 +18,7 @@ func (s *FeedSrvImpl) Feed(ctx context.Context, req *feed.DouyinFeedRequest) (re
 	videos, nextTime, err := service.NewFeedService(ctx).Feed(req)
 	if err != nil {
 		resp = pack.BuildFeedResp(err)
-		return resp, nil
+		return resp, err
 	}
 
 	resp = pack.BuildFeedResp(errno.Success)
@@ -34,10 +34,25 @@ func (s *FeedSrvImpl) GetVideosByVideoIdsAndCurrentUserId(ctx context.Context, r
 	videos, err := service.NewGetVideoService(ctx).GetVideosByVideoIdsAndCurrUserId(req)
 	if err != nil {
 		resp = pack.BuildGetVideosByVideoIdsAndCurrentUserIdResponse(err)
-		return resp, nil
+		return resp, err
 	}
 
 	resp = pack.BuildGetVideosByVideoIdsAndCurrentUserIdResponse(errno.Success)
 	resp.VideoList = videos
+	return resp, nil
+}
+
+// IsVideoIdsExist implements the FeedSrvImpl interface.
+func (s *FeedSrvImpl) IsVideoIdsExist(ctx context.Context, req *feed.DouyinIsVideoIdsExistRequest) (resp *feed.DouyinIsVideoIdsExistResponse, err error) {
+	resp = new(feed.DouyinIsVideoIdsExistResponse)
+
+	res, err := service.NewGetVideoService(ctx).IsVideoIdsExist(req)
+	if err != nil {
+		resp = pack.BuildIsVideoIdsExistResponse(err)
+		return resp, err
+	}
+
+	resp = pack.BuildIsVideoIdsExistResponse(errno.Success)
+	resp.IsExist = res
 	return resp, nil
 }
