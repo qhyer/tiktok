@@ -50,6 +50,11 @@ func Router() {
 	publishRouter := authRouter.Group("/publish/")
 	publishRouter.POST("/action/", handler.PublishAction)
 
+	// 点赞和喜欢列表路由
+	favoriteRouter := authRouter.Group("/favorite/")
+	favoriteRouter.POST("/action/", handler.FavoriteAction)
+	favoriteRouter.GET("/list/", handler.FavoriteList)
+
 	// TODO 其余接口路由
 	h.Spin()
 }

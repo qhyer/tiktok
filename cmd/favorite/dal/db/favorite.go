@@ -2,9 +2,11 @@ package db
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"tiktok/pkg/constants"
 	"time"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Favorite struct {
@@ -31,6 +33,10 @@ func FavoriteList(ctx context.Context, userId int64) ([]*Favorite, error) {
 	return res, nil
 }
 
-func FavoriteAction(ctx context.Context, videoId int64, userId int64) {
-
+// FavoriteAction user favorite video
+func FavoriteAction(ctx context.Context, favorite *Favorite) error {
+	return DB.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"is_favorite"}),
+	}).Create(favorite).Error
 }

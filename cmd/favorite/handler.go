@@ -13,8 +13,16 @@ type FavoriteSrvImpl struct{}
 
 // FavoriteAction implements the FavoriteSrvImpl interface.
 func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.DouyinFavoriteActionRequest) (resp *favorite.DouyinFavoriteActionResponse, err error) {
-	// TODO: Your code here...
-	return
+	resp = new(favorite.DouyinFavoriteActionResponse)
+
+	err = service.NewFavoriteActionService(ctx).FavoriteAction(req)
+	if err != nil {
+		resp = pack.BuildFavoriteActionResp(err)
+		return resp, nil
+	}
+
+	resp = pack.BuildFavoriteActionResp(errno.Success)
+	return resp, nil
 }
 
 // FavoriteList implements the FavoriteSrvImpl interface.

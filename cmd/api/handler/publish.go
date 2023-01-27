@@ -20,6 +20,11 @@ type PublishActionParam struct {
 	Title string                `form:"title"`
 }
 
+type PublishActionResponse struct {
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+}
+
 // TODO 参数校验
 type PublishListParam struct {
 	UserId int64 `query:"user_id"`
@@ -60,7 +65,7 @@ func PublishAction(_ context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	_, err = rpc.PublishAction(context.Background(), &publish.DouyinPublishActionRequest{
+	publishActionResponse, err := rpc.PublishAction(context.Background(), &publish.DouyinPublishActionRequest{
 		Data:   videoData.Bytes(),
 		Title:  req.Title,
 		UserId: userId,
@@ -71,7 +76,10 @@ func PublishAction(_ context.Context, c *app.RequestContext) {
 		return
 	}
 
-	SendResponse(c, errno.Success)
+	c.JSON(http.StatusOK, PublishActionResponse{
+		StatusCode: publishActionResponse.StatusCode,
+		StatusMsg:  *publishActionResponse.StatusMsg,
+	})
 }
 
 func PublishList(_ context.Context, c *app.RequestContext) {
@@ -91,10 +99,14 @@ func PublishList(_ context.Context, c *app.RequestContext) {
 		UserId:   userId,
 		ToUserId: toUserId,
 	})
+	if err != nil {
+		SendResponse(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, PublishListResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: publishListResponse.StatusCode,
+		StatusMsg:  *publishListResponse.StatusMsg,
 		VideoList:  publishListResponse.VideoList,
 	})
 }

@@ -16,7 +16,7 @@ type FavoriteListService struct {
 	ctx context.Context
 }
 
-// NewFavoriteListService new GetVideoService
+// NewFavoriteListService new FavoriteListService
 func NewFavoriteListService(ctx context.Context) *FavoriteListService {
 	return &FavoriteListService{ctx: ctx}
 }

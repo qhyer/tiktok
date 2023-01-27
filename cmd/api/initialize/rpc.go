@@ -6,4 +6,5 @@ func Rpc() {
 	rpc.InitUserRpc()
 	rpc.InitFeedRpc()
 	rpc.InitPublishRpc()
+	rpc.InitFavoriteRpc()
 }
