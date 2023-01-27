@@ -36,7 +36,7 @@ type PublishListResponse struct {
 	VideoList  []*feed.Video `json:"video_list"`
 }
 
-func PublishAction(_ context.Context, c *app.RequestContext) {
+func PublishAction(ctx context.Context, c *app.RequestContext) {
 	var req PublishActionParam
 	err := c.BindAndValidate(&req)
 	if err != nil {
@@ -65,7 +65,7 @@ func PublishAction(_ context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	publishActionResponse, err := rpc.PublishAction(context.Background(), &publish.DouyinPublishActionRequest{
+	publishActionResponse, err := rpc.PublishAction(ctx, &publish.DouyinPublishActionRequest{
 		Data:   videoData.Bytes(),
 		Title:  req.Title,
 		UserId: userId,
@@ -82,7 +82,7 @@ func PublishAction(_ context.Context, c *app.RequestContext) {
 	})
 }
 
-func PublishList(_ context.Context, c *app.RequestContext) {
+func PublishList(ctx context.Context, c *app.RequestContext) {
 	var req PublishListParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -95,7 +95,7 @@ func PublishList(_ context.Context, c *app.RequestContext) {
 	toUserId := req.UserId
 
 	// rpc通信
-	publishListResponse, err := rpc.PublishList(context.Background(), &publish.DouyinPublishListRequest{
+	publishListResponse, err := rpc.PublishList(ctx, &publish.DouyinPublishListRequest{
 		UserId:   userId,
 		ToUserId: toUserId,
 	})

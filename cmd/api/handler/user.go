@@ -23,7 +23,7 @@ type RegisterResponse struct {
 	Token      string `json:"token"`
 }
 
-func Register(_ context.Context, c *app.RequestContext) {
+func Register(ctx context.Context, c *app.RequestContext) {
 	var req RegisterParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -33,7 +33,7 @@ func Register(_ context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	registerResponse, err := rpc.Register(context.Background(), &user.DouyinUserRegisterRequest{
+	registerResponse, err := rpc.Register(ctx, &user.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -70,7 +70,7 @@ type LoginResponse struct {
 	Token      string `json:"token"`
 }
 
-func Login(_ context.Context, c *app.RequestContext) {
+func Login(ctx context.Context, c *app.RequestContext) {
 	var req LoginParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -80,7 +80,7 @@ func Login(_ context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	loginResponse, err := rpc.Login(context.Background(), &user.DouyinUserLoginRequest{
+	loginResponse, err := rpc.Login(ctx, &user.DouyinUserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -115,7 +115,7 @@ type GetUserInfoResponse struct {
 	User       *user.User `json:"user"`
 }
 
-func GetUserInfo(_ context.Context, c *app.RequestContext) {
+func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	var req GetUserInfoParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -128,7 +128,7 @@ func GetUserInfo(_ context.Context, c *app.RequestContext) {
 	// rpc通信
 	var userIds []int64
 	userIds = append(userIds, req.UserId)
-	getUserInfoResponse, err := rpc.UserInfo(context.Background(), &user.DouyinUserInfoRequest{
+	getUserInfoResponse, err := rpc.UserInfo(ctx, &user.DouyinUserInfoRequest{
 		UserId:    userId,
 		ToUserIds: userIds,
 	})

@@ -20,7 +20,7 @@ type FavoriteActionResponse struct {
 	StatusMsg  string `json:"status_msg"`
 }
 
-func FavoriteAction(_ context.Context, c *app.RequestContext) {
+func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	var req FavoriteActionParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -31,7 +31,7 @@ func FavoriteAction(_ context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	favoriteResponse, err := rpc.FavoriteAction(context.Background(), &favorite.DouyinFavoriteActionRequest{
+	favoriteResponse, err := rpc.FavoriteAction(ctx, &favorite.DouyinFavoriteActionRequest{
 		UserId:     userId,
 		VideoId:    req.VideoId,
 		ActionType: req.ActionType,
@@ -58,7 +58,7 @@ type FavoriteListResponse struct {
 	VideoList  []*feed.Video `json:"video_list"`
 }
 
-func FavoriteList(_ context.Context, c *app.RequestContext) {
+func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	var req FavoriteListParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -69,7 +69,7 @@ func FavoriteList(_ context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	favoriteResponse, err := rpc.FavoriteList(context.Background(), &favorite.DouyinFavoriteListRequest{
+	favoriteResponse, err := rpc.FavoriteList(ctx, &favorite.DouyinFavoriteListRequest{
 		UserId: userId,
 	})
 	if err != nil {

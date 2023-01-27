@@ -34,7 +34,7 @@ type Video struct {
 	Title         string    `json:"title"`
 }
 
-func Feed(_ context.Context, c *app.RequestContext) {
+func Feed(ctx context.Context, c *app.RequestContext) {
 	var req FeedParam
 	// 参数校验
 	err := c.BindAndValidate(&req)
@@ -50,7 +50,7 @@ func Feed(_ context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	feedResponse, err := rpc.Feed(context.Background(), &feed.DouyinFeedRequest{
+	feedResponse, err := rpc.Feed(ctx, &feed.DouyinFeedRequest{
 		LatestTime: &req.LatestTime,
 		UserId:     userId,
 	})
