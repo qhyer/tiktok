@@ -13,6 +13,7 @@ const (
 	UserNotExistErrCode        = 10004
 	AuthorizationFailedErrCode = 10005
 	OSSUploadFailedErrCode     = 10006
+	DBOperationFailedErrCode   = 10007
 )
 
 type ErrNo struct {
@@ -41,6 +42,7 @@ var (
 	UserNotExistErr        = NewErrNo(UserNotExistErrCode, "User not exists")
 	AuthorizationFailedErr = NewErrNo(AuthorizationFailedErrCode, "Authorization failed")
 	OSSUploadFailedErr     = NewErrNo(OSSUploadFailedErrCode, "Upload file to oss failed")
+	DBOperationFailedErr   = NewErrNo(DBOperationFailedErrCode, "Database operation error")
 )
 
 // ConvertErr convert error to Errno

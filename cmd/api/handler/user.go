@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"net/http"
 	"tiktok/cmd/api/rpc"
 	"tiktok/cmd/api/util"
@@ -38,6 +39,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		Password: req.Password,
 	})
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -85,6 +87,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 		Password: req.Password,
 	})
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -92,6 +95,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	// 根据传回的userId生成token
 	token, err := util.GenerateToken(loginResponse.UserId)
 	if err != nil {
+		hlog.CtxFatalf(ctx, "generate token error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -120,6 +124,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
+		hlog.CtxWarnf(ctx, "param error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -133,10 +138,12 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 		ToUserIds: userIds,
 	})
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}
 	if len(getUserInfoResponse.User) == 0 {
+		hlog.CtxWarnf(ctx, "user not exist error %v", err)
 		SendResponse(c, errno.UserNotExistErr)
 		return
 	}

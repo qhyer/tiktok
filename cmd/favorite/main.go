@@ -34,8 +34,8 @@ func main() {
 	}
 	Init()
 	svr := favorite.NewServer(new(FavoriteSrvImpl),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.FeedServiceName}), // server name
-		server.WithMiddleware(middleware.CommonMiddleware),                                             // middleware
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.FavoriteServiceName}), // server name
+		server.WithMiddleware(middleware.CommonMiddleware),                                                 // middleware
 		server.WithMiddleware(middleware.ServerMiddleware),
 		server.WithServiceAddr(addr), // address
 		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit

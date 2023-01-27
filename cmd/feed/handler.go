@@ -41,18 +41,3 @@ func (s *FeedSrvImpl) GetVideosByVideoIdsAndCurrentUserId(ctx context.Context, r
 	resp.VideoList = videos
 	return resp, nil
 }
-
-// IsVideoIdsExist implements the FeedSrvImpl interface.
-func (s *FeedSrvImpl) IsVideoIdsExist(ctx context.Context, req *feed.DouyinIsVideoIdsExistRequest) (resp *feed.DouyinIsVideoIdsExistResponse, err error) {
-	resp = new(feed.DouyinIsVideoIdsExistResponse)
-
-	res, err := service.NewGetVideoService(ctx).IsVideoIdsExist(req)
-	if err != nil {
-		resp = pack.BuildIsVideoIdsExistResponse(err)
-		return resp, err
-	}
-
-	resp = pack.BuildIsVideoIdsExistResponse(errno.Success)
-	resp.IsExist = res
-	return resp, nil
-}

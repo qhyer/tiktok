@@ -50,14 +50,3 @@ func GetVideosByVideoIdsAndCurrentUserId(ctx context.Context, req *feed.DouyinGe
 	}
 	return resp, err
 }
-
-func IsVideoIdsExist(ctx context.Context, req *feed.DouyinIsVideoIdsExistRequest) (*feed.DouyinIsVideoIdsExistResponse, error) {
-	resp, err := feedClient.IsVideoIdsExist(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.StatusCode, *resp.StatusMsg)
-	}
-	return resp, err
-}

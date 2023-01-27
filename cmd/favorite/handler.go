@@ -11,11 +11,23 @@ import (
 // FavoriteSrvImpl implements the last service interface defined in the IDL.
 type FavoriteSrvImpl struct{}
 
+const (
+	DoFavoriteAction     = 1
+	CancelFavoriteAction = 2
+)
+
 // FavoriteAction implements the FavoriteSrvImpl interface.
 func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.DouyinFavoriteActionRequest) (resp *favorite.DouyinFavoriteActionResponse, err error) {
 	resp = new(favorite.DouyinFavoriteActionResponse)
 
-	err = service.NewFavoriteActionService(ctx).FavoriteAction(req)
+	switch req.ActionType {
+	case DoFavoriteAction:
+		err = service.NewFavoriteActionService(ctx).FavoriteAction(req)
+	case CancelFavoriteAction:
+		err = service.NewFavoriteActionService(ctx).CancelFavoriteAction(req)
+	default:
+		err = errno.ParamErr
+	}
 	if err != nil {
 		resp = pack.BuildFavoriteActionResp(err)
 		return resp, err

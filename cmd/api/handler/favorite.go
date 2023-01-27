@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"net/http"
 	"tiktok/cmd/api/rpc"
 	"tiktok/kitex_gen/favorite"
@@ -25,6 +26,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
+		hlog.CtxWarnf(ctx, "param error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -37,6 +39,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		ActionType: req.ActionType,
 	})
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -63,6 +66,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
+		hlog.CtxWarnf(ctx, "param error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -73,6 +77,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		UserId: userId,
 	})
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}

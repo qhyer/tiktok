@@ -20,7 +20,7 @@ const (
 	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(103.200.115.51:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	VideoQueryLimit = 30
 
-	EtcdAddress = "127.0.0.1:2379"
+	EtcdAddress = "103.200.115.51:2379"
 
 	CPURateLimit float64 = 80.0
 

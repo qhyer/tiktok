@@ -7,7 +7,6 @@ require (
 	github.com/cloudwego/hertz v0.5.1
 	github.com/cloudwego/kitex v0.4.4
 	github.com/golang-jwt/jwt/v4 v4.4.3
-	github.com/google/uuid v1.3.0
 	github.com/h2non/filetype v1.1.3
 	github.com/kitex-contrib/registry-etcd v0.0.0-20221223084757-0d49e7162359
 	github.com/kitex-contrib/tracer-opentracing v0.0.3
@@ -45,6 +44,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/pprof v0.0.0-20220608213341-c488b8fa1db3 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/henrylee2cn/ameda v1.4.10 // indirect
 	github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 // indirect
 	github.com/jhump/protoreflect v1.8.2 // indirect

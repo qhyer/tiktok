@@ -20,6 +20,7 @@ message douyin_comment_action_response {
 
 message douyin_comment_list_request {
   int64 video_id = 1; // 视频id
+  int64 user_id = 2; // 用户id
 }
 
 message douyin_comment_list_response {

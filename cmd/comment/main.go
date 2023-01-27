@@ -20,7 +20,7 @@ import (
 func Init() {
 	tracer2.InitJaeger(constants.CommentServiceName)
 	dal.Init()
-	rpc.InitFeedRpc()
+	rpc.InitUserRpc()
 }
 
 func main() {
@@ -34,8 +34,8 @@ func main() {
 	}
 	Init()
 	svr := comment.NewServer(new(CommentSrvImpl),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.FeedServiceName}), // server name
-		server.WithMiddleware(middleware.CommonMiddleware),                                             // middleware
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.CommentServiceName}), // server name
+		server.WithMiddleware(middleware.CommonMiddleware),                                                // middleware
 		server.WithMiddleware(middleware.ServerMiddleware),
 		server.WithServiceAddr(addr), // address
 		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit

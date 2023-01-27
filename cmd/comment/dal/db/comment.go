@@ -2,19 +2,19 @@ package db
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"time"
-
-	"gorm.io/gorm"
 )
 
-type Favorite struct {
+type Comment struct {
 	gorm.Model
 	Id        int64          `gorm:"column:id;primaryKey"`
-	UserId    int64          `gorm:"column:user_id;uniqueIndex:uk_user_video_id"`
-	VideoId   int64          `gorm:"column:video_id;uniqueIndex:uk_user_video_id"`
+	UserId    int64          `gorm:"column:user_id"`
+	VideoId   int64          `gorm:"column:video_id;index:idx_video_id"`
+	Content   string         `gorm:"column:content"`
 	CreatedAt time.Time      `gorm:"column:created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;index:idx_updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"`
@@ -34,31 +34,31 @@ type Video struct {
 	DeletedAt     gorm.DeletedAt `gorm:"column:deleted_at"`
 }
 
-func (f *Favorite) TableName() string {
-	return constants.FavoriteTableName
+func (c *Comment) TableName() string {
+	return constants.CommentTableName
 }
 
 func (v *Video) TableName() string {
 	return constants.VideoTableName
 }
 
-// FavoriteList get list of user favorite videos
-func FavoriteList(ctx context.Context, userId int64) ([]*Favorite, error) {
-	res := make([]*Favorite, 0)
-	if err := DB.WithContext(ctx).Where("user_id = ?", userId).Find(&res).Error; err != nil {
+// CommentList get list of video comment
+func CommentList(ctx context.Context, videoId int64) ([]*Comment, error) {
+	res := make([]*Comment, 0)
+	if err := DB.WithContext(ctx).Where("video_id = ?", videoId).Order("updated_at desc").Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-// FavoriteAction user favorite video
-func FavoriteAction(ctx context.Context, favorite *Favorite) error {
+// CommentAction user comment video
+func CommentAction(ctx context.Context, comment *Comment) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 用户新增喜欢
+		// 用户新增评论
 		res := tx.Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "id"}},
 			DoUpdates: clause.AssignmentColumns([]string{"deleted_at"}),
-		}).Create(favorite)
+		}).Create(comment)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -68,13 +68,13 @@ func FavoriteAction(ctx context.Context, favorite *Favorite) error {
 			return errno.DBOperationFailedErr
 		}
 
-		// video 喜欢数+1
-		res = tx.Model(&Video{}).Where("id = ?", favorite.VideoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1))
+		// video 评论数+1
+		res = tx.Model(&Video{}).Where("id = ?", comment.VideoId).Update("comment_count", gorm.Expr("comment_count - ?", 1))
 		if res.Error != nil {
 			return res.Error
 		}
 
-		// 更新喜欢数失败
+		// 更新评论数失败
 		if res.RowsAffected != 1 {
 			return errno.DBOperationFailedErr
 		}
@@ -83,11 +83,11 @@ func FavoriteAction(ctx context.Context, favorite *Favorite) error {
 	})
 }
 
-// CancelFavoriteAction user cancel favorite video
-func CancelFavoriteAction(ctx context.Context, favorite *Favorite) error {
+// DeleteCommentAction delete video comment action
+func DeleteCommentAction(ctx context.Context, comment *Comment) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 用户取消喜欢
-		res := tx.Where("video_id = ? and user_id = ?", favorite.VideoId, favorite.UserId).Delete(&favorite)
+		// 用户删除评论
+		res := tx.Where("id = ? and user_id = ? and video_id = ?", comment.Id, comment.UserId, comment.VideoId).Delete(&comment)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -97,13 +97,13 @@ func CancelFavoriteAction(ctx context.Context, favorite *Favorite) error {
 			return errno.DBOperationFailedErr
 		}
 
-		// video 喜欢数-1
-		res = tx.Model(&Video{}).Where("id = ?", favorite.VideoId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1))
+		// video 评论数-1
+		res = tx.Model(&Video{}).Where("id = ?", comment.VideoId).Update("comment_count", gorm.Expr("comment_count - ?", 1))
 		if res.Error != nil {
 			return res.Error
 		}
 
-		// 更新喜欢数失败
+		// 更新评论数失败
 		if res.RowsAffected != 1 {
 			return errno.DBOperationFailedErr
 		}

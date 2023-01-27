@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/h2non/filetype"
 	"io"
 	"mime/multipart"
@@ -40,6 +41,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	var req PublishActionParam
 	err := c.BindAndValidate(&req)
 	if err != nil {
+		hlog.CtxWarnf(ctx, "param error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -49,6 +51,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	// 读取视频
 	videoFile, err := req.Data.Open()
 	if err != nil {
+		hlog.CtxWarnf(ctx, "read video error %v", err)
 		SendResponse(c, errno.ParamErr)
 		return
 	}
@@ -60,6 +63,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 
 	// 校验视频文件合法性
 	if !filetype.IsVideo(videoData.Bytes()) {
+		hlog.CtxWarnf(ctx, "param error %v", err)
 		SendResponse(c, errno.ParamErr)
 		return
 	}
@@ -72,6 +76,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	})
 
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -87,6 +92,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
+		hlog.CtxWarnf(ctx, "param error %v", err)
 		SendResponse(c, err)
 		return
 	}
@@ -100,6 +106,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 		ToUserId: toUserId,
 	})
 	if err != nil {
+		hlog.CtxErrorf(ctx, "rpc response error %v", err)
 		SendResponse(c, err)
 		return
 	}

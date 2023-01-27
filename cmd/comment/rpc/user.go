@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"context"
-	"tiktok/kitex_gen/feed"
-	"tiktok/kitex_gen/feed/feedsrv"
+	"tiktok/kitex_gen/user"
+	"tiktok/kitex_gen/user/usersrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/middleware"
@@ -15,16 +15,16 @@ import (
 	trace "github.com/kitex-contrib/tracer-opentracing"
 )
 
-var feedClient feedsrv.Client
+var userClient usersrv.Client
 
-func InitFeedRpc() {
+func InitUserRpc() {
 	r, err := etcd.NewEtcdResolver([]string{constants.EtcdAddress})
 	if err != nil {
 		panic(err)
 	}
 
-	c, err := feedsrv.NewClient(
-		constants.FeedServiceName,
+	c, err := usersrv.NewClient(
+		constants.UserServiceName,
 		client.WithMiddleware(middleware.CommonMiddleware),
 		client.WithInstanceMW(middleware.ClientMiddleware),
 		client.WithMuxConnection(1),                       // mux
@@ -37,11 +37,11 @@ func InitFeedRpc() {
 	if err != nil {
 		panic(err)
 	}
-	feedClient = c
+	userClient = c
 }
 
-func IsVideoIdsExist(ctx context.Context, req *feed.DouyinIsVideoIdsExistRequest) (*feed.DouyinIsVideoIdsExistResponse, error) {
-	resp, err := feedClient.IsVideoIdsExist(ctx, req)
+func UserInfo(ctx context.Context, req *user.DouyinUserInfoRequest) (*user.DouyinUserInfoResponse, error) {
+	resp, err := userClient.GetUserInfoByUserIds(ctx, req)
 	if err != nil {
 		return nil, err
 	}

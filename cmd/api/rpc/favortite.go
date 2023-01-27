@@ -8,7 +8,6 @@ import (
 	trace "github.com/kitex-contrib/tracer-opentracing"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/favorite/favoritesrv"
-	"tiktok/kitex_gen/feed/feedsrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/middleware"
@@ -23,8 +22,8 @@ func InitFavoriteRpc() {
 		panic(err)
 	}
 
-	c, err := feedsrv.NewClient(
-		constants.FeedServiceName,
+	c, err := favoritesrv.NewClient(
+		constants.FavoriteServiceName,
 		client.WithMiddleware(middleware.CommonMiddleware),
 		client.WithInstanceMW(middleware.ClientMiddleware),
 		client.WithMuxConnection(1),                       // mux
@@ -37,7 +36,7 @@ func InitFavoriteRpc() {
 	if err != nil {
 		panic(err)
 	}
-	feedClient = c
+	favoriteClient = c
 }
 
 func FavoriteAction(ctx context.Context, req *favorite.DouyinFavoriteActionRequest) (*favorite.DouyinFavoriteActionResponse, error) {

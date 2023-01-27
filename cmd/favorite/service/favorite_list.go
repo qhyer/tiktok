@@ -44,5 +44,6 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", err)
 		return nil, err
 	}
+
 	return feedResponse.VideoList, nil
 }
