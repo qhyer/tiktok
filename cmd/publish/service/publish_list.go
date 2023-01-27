@@ -5,6 +5,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"tiktok/cmd/publish/dal/db"
 	"tiktok/cmd/publish/pack"
+	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
 )
 
@@ -18,7 +19,7 @@ func NewPublishListService(ctx context.Context) *PublishListService {
 }
 
 // PublishList get list of video
-func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) ([]*publish.Video, error) {
+func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) ([]*feed.Video, error) {
 	vs, err := db.GetPublishedVideosByUserId(s.ctx, req.ToUserId)
 	if err != nil {
 		klog.CtxFatalf(s.ctx, "db get video failed %v", err)

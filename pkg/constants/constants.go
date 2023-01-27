@@ -5,13 +5,15 @@ import "time"
 const (
 	JWTSigningKey = "8QpXHd59YYhk5IMj"
 
-	UserTableName  = "user"
-	VideoTableName = "video"
+	UserTableName     = "user"
+	VideoTableName    = "video"
+	FavoriteTableName = "favorite"
 
-	ApiServiceName     = "api"
-	UserServiceName    = "user"
-	FeedServiceName    = "feed"
-	PublishServiceName = "publish"
+	ApiServiceName      = "api"
+	UserServiceName     = "user"
+	FeedServiceName     = "feed"
+	PublishServiceName  = "publish"
+	FavoriteServiceName = "favorite"
 
 	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(103.200.115.51:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	VideoQueryLimit = 30
@@ -27,4 +29,6 @@ const (
 	OSSAccessKeyID     = "tiktok"
 	OSSSecretAccessKey = "ZqRNq8vd;9KLjx=9"
 	OSSDefaultExpiry   = time.Hour
+
+	DefaultUserId = 0
 )

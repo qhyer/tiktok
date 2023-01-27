@@ -11,6 +11,7 @@ import (
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
+	"tiktok/pkg/errno"
 )
 
 // Video pack video
@@ -50,7 +51,8 @@ func Videos(ctx context.Context, vs []*db.Video, userId int64) ([]*feed.Video, e
 		UserId:    userId,
 		ToUserIds: authorUserIds,
 	})
-	if err != nil {
+	if err != nil || userInfoResponse.StatusCode != errno.SuccessCode {
+		klog.CtxErrorf(ctx, "query userinfo failed %v", userInfoResponse)
 		return nil, err
 	}
 

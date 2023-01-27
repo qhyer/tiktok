@@ -37,7 +37,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// 生成文件名
 	ruid := uuid.NewV4()
-	fileName := strconv.FormatInt(time.Now().UnixMicro(), 16) + ruid.String()
+	fileName := strconv.FormatInt(time.Now().UnixMicro(), 62) + ruid.String()
 
 	// Initialize minio client object.
 	minioClient, err := minio.New(constants.OSSEndPoint, &minio.Options{
@@ -82,11 +82,13 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	}
 
 	// 在db插入结果
-	err = db.CreateVideo(s.ctx, db.Video{
-		AuthorUserId: req.UserId,
-		PlayUrl:      videoUploadInfo.Key,
-		CoverUrl:     coverUploadInfo.Key,
-		Title:        req.Title,
+	err = db.CreateVideo(s.ctx, []*db.Video{
+		{
+			AuthorUserId: req.UserId,
+			PlayUrl:      videoUploadInfo.Key,
+			CoverUrl:     coverUploadInfo.Key,
+			Title:        req.Title,
+		},
 	})
 	if err != nil {
 		klog.CtxFatalf(s.ctx, "db create video failed %v", err)

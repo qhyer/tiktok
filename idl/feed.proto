@@ -16,9 +16,20 @@ message douyin_feed_response {
   optional int64 next_time = 4; // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
 }
 
-message video_id_request{
+message video_id_request {
   int64 video_id = 1;
   int64 search_id = 2;
+}
+
+message douyin_get_videos_by_video_ids_and_current_user_id_request {
+  int64 user_id = 1; // 当前用户id
+  repeated int64 video_ids = 2; // 视频id
+}
+
+message douyin_get_videos_by_video_ids_and_current_user_id_response {
+  int32 status_code = 1; // 状态码，0-成功，其他值-失败
+  optional string status_msg = 2; // 返回状态描述
+  repeated Video video_list = 3; // 视频列表
 }
 
 message Video {
@@ -32,6 +43,7 @@ message Video {
   string title = 8; // 视频标题
 }
 
-service FeedSrv{
+service FeedSrv {
   rpc Feed (douyin_feed_request) returns (douyin_feed_response) {}
+  rpc GetVideosByVideoIdsAndCurrentUserId (douyin_get_videos_by_video_ids_and_current_user_id_request) returns (douyin_get_videos_by_video_ids_and_current_user_id_response) {}
 }

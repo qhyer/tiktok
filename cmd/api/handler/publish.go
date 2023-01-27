@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"tiktok/cmd/api/rpc"
+	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/errno"
 )
@@ -25,9 +26,9 @@ type PublishListParam struct {
 }
 
 type PublishListResponse struct {
-	StatusCode int32   `json:"status_code"`
-	StatusMsg  string  `json:"status_msg"`
-	VideoList  []Video `json:"video_list"`
+	StatusCode int32         `json:"status_code"`
+	StatusMsg  string        `json:"status_msg"`
+	VideoList  []*feed.Video `json:"video_list"`
 }
 
 func PublishAction(_ context.Context, c *app.RequestContext) {
@@ -84,33 +85,16 @@ func PublishList(_ context.Context, c *app.RequestContext) {
 
 	userId := c.GetInt64("UserID")
 	toUserId := req.UserId
+
+	// rpc通信
 	publishListResponse, err := rpc.PublishList(context.Background(), &publish.DouyinPublishListRequest{
 		UserId:   userId,
 		ToUserId: toUserId,
 	})
 
-	videoList := make([]Video, 0, len(publishListResponse.VideoList))
-	for _, v := range publishListResponse.VideoList {
-		videoList = append(videoList, Video{
-			Id: v.Id,
-			Author: User{
-				Id:            v.Author.Id,
-				IsFollow:      v.Author.IsFollow,
-				FollowerCount: *v.Author.FollowerCount,
-				FollowCount:   *v.Author.FollowCount,
-				Name:          v.Author.Name,
-			},
-			PlayUrl:       v.PlayUrl,
-			CoverUrl:      v.CoverUrl,
-			FavoriteCount: v.FavoriteCount,
-			CommentCount:  v.CommentCount,
-			Title:         v.Title,
-		})
-	}
-
 	c.JSON(http.StatusOK, PublishListResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		VideoList:  videoList,
+		VideoList:  publishListResponse.VideoList,
 	})
 }

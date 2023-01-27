@@ -26,3 +26,18 @@ func (s *FeedSrvImpl) Feed(ctx context.Context, req *feed.DouyinFeedRequest) (re
 	resp.NextTime = &nextTime
 	return resp, nil
 }
+
+// GetVideosByVideoIdsAndCurrentUserId implements the FeedSrvImpl interface.
+func (s *FeedSrvImpl) GetVideosByVideoIdsAndCurrentUserId(ctx context.Context, req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest) (resp *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse, err error) {
+	resp = new(feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse)
+
+	videos, err := service.NewGetVideoService(ctx).GetVideosByVideoIdsAndCurrUserId(req)
+	if err != nil {
+		resp = pack.BuildGetVideosByVideoIdsAndCurrentUserIdResponse(err)
+		return resp, nil
+	}
+
+	resp = pack.BuildGetVideosByVideoIdsAndCurrentUserIdResponse(errno.Success)
+	resp.VideoList = videos
+	return resp, nil
+}

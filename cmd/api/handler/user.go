@@ -109,18 +109,10 @@ type GetUserInfoParam struct {
 	UserId int64 `query:"user_id"`
 }
 
-type User struct {
-	Id            int64  `json:"id"`
-	Name          string `json:"name"`
-	FollowCount   int64  `json:"follow_count"`
-	FollowerCount int64  `json:"follower_count"`
-	IsFollow      bool   `json:"is_follow"`
-}
-
 type GetUserInfoResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-	User       User   `json:"user"`
+	StatusCode int32      `json:"status_code"`
+	StatusMsg  string     `json:"status_msg"`
+	User       *user.User `json:"user"`
 }
 
 func GetUserInfo(_ context.Context, c *app.RequestContext) {
@@ -153,12 +145,6 @@ func GetUserInfo(_ context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, GetUserInfoResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		User: User{
-			Id:            usr.Id,
-			Name:          usr.Name,
-			FollowerCount: *usr.FollowerCount,
-			FollowCount:   *usr.FollowCount,
-			IsFollow:      usr.IsFollow,
-		},
+		User:       usr,
 	})
 }

@@ -27,8 +27,8 @@ func (v *Video) TableName() string {
 }
 
 // CreateVideo create video
-func CreateVideo(ctx context.Context, video Video) error {
-	return DB.WithContext(ctx).Create(&video).Error
+func CreateVideo(ctx context.Context, video []*Video) error {
+	return DB.WithContext(ctx).Create(video).Error
 }
 
 // GetPublishedVideosByUserId get list of published video

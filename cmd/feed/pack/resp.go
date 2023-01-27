@@ -23,3 +23,21 @@ func BuildFeedResp(err error) *feed.DouyinFeedResponse {
 func feedResp(err errno.ErrNo) *feed.DouyinFeedResponse {
 	return &feed.DouyinFeedResponse{StatusCode: err.ErrCode, StatusMsg: &err.ErrMsg}
 }
+
+func BuildGetVideosByVideoIdsAndCurrentUserIdResponse(err error) *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse {
+	if err == nil {
+		return getVideosByVideoIdsAndCurrentUserIdResponse(errno.Success)
+	}
+
+	e := errno.ErrNo{}
+	if errors.As(err, &e) {
+		return getVideosByVideoIdsAndCurrentUserIdResponse(e)
+	}
+
+	s := errno.ServiceErr.WithMessage(err.Error())
+	return getVideosByVideoIdsAndCurrentUserIdResponse(s)
+}
+
+func getVideosByVideoIdsAndCurrentUserIdResponse(err errno.ErrNo) *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse {
+	return &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse{StatusCode: err.ErrCode, StatusMsg: &err.ErrMsg}
+}

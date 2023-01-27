@@ -34,3 +34,16 @@ func GetVideosByLatestTime(ctx context.Context, limit int, latestTime int64) ([]
 	}
 	return res, nil
 }
+
+// MGetVideosByVideoIds get list of video by video ids
+func MGetVideosByVideoIds(ctx context.Context, videoIds []int64) ([]*Video, error) {
+	res := make([]*Video, 0)
+	if len(videoIds) == 0 {
+		return res, nil
+	}
+
+	if err := DB.WithContext(ctx).Where("id in ?", videoIds).Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}
