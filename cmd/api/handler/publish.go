@@ -37,6 +37,7 @@ type PublishListResponse struct {
 	VideoList  []*feed.Video `json:"video_list"`
 }
 
+// PublishAction 发布视频
 func PublishAction(ctx context.Context, c *app.RequestContext) {
 	var req PublishActionParam
 	err := c.BindAndValidate(&req)
@@ -87,6 +88,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
+// PublishList 获取用户发布的视频列表
 func PublishList(ctx context.Context, c *app.RequestContext) {
 	var req PublishListParam
 	// 参数校验

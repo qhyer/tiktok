@@ -29,6 +29,7 @@ const (
 	DeleteCommentAction = 2
 )
 
+// CommentAction 评论和删除评论
 func CommentAction(ctx context.Context, c *app.RequestContext) {
 	var req CommentActionParam
 	// 参数校验
@@ -85,6 +86,7 @@ type CommentListResponse struct {
 	CommentList []*comment.Comment `json:"comment_list"`
 }
 
+// CommentList 获取视频的评论列表
 func CommentList(ctx context.Context, c *app.RequestContext) {
 	var req CommentListParam
 	// 参数校验

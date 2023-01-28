@@ -14,8 +14,8 @@ import (
 )
 
 type RegisterParam struct {
-	Username string `query:"username" vd:"$!=nil&&len($)<=32"`
-	Password string `query:"password" vd:"$!=nil&&len($)<=32"`
+	Username string `query:"username" vd:"$!=nil&&len($)>=6&&len($)<=32"`
+	Password string `query:"password" vd:"$!=nil&&len($)>=6&&len($)<=32"`
 }
 
 type RegisterResponse struct {
@@ -25,6 +25,7 @@ type RegisterResponse struct {
 	Token      string `json:"token"`
 }
 
+// Register 用户注册
 func Register(ctx context.Context, c *app.RequestContext) {
 	var req RegisterParam
 	// 参数校验
@@ -61,8 +62,8 @@ func Register(ctx context.Context, c *app.RequestContext) {
 }
 
 type LoginParam struct {
-	Username string `query:"username" vd:"$!=nil&&len($)<=32"`
-	Password string `query:"password" vd:"$!=nil&&len($)<=32"`
+	Username string `query:"username" vd:"$!=nil&&len($)>=6&&len($)<=32"`
+	Password string `query:"password" vd:"$!=nil&&len($)>=6&&len($)<=32"`
 }
 
 type LoginResponse struct {
@@ -72,6 +73,7 @@ type LoginResponse struct {
 	Token      string `json:"token"`
 }
 
+// Login 用户登录
 func Login(ctx context.Context, c *app.RequestContext) {
 	var req LoginParam
 	// 参数校验
@@ -118,6 +120,7 @@ type GetUserInfoResponse struct {
 	User       *user.User `json:"user"`
 }
 
+// GetUserInfo 获取用户信息
 func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	var req GetUserInfoParam
 	// 参数校验

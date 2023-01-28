@@ -36,6 +36,7 @@ type Video struct {
 	Title         string    `json:"title"`
 }
 
+// Feed 视频流
 func Feed(ctx context.Context, c *app.RequestContext) {
 	var req FeedParam
 	// 参数校验

@@ -22,6 +22,7 @@ type FavoriteActionResponse struct {
 	StatusMsg  string `json:"status_msg"`
 }
 
+// FavoriteAction 关注、取关
 func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	var req FavoriteActionParam
 	// 参数校验
@@ -61,6 +62,7 @@ type FavoriteListResponse struct {
 	VideoList  []*feed.Video `json:"video_list"`
 }
 
+// FavoriteList 获取个人点赞列表
 func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	var req FavoriteListParam
 	// 参数校验
@@ -70,11 +72,10 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
-	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	favoriteResponse, err := rpc.FavoriteList(ctx, &favorite.DouyinFavoriteListRequest{
-		UserId: userId,
+		UserId: req.userId,
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)

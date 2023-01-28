@@ -7,13 +7,12 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
-// Response 接口基础相应结构体
 type Response struct {
 	StatusCode int32  `json:"status_code"`
 	StatusMsg  string `json:"status_msg"`
 }
 
-// SendResponse pack response
+// SendResponse 封装返回结构体
 func SendResponse(c *app.RequestContext, err error) {
 	Err := errno.ConvertErr(err)
 
