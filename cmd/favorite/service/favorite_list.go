@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"tiktok/dal/db"
-	"tiktok/dal/pack"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/rpc"
@@ -24,23 +23,16 @@ func NewFavoriteListService(ctx context.Context) *FavoriteListService {
 // FavoriteList get user favorite list
 func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListRequest) ([]*feed.Video, error) {
 	userId := req.UserId
-	fl, err := db.FavoriteList(s.ctx, userId)
+	fl, err := db.GetFavoriteVideoIdsByUserId(s.ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "db get favorite list failed %v", err)
 		return nil, err
 	}
 
-	favoriteList := pack.Favorites(fl)
-
-	videoIds := make([]int64, 0, len(favoriteList))
-	for _, v := range favoriteList {
-		videoIds = append(videoIds, v.VideoId)
-	}
-
 	// rpc通信
 	feedResponse, err := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
 		UserId:   userId,
-		VideoIds: videoIds,
+		VideoIds: fl,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", err)

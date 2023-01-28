@@ -26,11 +26,8 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 		return nil, err
 	}
 
-	comments, err := pack.Comments(s.ctx, cs, req.UserId)
-	if err != nil {
-		klog.CtxErrorf(s.ctx, "pack comment list failed %v", err)
-		return nil, err
-	}
+	comments := pack.Comments(cs)
 
+	// TODO add user
 	return comments, nil
 }

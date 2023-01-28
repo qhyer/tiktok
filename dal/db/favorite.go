@@ -25,10 +25,10 @@ func (f *Favorite) TableName() string {
 	return constants.FavoriteTableName
 }
 
-// FavoriteList get list of user favorite videos
-func FavoriteList(ctx context.Context, userId int64) ([]*Favorite, error) {
-	res := make([]*Favorite, 0)
-	if err := DB.WithContext(ctx).Where("user_id = ?", userId).Find(&res).Error; err != nil {
+// GetFavoriteVideoIdsByUserId get favorite video ids by user id
+func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, error) {
+	res := make([]int64, 0)
+	if err := DB.WithContext(ctx).Select("video_id").Where("user_id = ?", userId).Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil

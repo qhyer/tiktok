@@ -7,6 +7,7 @@ import (
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/constants"
+	"tiktok/pkg/minio"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -28,11 +29,14 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		return nil, 0, err
 	}
 
-	videos, nextTime, err := pack.Videos(s.ctx, vs, req.UserId)
+	videos, nextTime := pack.Videos(vs)
+
+	videos, err = minio.SignFeed(s.ctx, videos)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "pack video failed %v", err)
+		klog.CtxErrorf(s.ctx, "minio sign feed failed %v", err)
 		return nil, 0, err
 	}
 
+	// TODO add user
 	return videos, nextTime, nil
 }

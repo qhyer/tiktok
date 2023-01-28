@@ -8,14 +8,13 @@ import (
 	"tiktok/kitex_gen/favorite"
 )
 
-func FavoriteActionService_CancelFavoriteAction(t *testing.T) {
+func TestFavoriteActionService_CancelFavoriteAction(t *testing.T) {
 	type fields struct {
 		ctx context.Context
 	}
 	type args struct {
 		req *favorite.DouyinFavoriteActionRequest
 	}
-
 	db.Init()
 	tests := []struct {
 		name    string

@@ -6,6 +6,7 @@ import (
 	"tiktok/dal/db"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
+	"tiktok/pkg/censor"
 )
 
 type CommentActionService struct {
@@ -19,10 +20,15 @@ func NewCommentActionService(ctx context.Context) *CommentActionService {
 
 // CommentAction user comment video action
 func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionRequest) (*comment.Comment, error) {
+	// 过滤敏感词
+	content := *req.CommentText
+	content = censor.TextCensor.GetFilter().Replace(content, '*')
+
+	// 插入数据
 	c, err := db.CommentAction(s.ctx, &db.Comment{
 		UserId:  req.UserId,
 		VideoId: req.VideoId,
-		Content: *req.CommentText,
+		Content: content,
 	})
 	if err != nil {
 		return nil, err

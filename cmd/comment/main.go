@@ -6,6 +6,7 @@ import (
 	"tiktok/dal"
 	comment "tiktok/kitex_gen/comment/commentsrv"
 	"tiktok/pkg/bound"
+	"tiktok/pkg/censor"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
 	"tiktok/pkg/rpc"
@@ -22,6 +23,7 @@ func Init() {
 	tracer2.InitJaeger(constants.CommentServiceName)
 	dal.Init()
 	rpc.InitUserRpc()
+	censor.Init()
 }
 
 func main() {

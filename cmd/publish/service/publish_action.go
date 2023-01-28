@@ -15,10 +15,9 @@ import (
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
+	"tiktok/pkg/minio"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/satori/go.uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -40,20 +39,10 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	ruid := uuid.NewV4()
 	fileName := strconv.FormatInt(time.Now().UnixMicro(), 62) + ruid.String()
 
-	// Initialize minio client object.
-	minioClient, err := minio.New(constants.OSSEndPoint, &minio.Options{
-		Creds: credentials.NewStaticV4(constants.OSSAccessKeyID, constants.OSSSecretAccessKey, ""),
-	})
-	if err != nil {
-		klog.CtxErrorf(s.ctx, "minio client init failed %v", err)
-	}
-
 	// 上传视频
 	videoFileName := fileName + ".mp4"
 	videoReader := bytes.NewReader(videoData)
-	videoUploadInfo, err := minioClient.PutObject(s.ctx, constants.VideoBucketName, videoFileName, videoReader, int64(len(videoData)), minio.PutObjectOptions{
-		ContentType: "application/octet-stream",
-	})
+	videoUploadInfo, err := minio.PutObject(s.ctx, constants.VideoBucketName, videoFileName, videoReader, int64(len(videoData)))
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "upload file to oss failed %v", err)
 		return errno.OSSUploadFailedErr
@@ -61,7 +50,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// 获取封面
 	reqParams := make(url.Values)
-	videoInfo, err := minioClient.PresignedGetObject(s.ctx, constants.VideoBucketName, videoFileName, constants.OSSDefaultExpiry, reqParams)
+	videoInfo, err := minio.PreSignedGetObject(s.ctx, constants.VideoBucketName, videoFileName, constants.OSSDefaultExpiry, reqParams)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "pre sign get object failed %v", err)
 		return err
@@ -74,9 +63,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	// 上传封面
 	coverFileName := fileName + ".jpeg"
 	coverReader := bytes.NewReader(coverData)
-	coverUploadInfo, err := minioClient.PutObject(s.ctx, constants.CoverBucketName, coverFileName, coverReader, int64(len(coverData)), minio.PutObjectOptions{
-		ContentType: "application/octet-stream",
-	})
+	coverUploadInfo, err := minio.PutObject(s.ctx, constants.CoverBucketName, coverFileName, coverReader, int64(len(coverData)))
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "upload file to oss failed %v", err)
 		return errno.OSSUploadFailedErr

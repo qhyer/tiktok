@@ -8,6 +8,7 @@ import (
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
+	"tiktok/pkg/minio"
 	"tiktok/pkg/rpc"
 	tracer2 "tiktok/pkg/tracer"
 
@@ -22,6 +23,7 @@ func Init() {
 	tracer2.InitJaeger(constants.FeedServiceName)
 	dal.Init()
 	rpc.InitUserRpc()
+	minio.Init()
 }
 
 func main() {
