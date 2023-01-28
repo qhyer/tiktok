@@ -2,12 +2,13 @@ package main
 
 import (
 	"net"
-	"tiktok/cmd/publish/dal"
-	"tiktok/cmd/publish/rpc"
+
+	"tiktok/dal"
 	publish "tiktok/kitex_gen/publish/publishsrv"
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
+	"tiktok/pkg/rpc"
 	tracer2 "tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"

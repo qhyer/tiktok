@@ -2,13 +2,15 @@ package handler
 
 import (
 	"context"
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"net/http"
-	"tiktok/cmd/api/rpc"
-	"tiktok/cmd/api/util"
+
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
+	"tiktok/pkg/jwt"
+	"tiktok/pkg/rpc"
+
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 // TODO: 用户名密码合法性校验 https://www.cloudwego.io/zh/docs/hertz/tutorials/basic-feature/binding-and-validate/
@@ -45,7 +47,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 根据传回的userId生成token
-	token, err := util.GenerateToken(registerResponse.UserId)
+	token, err := jwt.GenerateToken(registerResponse.UserId)
 	if err != nil {
 		SendResponse(c, err)
 		return
@@ -93,9 +95,9 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 根据传回的userId生成token
-	token, err := util.GenerateToken(loginResponse.UserId)
+	token, err := jwt.GenerateToken(loginResponse.UserId)
 	if err != nil {
-		hlog.CtxFatalf(ctx, "generate token error %v", err)
+		hlog.CtxErrorf(ctx, "generate token error %v", err)
 		SendResponse(c, err)
 		return
 	}

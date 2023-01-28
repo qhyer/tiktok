@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"testing"
-	"tiktok/cmd/favorite/dal/db"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/favorite"
 )
 
-func stFavoriteActionService_CancelFavoriteAction(t *testing.T) {
+func FavoriteActionService_CancelFavoriteAction(t *testing.T) {
 	type fields struct {
 		ctx context.Context
 	}

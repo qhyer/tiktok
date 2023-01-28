@@ -2,13 +2,13 @@ package main
 
 import (
 	"net"
-	"tiktok/cmd/feed/dal"
-	"tiktok/cmd/feed/rpc"
+
+	"tiktok/dal"
+	feed "tiktok/kitex_gen/feed/feedsrv"
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
-
-	feed "tiktok/kitex_gen/feed/feedsrv"
+	"tiktok/pkg/rpc"
 	tracer2 "tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"

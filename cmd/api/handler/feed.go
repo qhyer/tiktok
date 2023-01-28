@@ -2,14 +2,16 @@ package handler
 
 import (
 	"context"
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"net/http"
-	"tiktok/cmd/api/rpc"
+	"time"
+
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
-	"time"
+	"tiktok/pkg/rpc"
+
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 // TODO: 参数校验

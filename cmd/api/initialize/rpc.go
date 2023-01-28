@@ -1,6 +1,6 @@
 package initialize
 
-import "tiktok/cmd/api/rpc"
+import "tiktok/pkg/rpc"
 
 func Rpc() {
 	rpc.InitUserRpc()

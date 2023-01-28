@@ -2,7 +2,8 @@ package main
 
 import (
 	"net"
-	"tiktok/cmd/user/dal"
+
+	"tiktok/dal"
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"

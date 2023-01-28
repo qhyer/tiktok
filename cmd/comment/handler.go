@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"tiktok/cmd/comment/pack"
+
 	"tiktok/cmd/comment/service"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/errno"
 )

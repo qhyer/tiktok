@@ -3,14 +3,16 @@ package initialize
 import (
 	"context"
 	"fmt"
+
+	"tiktok/cmd/api/handler"
+	"tiktok/pkg/errno"
+	"tiktok/pkg/middleware"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"tiktok/cmd/api/handler"
-	"tiktok/cmd/api/middleware"
-	"tiktok/pkg/errno"
 )
 
 func Router() {

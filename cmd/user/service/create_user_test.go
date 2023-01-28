@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 	"testing"
-	"tiktok/cmd/user/dal/db"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"

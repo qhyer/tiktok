@@ -2,7 +2,8 @@ package service
 
 import (
 	"context"
-	"tiktok/cmd/favorite/dal/db"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/favorite"
 )
 

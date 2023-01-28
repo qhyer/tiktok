@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"tiktok/cmd/user/dal/db"
-	"tiktok/cmd/user/pack"
+
+	"tiktok/dal/db"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/user"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type MGetUserService struct {
@@ -21,7 +23,7 @@ func NewMGetUserService(ctx context.Context) *MGetUserService {
 func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.User, error) {
 	modelUsers, err := db.MGetUsers(s.ctx, req.ToUserIds)
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db get multiple users failed %v", err)
+		klog.CtxErrorf(s.ctx, "db get multiple users failed %v", err)
 		return nil, err
 	}
 

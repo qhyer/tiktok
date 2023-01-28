@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"tiktok/cmd/user/pack"
+
 	"tiktok/cmd/user/service"
-	user "tiktok/kitex_gen/user"
+	"tiktok/dal/pack"
+	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
 )
 

@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"testing"
-	"tiktok/cmd/publish/dal/db"
-	"tiktok/cmd/publish/rpc"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
+	"tiktok/pkg/rpc"
 )
 
 func TestPublishListService_PublishList(t *testing.T) {

@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"tiktok/cmd/feed/pack"
+
 	"tiktok/cmd/feed/service"
-	feed "tiktok/kitex_gen/feed"
+	"tiktok/dal/pack"
+	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/errno"
 )
 

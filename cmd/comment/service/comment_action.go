@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
-	"tiktok/cmd/comment/dal/db"
+
+	"tiktok/dal/db"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
 )
 
@@ -17,13 +19,17 @@ func NewCommentActionService(ctx context.Context) *CommentActionService {
 
 // CommentAction user comment video action
 func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionRequest) (*comment.Comment, error) {
-	// TODO 文本内容审核 返回评论内容
-	err := db.CommentAction(s.ctx, &db.Comment{
+	c, err := db.CommentAction(s.ctx, &db.Comment{
 		UserId:  req.UserId,
 		VideoId: req.VideoId,
 		Content: *req.CommentText,
 	})
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+
+	com := pack.Comment(c)
+	return com, err
 }
 
 // DeleteCommentAction delete user comment action

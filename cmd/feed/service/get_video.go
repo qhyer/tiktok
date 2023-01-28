@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"tiktok/cmd/feed/dal/db"
-	"tiktok/cmd/feed/pack"
+
+	"tiktok/dal/db"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/feed"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type GetVideoService struct {
@@ -21,7 +23,7 @@ func NewGetVideoService(ctx context.Context) *GetVideoService {
 func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest) ([]*feed.Video, error) {
 	vs, err := db.MGetVideosByVideoIds(s.ctx, req.VideoIds)
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db get video failed %v", err)
+		klog.CtxErrorf(s.ctx, "db get video failed %v", err)
 		return nil, err
 	}
 

@@ -2,12 +2,13 @@ package main
 
 import (
 	"net"
-	"tiktok/cmd/favorite/dal"
-	"tiktok/cmd/favorite/rpc"
+
+	"tiktok/dal"
 	favorite "tiktok/kitex_gen/favorite/favoritesrv"
 	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
+	"tiktok/pkg/rpc"
 	tracer2 "tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"

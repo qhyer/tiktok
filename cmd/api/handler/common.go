@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"tiktok/pkg/errno"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"tiktok/pkg/errno"
 )
 
 // Response 接口基础相应结构体

@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"testing"
-	"tiktok/cmd/feed/dal/db"
-	"tiktok/cmd/feed/rpc"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/feed"
+	"tiktok/pkg/rpc"
 )
 
 func TestGetVideoService_GetVideosByVideoIdsAndCurrUserId(t *testing.T) {

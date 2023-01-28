@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"testing"
-	"tiktok/cmd/favorite/dal/db"
-	"tiktok/cmd/favorite/rpc"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
+	"tiktok/pkg/rpc"
 )
 
 func TestFavoriteListService_FavoriteList(t *testing.T) {

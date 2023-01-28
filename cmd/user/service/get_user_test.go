@@ -4,7 +4,8 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"tiktok/cmd/user/dal/db"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/user"
 )
 

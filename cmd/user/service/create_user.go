@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"tiktok/cmd/user/dal/db"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -40,13 +41,13 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 		Password: passWord,
 	}})
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db create user failed %v", err)
+		klog.CtxErrorf(s.ctx, "db create user failed %v", err)
 		return 0, err
 	}
 
 	users, err = db.QueryUser(s.ctx, req.Username)
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db query user failed %v", err)
+		klog.CtxErrorf(s.ctx, "db query user failed %v", err)
 		return 0, err
 	}
 	if len(users) == 0 {

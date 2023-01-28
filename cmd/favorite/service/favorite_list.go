@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"tiktok/cmd/favorite/dal/db"
-	"tiktok/cmd/favorite/pack"
-	"tiktok/cmd/favorite/rpc"
+
+	"tiktok/dal/db"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
+	"tiktok/pkg/rpc"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type FavoriteListService struct {
@@ -24,7 +26,7 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 	userId := req.UserId
 	fl, err := db.FavoriteList(s.ctx, userId)
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db get favorite list failed %v", err)
+		klog.CtxErrorf(s.ctx, "db get favorite list failed %v", err)
 		return nil, err
 	}
 

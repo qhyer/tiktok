@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
-	"tiktok/cmd/feed/dal/db"
-	"tiktok/cmd/feed/pack"
+
+	"tiktok/dal/db"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/constants"
 
@@ -23,7 +24,7 @@ func NewFeedService(ctx context.Context) *FeedService {
 func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, error) {
 	vs, err := db.GetVideosByLatestTime(s.ctx, constants.VideoQueryLimit, *req.LatestTime)
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db get video failed %v", err)
+		klog.CtxErrorf(s.ctx, "db get video failed %v", err)
 		return nil, 0, err
 	}
 

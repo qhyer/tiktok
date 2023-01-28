@@ -9,11 +9,12 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"tiktok/cmd/publish/dal/db"
+	"time"
+
+	"tiktok/dal/db"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
-	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/minio/minio-go/v7"

@@ -4,10 +4,11 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"tiktok/cmd/feed/dal/db"
-	"tiktok/cmd/feed/rpc"
-	"tiktok/kitex_gen/feed"
 	"time"
+
+	"tiktok/dal/db"
+	"tiktok/kitex_gen/feed"
+	"tiktok/pkg/rpc"
 )
 
 func TestFeedService_Feed(t *testing.T) {

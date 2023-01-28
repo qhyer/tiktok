@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"tiktok/cmd/comment/dal/db"
-	"tiktok/cmd/comment/pack"
+
+	"tiktok/dal/db"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type CommentListService struct {
@@ -20,7 +22,7 @@ func NewCommentListService(ctx context.Context) *CommentListService {
 func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) ([]*comment.Comment, error) {
 	cs, err := db.CommentList(s.ctx, req.VideoId)
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db get comment list failed %v", err)
+		klog.CtxErrorf(s.ctx, "db get comment list failed %v", err)
 		return nil, err
 	}
 
