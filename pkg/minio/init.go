@@ -8,7 +8,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-var Client *minio.Client
+var client *minio.Client
 
 func Init() {
 	// Initialize minio client object.
@@ -18,5 +18,5 @@ func Init() {
 	if err != nil {
 		klog.Errorf("minio client init failed %v", err)
 	}
-	Client = c
+	client = c
 }

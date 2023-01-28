@@ -7,4 +7,5 @@ func Rpc() {
 	rpc.InitFeedRpc()
 	rpc.InitPublishRpc()
 	rpc.InitFavoriteRpc()
+	rpc.InitCommentRpc()
 }

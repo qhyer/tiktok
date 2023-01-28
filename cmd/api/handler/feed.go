@@ -14,9 +14,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-// TODO: 参数校验
 type FeedParam struct {
-	LatestTime int64 `query:"latest_time"`
+	LatestTime int64 `query:"latest_time" vd:"$!=nil&&$>0"`
 }
 
 type FeedResponse struct {

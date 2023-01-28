@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"tiktok/cmd/api/handler"
+	"tiktok/cmd/api/middleware"
 	"tiktok/pkg/errno"
-	"tiktok/pkg/middleware"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
@@ -40,22 +40,28 @@ func Router() {
 	apiRouter.POST("/user/login/", handler.Login)
 	apiRouter.GET("/user/", handler.GetUserInfo)
 
-	// 用户发布列表接口
-	apiRouter.GET("/publish/list/", handler.PublishList)
-
 	// 需要鉴权的接口路由
 	authRouter := apiRouter.Group("/")
 	// 中间件鉴权
 	authRouter.Use(middleware.JWT())
 
 	// 投稿路由
-	publishRouter := authRouter.Group("/publish/")
-	publishRouter.POST("/action/", handler.PublishAction)
+	authRouter.POST("/publish/action/", handler.PublishAction)
 
-	// 点赞和喜欢列表路由
-	favoriteRouter := authRouter.Group("/favorite/")
-	favoriteRouter.POST("/action/", handler.FavoriteAction)
-	favoriteRouter.GET("/list/", handler.FavoriteList)
+	// 发布列表路由
+	apiRouter.GET("/publish/list/", handler.PublishList)
+
+	// 点赞路由
+	authRouter.POST("/favorite/action/", handler.FavoriteAction)
+
+	// 喜欢列表路由
+	apiRouter.GET("/favorite/list/", handler.FavoriteList)
+
+	// 评论路由
+	authRouter.POST("/comment/action/", handler.CommentAction)
+
+	// 评论列表路由
+	apiRouter.GET("/comment/list/", handler.CommentList)
 
 	// TODO 其余接口路由
 	h.Spin()

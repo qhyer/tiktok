@@ -12,10 +12,9 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-// TODO 参数校验
 type FavoriteActionParam struct {
-	VideoId    int64 `query:"video_id"`
-	ActionType int32 `query:"action_type"`
+	VideoId    int64 `query:"video_id" vd:"$!=nil&&$>0"`
+	ActionType int32 `query:"action_type" vd:"$!=nil&&$==1||$==2"`
 }
 
 type FavoriteActionResponse struct {
@@ -52,9 +51,8 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// TODO 参数校验
 type FavoriteListParam struct {
-	userId int64 `query:"user_id"`
+	userId int64 `query:"user_id" vd:"$!=nil&&$>0"`
 }
 
 type FavoriteListResponse struct {

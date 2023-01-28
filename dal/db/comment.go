@@ -8,7 +8,6 @@ import (
 	"tiktok/pkg/errno"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type Comment struct {
@@ -38,11 +37,8 @@ func CommentList(ctx context.Context, videoId int64) ([]*Comment, error) {
 // CommentAction user comment video
 func CommentAction(ctx context.Context, comment *Comment) (*Comment, error) {
 	return comment, DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 用户新增评论
-		res := tx.Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"deleted_at"}),
-		}).Create(comment)
+		// 新增评论
+		res := tx.Create(comment)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -70,8 +66,14 @@ func CommentAction(ctx context.Context, comment *Comment) (*Comment, error) {
 // DeleteCommentAction delete video comment action
 func DeleteCommentAction(ctx context.Context, comment *Comment) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 用户删除评论
-		res := tx.Where("id = ? and user_id = ? and video_id = ?", comment.Id, comment.UserId, comment.VideoId).Delete(&comment)
+		// 找到要删除的评论
+		delCom := tx.Where("id = ? and user_id = ?", comment.Id, comment.UserId).Take(&comment)
+		if delCom.Error != nil {
+			return delCom.Error
+		}
+
+		// 删除评论
+		res := tx.Where("id = ?", comment.Id).Delete(&comment)
 		if res.Error != nil {
 			return res.Error
 		}

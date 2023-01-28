@@ -13,10 +13,9 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-// TODO: 用户名密码合法性校验 https://www.cloudwego.io/zh/docs/hertz/tutorials/basic-feature/binding-and-validate/
 type RegisterParam struct {
-	Username string `query:"username"`
-	Password string `query:"password"`
+	Username string `query:"username" vd:"$!=nil&&len($)<=32"`
+	Password string `query:"password" vd:"$!=nil&&len($)<=32"`
 }
 
 type RegisterResponse struct {
@@ -61,10 +60,9 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// TODO: 用户名密码合法性校验 https://www.cloudwego.io/zh/docs/hertz/tutorials/basic-feature/binding-and-validate/
 type LoginParam struct {
-	Username string `query:"username"`
-	Password string `query:"password"`
+	Username string `query:"username" vd:"$!=nil&&len($)<=32"`
+	Password string `query:"password" vd:"$!=nil&&len($)<=32"`
 }
 
 type LoginResponse struct {
@@ -110,9 +108,8 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// TODO: userId合法性校验 https://www.cloudwego.io/zh/docs/hertz/tutorials/basic-feature/binding-and-validate/
 type GetUserInfoParam struct {
-	UserId int64 `query:"user_id"`
+	UserId int64 `query:"user_id" vd:"$!=nil&&$>0"`
 }
 
 type GetUserInfoResponse struct {

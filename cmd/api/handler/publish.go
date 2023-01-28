@@ -17,10 +17,9 @@ import (
 	"github.com/h2non/filetype"
 )
 
-// TODO 参数校验
 type PublishActionParam struct {
-	Data  *multipart.FileHeader `form:"data"`
-	Title string                `form:"title"`
+	Data  *multipart.FileHeader `form:"data" vd:"$!=nil"`
+	Title string                `form:"title" vd:"$!=nil"`
 }
 
 type PublishActionResponse struct {
@@ -28,9 +27,8 @@ type PublishActionResponse struct {
 	StatusMsg  string `json:"status_msg"`
 }
 
-// TODO 参数校验
 type PublishListParam struct {
-	UserId int64 `query:"user_id"`
+	UserId int64 `query:"user_id" vd:"$!=nil&&$>0"`
 }
 
 type PublishListResponse struct {

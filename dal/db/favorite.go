@@ -39,8 +39,7 @@ func FavoriteAction(ctx context.Context, favorite *Favorite) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 用户新增喜欢
 		res := tx.Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"deleted_at"}),
+			UpdateAll: true,
 		}).Create(favorite)
 		if res.Error != nil {
 			return res.Error
