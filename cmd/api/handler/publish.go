@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"mime/multipart"
-	"net/http"
 
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
@@ -22,19 +21,12 @@ type PublishActionParam struct {
 	Title string                `form:"title" vd:"$!=nil"`
 }
 
-type PublishActionResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-}
-
 type PublishListParam struct {
 	UserId int64 `query:"user_id" vd:"$!=nil&&$>0"`
 }
 
 type PublishListResponse struct {
-	StatusCode int32         `json:"status_code"`
-	StatusMsg  string        `json:"status_msg"`
-	VideoList  []*feed.Video `json:"video_list"`
+	VideoList []*feed.Video `json:"video_list"`
 }
 
 // PublishAction 发布视频
@@ -43,7 +35,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
@@ -53,24 +45,24 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	videoFile, err := req.Data.Open()
 	if err != nil {
 		hlog.CtxWarnf(ctx, "read video error %v", err)
-		SendResponse(c, errno.ParamErr)
+		SendResponse(c, errno.ParamErr, nil)
 		return
 	}
 	videoData := bytes.NewBuffer(nil)
 	if _, err := io.Copy(videoData, videoFile); err != nil {
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
 	// 校验视频文件合法性
 	if !filetype.IsVideo(videoData.Bytes()) {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, errno.ParamErr)
+		SendResponse(c, errno.ParamErr, nil)
 		return
 	}
 
 	// rpc通信
-	publishActionResponse, err := rpc.PublishAction(ctx, &publish.DouyinPublishActionRequest{
+	_, err = rpc.PublishAction(ctx, &publish.DouyinPublishActionRequest{
 		Data:   videoData.Bytes(),
 		Title:  req.Title,
 		UserId: userId,
@@ -78,14 +70,11 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, PublishActionResponse{
-		StatusCode: publishActionResponse.StatusCode,
-		StatusMsg:  *publishActionResponse.StatusMsg,
-	})
+	SendResponse(c, errno.Success, nil)
 }
 
 // PublishList 获取用户发布的视频列表
@@ -95,7 +84,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
@@ -109,13 +98,11 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, PublishListResponse{
-		StatusCode: publishListResponse.StatusCode,
-		StatusMsg:  *publishListResponse.StatusMsg,
-		VideoList:  publishListResponse.VideoList,
+	SendResponse(c, errno.Success, PublishListResponse{
+		VideoList: publishListResponse.VideoList,
 	})
 }

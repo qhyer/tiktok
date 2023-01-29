@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"net/http"
 
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
@@ -19,10 +18,8 @@ type RegisterParam struct {
 }
 
 type RegisterResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-	UserId     int64  `json:"user_id"`
-	Token      string `json:"token"`
+	UserId int64  `json:"user_id"`
+	Token  string `json:"token"`
 }
 
 // Register 用户注册
@@ -31,7 +28,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
@@ -42,22 +39,20 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
 	// 根据传回的userId生成token
 	token, err := jwt.GenerateToken(registerResponse.UserId)
 	if err != nil {
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, RegisterResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
-		UserId:     registerResponse.UserId,
-		Token:      token,
+	SendResponse(c, errno.Success, RegisterResponse{
+		UserId: registerResponse.UserId,
+		Token:  token,
 	})
 }
 
@@ -67,10 +62,8 @@ type LoginParam struct {
 }
 
 type LoginResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-	UserId     int64  `json:"user_id"`
-	Token      string `json:"token"`
+	UserId int64  `json:"user_id"`
+	Token  string `json:"token"`
 }
 
 // Login 用户登录
@@ -79,7 +72,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
@@ -90,7 +83,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
@@ -98,15 +91,13 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	token, err := jwt.GenerateToken(loginResponse.UserId)
 	if err != nil {
 		hlog.CtxErrorf(ctx, "generate token error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
-		UserId:     loginResponse.UserId,
-		Token:      token,
+	SendResponse(c, errno.Success, LoginResponse{
+		UserId: loginResponse.UserId,
+		Token:  token,
 	})
 }
 
@@ -115,9 +106,7 @@ type GetUserInfoParam struct {
 }
 
 type GetUserInfoResponse struct {
-	StatusCode int32      `json:"status_code"`
-	StatusMsg  string     `json:"status_msg"`
-	User       *user.User `json:"user"`
+	User *user.User `json:"user"`
 }
 
 // GetUserInfo 获取用户信息
@@ -127,7 +116,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 	userId := c.GetInt64("UserID")
@@ -141,19 +130,17 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err)
+		SendResponse(c, err, nil)
 		return
 	}
 	if len(getUserInfoResponse.User) == 0 {
 		hlog.CtxWarnf(ctx, "user not exist error %v", err)
-		SendResponse(c, errno.UserNotExistErr)
+		SendResponse(c, errno.UserNotExistErr, nil)
 		return
 	}
 	usr := getUserInfoResponse.User[0]
 
-	c.JSON(http.StatusOK, GetUserInfoResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
-		User:       usr,
+	SendResponse(c, errno.Success, GetUserInfoResponse{
+		User: usr,
 	})
 }
