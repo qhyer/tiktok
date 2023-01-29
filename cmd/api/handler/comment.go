@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"tiktok/kitex_gen/comment"
+	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/rpc"
 
@@ -24,11 +25,6 @@ type CommentActionResponse struct {
 	StatusMsg  string `json:"status_msg"`
 }
 
-const (
-	DoCommentAction     = 1
-	DeleteCommentAction = 2
-)
-
 // CommentAction 评论和删除评论
 func CommentAction(ctx context.Context, c *app.RequestContext) {
 	var req CommentActionParam
@@ -40,13 +36,13 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	switch req.ActionType {
-	case DoCommentAction:
-		if req.CommentText == "" {
+	case constants.DoCommentAction:
+		if len(req.CommentText) == 0 {
 			hlog.CtxWarnf(ctx, "param comment_text error %v", req.CommentText)
 			SendResponse(c, errno.ParamErr)
 			return
 		}
-	case DeleteCommentAction:
+	case constants.DeleteCommentAction:
 		if req.CommentID <= 0 {
 			hlog.CtxWarnf(ctx, "param comment_id error %v", req.CommentID)
 			SendResponse(c, errno.ParamErr)

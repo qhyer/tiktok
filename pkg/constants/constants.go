@@ -16,6 +16,13 @@ const (
 	PublishServiceName  = "publish"
 	FavoriteServiceName = "favorite"
 	CommentServiceName  = "comment"
+	RelationServiceName = "relation"
+
+	DoCommentAction     = 1
+	DeleteCommentAction = 2
+
+	DoFavoriteAction     = 1
+	CancelFavoriteAction = 2
 
 	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(103.200.115.51:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	VideoQueryLimit = 30

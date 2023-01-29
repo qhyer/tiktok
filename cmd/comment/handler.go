@@ -6,16 +6,12 @@ import (
 	"tiktok/cmd/comment/service"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
+	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 )
 
 // CommentSrvImpl implements the last service interface defined in the IDL.
 type CommentSrvImpl struct{}
-
-const (
-	DoCommentAction     = 1
-	DeleteCommentAction = 2
-)
 
 // CommentAction implements the CommentSrvImpl interface.
 func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinCommentActionRequest) (resp *comment.DouyinCommentActionResponse, err error) {
@@ -23,9 +19,9 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	var newComment *comment.Comment
 
 	switch req.ActionType {
-	case DoCommentAction:
+	case constants.DoCommentAction:
 		newComment, err = service.NewCommentActionService(ctx).CommentAction(req)
-	case DeleteCommentAction:
+	case constants.DeleteCommentAction:
 		err = service.NewCommentActionService(ctx).DeleteCommentAction(req)
 	default:
 		err = errno.ParamErr
