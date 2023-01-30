@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/censor"
@@ -25,7 +25,7 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 	content = censor.TextCensor.GetFilter().Replace(content, '*')
 
 	// 插入数据
-	c, err := db.CommentAction(s.ctx, &db.Comment{
+	c, err := mysql.CommentAction(s.ctx, &mysql.Comment{
 		UserId:  req.UserId,
 		VideoId: req.VideoId,
 		Content: content,
@@ -40,7 +40,7 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 
 // DeleteCommentAction delete user comment action
 func (s *CommentActionService) DeleteCommentAction(req *comment.DouyinCommentActionRequest) error {
-	err := db.DeleteCommentAction(s.ctx, &db.Comment{
+	err := mysql.DeleteCommentAction(s.ctx, &mysql.Comment{
 		UserId: req.UserId,
 		Id:     *req.CommentId,
 	})

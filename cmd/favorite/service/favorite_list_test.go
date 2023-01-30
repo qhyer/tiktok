@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/rpc"
@@ -17,7 +17,7 @@ func TestFavoriteListService_FavoriteList(t *testing.T) {
 	type args struct {
 		req *favorite.DouyinFavoriteListRequest
 	}
-	db.Init()
+	mysql.Init()
 	rpc.InitFeedRpc()
 	tests := []struct {
 		name    string

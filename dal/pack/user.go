@@ -1,12 +1,12 @@
 package pack
 
 import (
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/user"
 )
 
 // User pack user info
-func User(u *db.User) *user.User {
+func User(u *mysql.User) *user.User {
 	if u == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func User(u *db.User) *user.User {
 }
 
 // Users pack list of user info
-func Users(us []*db.User) []*user.User {
+func Users(us []*mysql.User) []*user.User {
 	users := make([]*user.User, 0)
 	for _, u := range us {
 		if user2 := User(u); user2 != nil {

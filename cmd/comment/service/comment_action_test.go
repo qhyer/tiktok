@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/censor"
 )
@@ -18,7 +18,7 @@ func TestCommentActionService_CommentAction(t *testing.T) {
 		req *comment.DouyinCommentActionRequest
 	}
 	censor.Init()
-	db.Init()
+	mysql.Init()
 	text := "测试敏感词"
 	tests := []struct {
 		name    string
@@ -112,7 +112,7 @@ func TestCommentActionService_DeleteCommentAction(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	db.Init()
+	mysql.Init()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &CommentActionService{

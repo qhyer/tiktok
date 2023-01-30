@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
 
@@ -25,15 +25,16 @@ func NewCheckUserService(ctx context.Context) *CheckUserService {
 // CheckUser check user info
 func (s *CheckUserService) CheckUser(req *user.DouyinUserLoginRequest) (int64, error) {
 	userName := req.Username
-	users, err := db.QueryUser(s.ctx, userName)
+	users, err := mysql.QueryUser(s.ctx, userName)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db query user failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql query user failed %v", err)
 		return 0, err
 	}
 	if len(users) == 0 {
 		return 0, errno.AuthorizationFailedErr
 	}
 	u := users[0]
+	// 校验密码
 	if !CheckPasswordHash(req.Password, u.Password) {
 		return 0, errno.AuthorizationFailedErr
 	}

@@ -3,13 +3,13 @@ package pack
 import (
 	"time"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/comment"
 	"tiktok/kitex_gen/user"
 )
 
 // Comment pack comment
-func Comment(com *db.Comment) *comment.Comment {
+func Comment(com *mysql.Comment) *comment.Comment {
 	if com == nil {
 		return nil
 	}
@@ -22,7 +22,7 @@ func Comment(com *db.Comment) *comment.Comment {
 }
 
 // Comments pack list of comment
-func Comments(cms []*db.Comment) []*comment.Comment {
+func Comments(cms []*mysql.Comment) []*comment.Comment {
 	comments := make([]*comment.Comment, 0, len(cms))
 	if len(cms) == 0 {
 		return comments

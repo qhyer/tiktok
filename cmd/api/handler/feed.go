@@ -14,7 +14,7 @@ import (
 )
 
 type FeedParam struct {
-	LatestTime int64 `query:"latest_time" vd:"$!=nil&&$>0"`
+	LatestTime int64 `query:"latest_time" vd:"$>0"`
 }
 
 type FeedResponse struct {

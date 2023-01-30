@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/rpc"
@@ -22,9 +22,9 @@ func NewPublishListService(ctx context.Context) *PublishListService {
 
 // PublishList get list of video
 func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) ([]*feed.Video, error) {
-	vs, err := db.GetPublishedVideoIdsByUserId(s.ctx, req.ToUserId)
+	vs, err := mysql.GetPublishedVideoIdsByUserId(s.ctx, req.ToUserId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db get video failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 		return nil, err
 	}
 

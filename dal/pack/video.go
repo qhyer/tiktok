@@ -1,13 +1,13 @@
 package pack
 
 import (
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 )
 
 // Video pack video
-func Video(video *db.Video) *feed.Video {
+func Video(video *mysql.Video) *feed.Video {
 	if video == nil {
 		return nil
 	}
@@ -26,7 +26,7 @@ func Video(video *db.Video) *feed.Video {
 }
 
 // Videos pack list of video
-func Videos(vs []*db.Video) ([]*feed.Video, int64) {
+func Videos(vs []*mysql.Video) ([]*feed.Video, int64) {
 	var nextTime int64
 	videos := make([]*feed.Video, 0, len(vs))
 

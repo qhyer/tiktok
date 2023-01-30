@@ -1,8 +1,12 @@
 package dal
 
-import "tiktok/dal/db"
+import (
+	"tiktok/dal/mysql"
+	"tiktok/dal/neo4j"
+)
 
 // Init init dal
 func Init() {
-	db.Init() // mysql init
+	mysql.Init() // mysql init
+	neo4j.Init() // neo4j init
 }

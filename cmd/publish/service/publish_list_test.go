@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/rpc"
@@ -17,7 +17,7 @@ func TestPublishListService_PublishList(t *testing.T) {
 	type args struct {
 		req *publish.DouyinPublishListRequest
 	}
-	db.Init()
+	mysql.Init()
 	rpc.InitUserRpc()
 	tests := []struct {
 		name    string

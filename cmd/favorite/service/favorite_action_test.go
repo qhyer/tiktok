@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
 )
 
@@ -15,7 +15,7 @@ func TestFavoriteActionService_CancelFavoriteAction(t *testing.T) {
 	type args struct {
 		req *favorite.DouyinFavoriteActionRequest
 	}
-	db.Init()
+	mysql.Init()
 	tests := []struct {
 		name    string
 		fields  fields
@@ -62,7 +62,7 @@ func TestFavoriteActionService_FavoriteAction(t *testing.T) {
 	type args struct {
 		req *favorite.DouyinFavoriteActionRequest
 	}
-	db.Init()
+	mysql.Init()
 	tests := []struct {
 		name    string
 		fields  fields

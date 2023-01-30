@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/user"
 )
 
@@ -46,7 +46,7 @@ func TestMGetUserService_MGetUser(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	db.Init()
+	mysql.Init()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &MGetUserService{

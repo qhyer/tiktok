@@ -3,6 +3,7 @@ module tiktok
 go 1.19
 
 require (
+	github.com/StellarisW/go-sensitive v1.0.1
 	github.com/cloudwego/fastpb v0.0.3
 	github.com/cloudwego/hertz v0.5.1
 	github.com/cloudwego/kitex v0.4.4
@@ -11,6 +12,7 @@ require (
 	github.com/kitex-contrib/registry-etcd v0.0.0-20221223084757-0d49e7162359
 	github.com/kitex-contrib/tracer-opentracing v0.0.3
 	github.com/minio/minio-go/v7 v7.0.47
+	github.com/neo4j/neo4j-go-driver/v5 v5.5.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -24,10 +26,8 @@ require (
 )
 
 require (
-	github.com/StellarisW/go-sensitive v1.0.1 // indirect
 	github.com/apache/thrift v0.13.0 // indirect
 	github.com/aws/aws-sdk-go v1.38.20 // indirect
-	github.com/bean-du/dfa v1.0.2 // indirect
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220531084716-665b4f21126f // indirect
 	github.com/bytedance/sonic v1.5.0 // indirect

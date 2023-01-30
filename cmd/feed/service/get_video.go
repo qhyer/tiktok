@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
@@ -24,9 +24,9 @@ func NewGetVideoService(ctx context.Context) *GetVideoService {
 
 // GetVideosByVideoIdsAndCurrUserId get videos by video ids and current userid
 func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest) ([]*feed.Video, error) {
-	vs, err := db.MGetVideosByVideoIds(s.ctx, req.VideoIds)
+	vs, err := mysql.MGetVideosByVideoIds(s.ctx, req.VideoIds)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db get video failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 		return nil, err
 	}
 

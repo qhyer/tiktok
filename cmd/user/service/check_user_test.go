@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -45,7 +45,7 @@ func TestCheckUser(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	db.Init()
+	mysql.Init()
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
 			_, err := NewCheckUserService(context.Background()).CheckUser(&user.DouyinUserLoginRequest{

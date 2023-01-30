@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
 
@@ -20,9 +20,9 @@ func NewCommentListService(ctx context.Context) *CommentListService {
 }
 
 func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) ([]*comment.Comment, error) {
-	cs, err := db.CommentList(s.ctx, req.VideoId)
+	cs, err := mysql.CommentList(s.ctx, req.VideoId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db get comment list failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql get comment list failed %v", err)
 		return nil, err
 	}
 

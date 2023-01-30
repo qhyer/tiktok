@@ -46,7 +46,7 @@ func (s *UserSrvImpl) GetUserInfoByUserIds(ctx context.Context, req *user.Douyin
 
 	if len(req.ToUserIds) == 0 {
 		resp = pack.BuildUserInfoResp(errno.ParamErr)
-		return resp, err
+		return resp, errno.ParamErr
 	}
 
 	users, err := service.NewMGetUserService(ctx).MGetUser(req)

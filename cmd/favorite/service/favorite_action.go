@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
 )
 
@@ -18,7 +18,7 @@ func NewFavoriteActionService(ctx context.Context) *FavoriteActionService {
 
 // FavoriteAction user do favorite video action
 func (s *FavoriteActionService) FavoriteAction(req *favorite.DouyinFavoriteActionRequest) error {
-	err := db.FavoriteAction(s.ctx, &db.Favorite{
+	err := mysql.FavoriteAction(s.ctx, &mysql.Favorite{
 		UserId:  req.UserId,
 		VideoId: req.VideoId,
 	})
@@ -27,7 +27,7 @@ func (s *FavoriteActionService) FavoriteAction(req *favorite.DouyinFavoriteActio
 
 // CancelFavoriteAction cancel favorite video action
 func (s *FavoriteActionService) CancelFavoriteAction(req *favorite.DouyinFavoriteActionRequest) error {
-	err := db.CancelFavoriteAction(s.ctx, &db.Favorite{
+	err := mysql.CancelFavoriteAction(s.ctx, &mysql.Favorite{
 		UserId:  req.UserId,
 		VideoId: req.VideoId,
 	})

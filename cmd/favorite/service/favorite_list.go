@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/rpc"
@@ -23,9 +23,9 @@ func NewFavoriteListService(ctx context.Context) *FavoriteListService {
 // FavoriteList get user favorite list
 func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListRequest) ([]*feed.Video, error) {
 	userId := req.UserId
-	fl, err := db.GetFavoriteVideoIdsByUserId(s.ctx, userId)
+	fl, err := mysql.GetFavoriteVideoIdsByUserId(s.ctx, userId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db get favorite list failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql get favorite list failed %v", err)
 		return nil, err
 	}
 

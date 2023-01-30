@@ -1,11 +1,11 @@
 package pack
 
 import (
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
 )
 
-func Favorite(fav *db.Favorite) *favorite.Favorite {
+func Favorite(fav *mysql.Favorite) *favorite.Favorite {
 	if fav == nil {
 		return nil
 	}
@@ -14,7 +14,7 @@ func Favorite(fav *db.Favorite) *favorite.Favorite {
 	}
 }
 
-func Favorites(fs []*db.Favorite) []*favorite.Favorite {
+func Favorites(fs []*mysql.Favorite) []*favorite.Favorite {
 	res := make([]*favorite.Favorite, 0, len(fs))
 	if len(fs) == 0 {
 		return res

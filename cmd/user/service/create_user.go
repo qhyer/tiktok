@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
+	"tiktok/dal/neo4j"
+	"tiktok/dal/pack"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
 
@@ -22,7 +24,7 @@ func NewCreateUserService(ctx context.Context) *CreateUserService {
 
 // CreateUser create user info.
 func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int64, error) {
-	users, err := db.QueryUser(s.ctx, req.Username)
+	users, err := mysql.QueryUser(s.ctx, req.Username)
 	if err != nil {
 		return 0, err
 	}
@@ -30,32 +32,40 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 		return 0, errno.UserAlreadyExistErr
 	}
 
+	// 对密码加盐
 	passWord, err := HashPassword(req.Password)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "hash password failed %v", err)
 		return 0, err
 	}
 
-	err = db.CreateUser(s.ctx, []*db.User{{
+	// TODO 延迟队列check是否在neo4j中创建用户成功
+
+	// 创建用户
+	us, err := mysql.CreateUser(s.ctx, []*mysql.User{{
 		UserName: req.Username,
 		Password: passWord,
 	}})
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db create user failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql create user failed %v", err)
 		return 0, err
 	}
 
-	users, err = db.QueryUser(s.ctx, req.Username)
-	if err != nil {
-		klog.CtxErrorf(s.ctx, "db query user failed %v", err)
-		return 0, err
-	}
-	if len(users) == 0 {
+	if len(us) == 0 {
 		return 0, errno.UserNotExistErr
 	}
 
-	usr := users[0]
-	return usr.Id, nil
+	usrs := pack.Users(us)
+
+	// 在neo4j中创建用户节点
+	err = neo4j.CreateUser(s.ctx, usrs[0])
+	if err != nil {
+		return 0, err
+	}
+
+	// 获取创建成功后的用户id
+	userId := users[0].Id
+	return userId, nil
 }
 
 func HashPassword(password string) (string, error) {

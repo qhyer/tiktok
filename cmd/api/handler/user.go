@@ -13,8 +13,8 @@ import (
 )
 
 type RegisterParam struct {
-	Username string `query:"username" vd:"$!=nil&&len($)>=6&&len($)<=32"`
-	Password string `query:"password" vd:"$!=nil&&len($)>=6&&len($)<=32"`
+	Username string `query:"username" vd:"len($)>=6&&len($)<=32"`
+	Password string `query:"password" vd:"len($)>=6&&len($)<=32"`
 }
 
 type RegisterResponse struct {
@@ -57,8 +57,8 @@ func Register(ctx context.Context, c *app.RequestContext) {
 }
 
 type LoginParam struct {
-	Username string `query:"username" vd:"$!=nil&&len($)>=6&&len($)<=32"`
-	Password string `query:"password" vd:"$!=nil&&len($)>=6&&len($)<=32"`
+	Username string `query:"username" vd:"len($)>=6&&len($)<=32"`
+	Password string `query:"password" vd:"len($)>=6&&len($)<=32"`
 }
 
 type LoginResponse struct {
@@ -102,7 +102,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 }
 
 type GetUserInfoParam struct {
-	UserId int64 `query:"user_id" vd:"$!=nil&&$>0"`
+	UserId int64 `query:"user_id" vd:"$>0"`
 }
 
 type GetUserInfoResponse struct {

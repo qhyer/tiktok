@@ -13,8 +13,8 @@ import (
 )
 
 type FavoriteActionParam struct {
-	VideoId    int64 `query:"video_id" vd:"$!=nil&&$>0"`
-	ActionType int32 `query:"action_type" vd:"$!=nil&&$==1||$==2"`
+	VideoId    int64 `query:"video_id" vd:"$>0"`
+	ActionType int32 `query:"action_type" vd:"$==1||$==2"`
 }
 
 // FavoriteAction 关注、取关
@@ -45,7 +45,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 }
 
 type FavoriteListParam struct {
-	userId int64 `query:"user_id" vd:"$!=nil&&$>0"`
+	userId int64 `query:"user_id" vd:"$>0"`
 }
 
 type FavoriteListResponse struct {

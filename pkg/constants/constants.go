@@ -24,10 +24,17 @@ const (
 	DoFavoriteAction     = 1
 	CancelFavoriteAction = 2
 
-	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(103.200.115.51:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
+	DoFollowAction = 1
+	UnfollowAction = 2
+
+	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(119.91.157.116:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	VideoQueryLimit = 30
 
-	EtcdAddress = "103.200.115.51:2379"
+	Neo4jDefaultURI = "neo4j://119.91.157.116:7687"
+	Neo4jUser       = "neo4j"
+	Neo4jPassword   = "MXOzml26024SyZl"
+
+	EtcdAddress = "119.91.157.116:2379"
 
 	CPURateLimit float64 = 80.0
 
@@ -38,6 +45,4 @@ const (
 	OSSAccessKeyID     = "tiktok"
 	OSSSecretAccessKey = "ZqRNq8vd;9KLjx=9"
 	OSSDefaultExpiry   = time.Hour
-
-	DefaultUserId = 0
 )

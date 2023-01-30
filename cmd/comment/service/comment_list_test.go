@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/comment"
 )
 
@@ -15,7 +15,7 @@ func TestCommentListService_CommentList(t *testing.T) {
 	type args struct {
 		req *comment.DouyinCommentListRequest
 	}
-	db.Init()
+	mysql.Init()
 	tests := []struct {
 		name    string
 		fields  fields

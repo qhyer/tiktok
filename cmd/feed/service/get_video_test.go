@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/rpc"
 )
@@ -16,7 +16,7 @@ func TestGetVideoService_GetVideosByVideoIdsAndCurrUserId(t *testing.T) {
 	type args struct {
 		req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest
 	}
-	db.Init()
+	mysql.Init()
 	rpc.InitUserRpc()
 	tests := []struct {
 		name    string

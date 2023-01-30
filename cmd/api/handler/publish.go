@@ -18,11 +18,11 @@ import (
 
 type PublishActionParam struct {
 	Data  *multipart.FileHeader `form:"data" vd:"$!=nil"`
-	Title string                `form:"title" vd:"$!=nil"`
+	Title string                `form:"title" vd:"len($)>0"`
 }
 
 type PublishListParam struct {
-	UserId int64 `query:"user_id" vd:"$!=nil&&$>0"`
+	UserId int64 `query:"user_id" vd:"$>0"`
 }
 
 type PublishListResponse struct {

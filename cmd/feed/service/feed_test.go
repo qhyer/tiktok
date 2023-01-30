@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/rpc"
 )
@@ -19,7 +19,7 @@ func TestFeedService_Feed(t *testing.T) {
 		req *feed.DouyinFeedRequest
 	}
 	rpc.InitUserRpc()
-	db.Init()
+	mysql.Init()
 	ts := time.Now().UnixMilli()
 	tests := []struct {
 		name    string

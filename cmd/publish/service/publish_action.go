@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"tiktok/dal/db"
+	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
@@ -70,7 +70,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	}
 
 	// 在db插入结果
-	err = db.CreateVideo(s.ctx, []*db.Video{
+	err = mysql.CreateVideo(s.ctx, []*mysql.Video{
 		{
 			AuthorUserId: req.UserId,
 			PlayUrl:      videoUploadInfo.Key,
@@ -79,7 +79,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 		},
 	})
 	if err != nil {
-		klog.CtxFatalf(s.ctx, "db create video failed %v", err)
+		klog.CtxFatalf(s.ctx, "mysql create video failed %v", err)
 		return err
 	}
 

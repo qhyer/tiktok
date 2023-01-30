@@ -8,4 +8,5 @@ func Rpc() {
 	rpc.InitPublishRpc()
 	rpc.InitFavoriteRpc()
 	rpc.InitCommentRpc()
+	rpc.InitRelationRpc()
 }

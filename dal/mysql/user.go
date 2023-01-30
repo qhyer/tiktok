@@ -1,4 +1,4 @@
-package db
+package mysql
 
 import (
 	"context"
@@ -39,8 +39,11 @@ func MGetUsers(ctx context.Context, userIDs []int64) ([]*User, error) {
 }
 
 // CreateUser create user info
-func CreateUser(ctx context.Context, users []*User) error {
-	return DB.WithContext(ctx).Create(users).Error
+func CreateUser(ctx context.Context, users []*User) ([]*User, error) {
+	if err := DB.WithContext(ctx).Create(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // QueryUser query list of user info

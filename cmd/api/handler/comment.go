@@ -13,8 +13,8 @@ import (
 )
 
 type CommentActionParam struct {
-	VideoId     int64  `query:"video_id" vd:"$!=nil&&$>0"`
-	ActionType  int32  `query:"action_type" vd:"$!=nil&&$==1||$==2"`
+	VideoId     int64  `query:"video_id" vd:"$>0"`
+	ActionType  int32  `query:"action_type" vd:"$==1||$==2"`
 	CommentText string `query:"comment_text"`
 	CommentID   int64  `query:"comment_id"`
 }
@@ -64,7 +64,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 }
 
 type CommentListParam struct {
-	VideoId int64 `query:"video_id" vd:"$!=nil&&$>0"`
+	VideoId int64 `query:"video_id" vd:"$>0"`
 }
 
 type CommentListResponse struct {
