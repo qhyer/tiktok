@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"net/http"
 
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/constants"
@@ -19,6 +20,12 @@ type CommentActionParam struct {
 	CommentID   int64  `query:"comment_id"`
 }
 
+type CommentActionResponse struct {
+	StatusCode int32            `json:"status_code"`
+	StatusMsg  string           `json:"status_msg"`
+	Comment    *comment.Comment `json:"comment"`
+}
+
 // CommentAction 评论和删除评论
 func CommentAction(ctx context.Context, c *app.RequestContext) {
 	var req CommentActionParam
@@ -26,28 +33,28 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 	switch req.ActionType {
 	case constants.DoCommentAction:
 		if len(req.CommentText) == 0 {
 			hlog.CtxWarnf(ctx, "param comment_text error %v", req.CommentText)
-			SendResponse(c, errno.ParamErr, nil)
+			SendResponse(c, errno.ParamErr)
 			return
 		}
 	case constants.DeleteCommentAction:
 		if req.CommentID <= 0 {
 			hlog.CtxWarnf(ctx, "param comment_id error %v", req.CommentID)
-			SendResponse(c, errno.ParamErr, nil)
+			SendResponse(c, errno.ParamErr)
 			return
 		}
 	}
 
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
-	_, err = rpc.CommentAction(ctx, &comment.DouyinCommentActionRequest{
+	commentResponse, err := rpc.CommentAction(ctx, &comment.DouyinCommentActionRequest{
 		UserId:      userId,
 		VideoId:     req.VideoId,
 		ActionType:  req.ActionType,
@@ -56,11 +63,15 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, nil)
+	c.JSON(http.StatusOK, CommentActionResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		Comment:    commentResponse.Comment,
+	})
 }
 
 type CommentListParam struct {
@@ -68,6 +79,8 @@ type CommentListParam struct {
 }
 
 type CommentListResponse struct {
+	StatusCode  int32              `json:"status_code"`
+	StatusMsg   string             `json:"status_msg"`
 	CommentList []*comment.Comment `json:"comment_list"`
 }
 
@@ -78,10 +91,10 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	CommentResponse, err := rpc.CommentList(ctx, &comment.DouyinCommentListRequest{
@@ -90,11 +103,13 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, CommentListResponse{
+	c.JSON(http.StatusOK, CommentListResponse{
+		StatusCode:  errno.Success.ErrCode,
+		StatusMsg:   errno.Success.ErrMsg,
 		CommentList: CommentResponse.CommentList,
 	})
 }

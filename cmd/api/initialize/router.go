@@ -21,7 +21,7 @@ func Router() {
 	h.Use(recovery.Recovery(recovery.WithRecoveryHandler(
 		func(ctx context.Context, c *app.RequestContext, err interface{}, stack []byte) {
 			hlog.SystemLogger().CtxErrorf(ctx, "[Recovery] err=%v\nstack=%s", err, stack)
-			handler.SendResponse(c, errno.ServiceErr, nil)
+			handler.SendResponse(c, errno.ServiceErr)
 		})))
 
 	// 接口路由

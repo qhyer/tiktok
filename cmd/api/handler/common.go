@@ -10,11 +10,10 @@ import (
 type Response struct {
 	StatusCode int32  `json:"status_code"`
 	StatusMsg  string `json:"status_msg"`
-	Data       interface{}
 }
 
 // SendResponse 封装返回结构体
-func SendResponse(c *app.RequestContext, err error, data interface{}) {
+func SendResponse(c *app.RequestContext, err error) {
 	Err := errno.ConvertErr(err)
 
 	// TODO 对外不应暴露服务器异常信息
@@ -25,6 +24,5 @@ func SendResponse(c *app.RequestContext, err error, data interface{}) {
 	c.JSON(consts.StatusOK, Response{
 		StatusCode: Err.ErrCode,
 		StatusMsg:  Err.ErrMsg,
-		Data:       data,
 	})
 }

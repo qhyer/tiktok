@@ -11,14 +11,9 @@ func User(u *mysql.User) *user.User {
 		return nil
 	}
 
-	followCount := u.FollowCount
-	followerCount := u.FollowerCount
-
 	return &user.User{
-		Id:            u.Id,
-		Name:          u.UserName,
-		FollowCount:   &followCount,
-		FollowerCount: &followerCount,
+		Id:   u.Id,
+		Name: u.UserName,
 	}
 }
 

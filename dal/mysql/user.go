@@ -11,14 +11,12 @@ import (
 
 type User struct {
 	gorm.Model
-	Id            int64          `gorm:"column:id;primaryKey'"`
-	UserName      string         `gorm:"column:username;unique_index:tk_username"`
-	Password      string         `gorm:"column:password"`
-	FollowCount   int64          `gorm:"column:follow_count;default:0"`
-	FollowerCount int64          `gorm:"column:follower_count;default:0"`
-	CreatedAt     time.Time      `gorm:"column:created_at"`
-	UpdatedAt     time.Time      `gorm:"column:updated_at"`
-	DeletedAt     gorm.DeletedAt `gorm:"column:deleted_at"`
+	Id        int64          `gorm:"column:id;primaryKey'"`
+	UserName  string         `gorm:"column:username;unique_index:tk_username"`
+	Password  string         `gorm:"column:password"`
+	CreatedAt time.Time      `gorm:"column:created_at"`
+	UpdatedAt time.Time      `gorm:"column:updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"`
 }
 
 func (u *User) TableName() string {

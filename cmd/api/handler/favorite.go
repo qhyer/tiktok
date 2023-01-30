@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"net/http"
 
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
@@ -24,10 +25,10 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	_, err = rpc.FavoriteAction(ctx, &favorite.DouyinFavoriteActionRequest{
@@ -37,11 +38,11 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, nil)
+	SendResponse(c, errno.Success)
 }
 
 type FavoriteListParam struct {
@@ -49,7 +50,9 @@ type FavoriteListParam struct {
 }
 
 type FavoriteListResponse struct {
-	VideoList []*feed.Video `json:"video_list"`
+	StatusCode int32         `json:"status_code"`
+	StatusMsg  string        `json:"status_msg"`
+	VideoList  []*feed.Video `json:"video_list"`
 }
 
 // FavoriteList 获取个人点赞列表
@@ -59,7 +62,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
@@ -69,11 +72,13 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, FavoriteListResponse{
-		VideoList: favoriteResponse.VideoList,
+	c.JSON(http.StatusOK, FavoriteListResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		VideoList:  favoriteResponse.VideoList,
 	})
 }

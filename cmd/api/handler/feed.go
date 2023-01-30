@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"tiktok/kitex_gen/feed"
@@ -18,8 +19,10 @@ type FeedParam struct {
 }
 
 type FeedResponse struct {
-	VideoList []*feed.Video `json:"video_list"`
-	NextTime  int64         `json:"next_time"`
+	StatusCode int32         `json:"status_code"`
+	StatusMsg  string        `json:"status_msg"`
+	VideoList  []*feed.Video `json:"video_list"`
+	NextTime   int64         `json:"next_time"`
 }
 
 type Video struct {
@@ -40,7 +43,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
@@ -48,7 +51,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	if req.LatestTime == 0 {
 		req.LatestTime = time.Now().UnixMilli()
 	}
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	feedResponse, err := rpc.Feed(ctx, &feed.DouyinFeedRequest{
@@ -57,12 +60,14 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, FeedResponse{
-		VideoList: feedResponse.VideoList,
-		NextTime:  *feedResponse.NextTime,
+	c.JSON(http.StatusOK, FeedResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		VideoList:  feedResponse.VideoList,
+		NextTime:   *feedResponse.NextTime,
 	})
 }

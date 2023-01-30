@@ -2,7 +2,6 @@ package neo4j
 
 import (
 	"context"
-	"log"
 
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
@@ -170,8 +169,7 @@ func addFollow(ctx context.Context, tx neo4j.ManagedTransaction, userId int64, t
 	if err != nil {
 		return nil, err
 	}
-	ret, found := record.Get("r")
-	log.Println(ret)
+	_, found := record.Get("r")
 	if !found {
 		return nil, errno.DBOperationFailedErr
 	}

@@ -33,6 +33,11 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 
 	videos, nextTime := pack.Videos(vs)
 
+	if len(videos) == 0 {
+		return nil, 0, nil
+	}
+
+	// 对链接签名
 	videos, err = minio.SignFeed(s.ctx, videos)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "minio sign feed failed %v", err)

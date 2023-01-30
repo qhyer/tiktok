@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"net/http"
 
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
@@ -10,16 +11,19 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type RegisterParam struct {
-	Username string `query:"username" vd:"len($)>=6&&len($)<=32"`
+	Username string `query:"username" vd:"len($)>=1&&len($)<=32"`
 	Password string `query:"password" vd:"len($)>=6&&len($)<=32"`
 }
 
 type RegisterResponse struct {
-	UserId int64  `json:"user_id"`
-	Token  string `json:"token"`
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	UserId     int64  `json:"user_id"`
+	Token      string `json:"token"`
 }
 
 // Register 用户注册
@@ -28,7 +32,8 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
-		SendResponse(c, err, nil)
+		klog.CtxWarnf(ctx, "param error %v", err)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
@@ -39,31 +44,35 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
 	// 根据传回的userId生成token
 	token, err := jwt.GenerateToken(registerResponse.UserId)
 	if err != nil {
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, RegisterResponse{
-		UserId: registerResponse.UserId,
-		Token:  token,
+	c.JSON(http.StatusOK, RegisterResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserId:     registerResponse.UserId,
+		Token:      token,
 	})
 }
 
 type LoginParam struct {
-	Username string `query:"username" vd:"len($)>=6&&len($)<=32"`
+	Username string `query:"username" vd:"len($)>=1&&len($)<=32"`
 	Password string `query:"password" vd:"len($)>=6&&len($)<=32"`
 }
 
 type LoginResponse struct {
-	UserId int64  `json:"user_id"`
-	Token  string `json:"token"`
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	UserId     int64  `json:"user_id"`
+	Token      string `json:"token"`
 }
 
 // Login 用户登录
@@ -72,7 +81,8 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	// 参数校验
 	err := c.BindAndValidate(&req)
 	if err != nil {
-		SendResponse(c, err, nil)
+		hlog.CtxWarnf(ctx, "param error %v", err)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
@@ -83,7 +93,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
@@ -91,13 +101,15 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	token, err := jwt.GenerateToken(loginResponse.UserId)
 	if err != nil {
 		hlog.CtxErrorf(ctx, "generate token error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, LoginResponse{
-		UserId: loginResponse.UserId,
-		Token:  token,
+	c.JSON(http.StatusOK, LoginResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserId:     loginResponse.UserId,
+		Token:      token,
 	})
 }
 
@@ -106,7 +118,9 @@ type GetUserInfoParam struct {
 }
 
 type GetUserInfoResponse struct {
-	User *user.User `json:"user"`
+	StatusCode int32      `json:"status_code"`
+	StatusMsg  string     `json:"status_msg"`
+	User       *user.User `json:"user"`
 }
 
 // GetUserInfo 获取用户信息
@@ -116,10 +130,10 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	var userIds []int64
@@ -130,17 +144,19 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 	if len(getUserInfoResponse.User) == 0 {
 		hlog.CtxWarnf(ctx, "user not exist error %v", err)
-		SendResponse(c, errno.UserNotExistErr, nil)
+		SendResponse(c, errno.UserNotExistErr)
 		return
 	}
 	usr := getUserInfoResponse.User[0]
 
-	SendResponse(c, errno.Success, GetUserInfoResponse{
-		User: usr,
+	c.JSON(http.StatusOK, GetUserInfoResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		User:       usr,
 	})
 }

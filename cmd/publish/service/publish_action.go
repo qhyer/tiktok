@@ -37,7 +37,7 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 
 	// 生成文件名
 	ruid := uuid.NewV4()
-	fileName := strconv.FormatInt(time.Now().UnixMicro(), 62) + ruid.String()
+	fileName := strconv.FormatInt(time.Now().UnixMicro(), 16) + ruid.String()
 
 	// 上传视频
 	videoFileName := fileName + ".mp4"

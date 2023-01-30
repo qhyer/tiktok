@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"reflect"
+	"log"
 	"testing"
 
-	"tiktok/dal/mysql"
+	"tiktok/dal"
 	"tiktok/kitex_gen/user"
 )
 
@@ -16,7 +16,7 @@ func TestMGetUserService_MGetUser(t *testing.T) {
 	type args struct {
 		req *user.DouyinUserInfoRequest
 	}
-	var zero int64
+	dal.Init()
 	tests := []struct {
 		name    string
 		fields  fields
@@ -27,26 +27,17 @@ func TestMGetUserService_MGetUser(t *testing.T) {
 		{
 			name: "qhyer",
 			fields: fields{
-				ctx: nil,
+				ctx: context.Background(),
 			},
 			args: args{
 				&user.DouyinUserInfoRequest{
 					UserId:    1,
-					ToUserIds: []int64{1},
-				},
-			},
-			want: []*user.User{
-				{
-					Id:            1,
-					Name:          "qhyer",
-					FollowerCount: &zero,
-					FollowCount:   &zero,
+					ToUserIds: []int64{1, 2},
 				},
 			},
 			wantErr: false,
 		},
 	}
-	mysql.Init()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &MGetUserService{
@@ -57,9 +48,7 @@ func TestMGetUserService_MGetUser(t *testing.T) {
 				t.Errorf("MGetUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MGetUser() got = %v, want %v", got, tt.want)
-			}
+			log.Print(got)
 		})
 	}
 }

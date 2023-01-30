@@ -39,7 +39,7 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 		return 0, err
 	}
 
-	// TODO 延迟队列check是否在neo4j中创建用户成功
+	// TODO 延时队列check是否在neo4j中创建用户成功
 
 	// 创建用户
 	us, err := mysql.CreateUser(s.ctx, []*mysql.User{{
@@ -64,7 +64,7 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 	}
 
 	// 获取创建成功后的用户id
-	userId := users[0].Id
+	userId := usrs[0].Id
 	return userId, nil
 }
 

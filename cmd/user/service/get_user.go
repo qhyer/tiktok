@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/mysql"
-	"tiktok/dal/pack"
+	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -21,13 +20,25 @@ func NewMGetUserService(ctx context.Context) *MGetUserService {
 
 // MGetUser multiple get list of user info
 func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.User, error) {
-	modelUsers, err := mysql.MGetUsers(s.ctx, req.ToUserIds)
+	if len(req.ToUserIds) == 0 {
+		return nil, nil
+	}
+
+	us, err := neo4j.MGetUserByUserIds(s.ctx, req.ToUserIds)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "mysql get multiple users failed %v", err)
+		klog.CtxErrorf(s.ctx, "neo4j get user failed %v", err)
 		return nil, err
 	}
 
-	// TODO 当前用户和被查询用户的关系
+	// 数据库结果存map 然后返回所有用户
+	userMap := make(map[int64]*user.User, 0)
+	users := make([]*user.User, 0, len(req.ToUserIds))
+	for _, u := range us {
+		userMap[u.Id] = u
+	}
+	for _, u := range req.ToUserIds {
+		users = append(users, userMap[u])
+	}
 
-	return pack.Users(modelUsers), nil
+	return users, nil
 }

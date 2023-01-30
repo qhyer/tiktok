@@ -28,6 +28,10 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 		return nil, err
 	}
 
+	if len(vs) == 0 {
+		return nil, nil
+	}
+
 	videoResponse, _ := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
 		UserId:   req.UserId,
 		VideoIds: vs,

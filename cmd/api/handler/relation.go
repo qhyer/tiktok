@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"net/http"
 
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
@@ -24,11 +25,18 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
+
+	// 两个用户不能相同
+	if req.ToUserId == userId {
+		hlog.CtxWarnf(ctx, "param error userId == toUserId")
+		SendResponse(c, errno.ParamErr)
+		return
+	}
 
 	// rpc通信
 	_, err = rpc.RelationAction(ctx, &relation.DouyinRelationActionRequest{
@@ -38,11 +46,11 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, nil)
+	SendResponse(c, errno.Success)
 }
 
 type RelationListParam struct {
@@ -50,7 +58,9 @@ type RelationListParam struct {
 }
 
 type RelationListResponse struct {
-	UserList []*user.User `json:"user_list"`
+	StatusCode int32        `json:"status_code"`
+	StatusMsg  string       `json:"status_msg"`
+	UserList   []*user.User `json:"user_list"`
 }
 
 // FollowList 关注列表
@@ -60,11 +70,11 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	relationResponse, err := rpc.FollowList(ctx, &relation.DouyinRelationFollowListRequest{
@@ -73,11 +83,15 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, RelationListResponse{UserList: relationResponse.UserList})
+	c.JSON(http.StatusOK, RelationListResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserList:   relationResponse.UserList,
+	})
 }
 
 // FollowerList 粉丝列表
@@ -87,11 +101,11 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	err := c.BindAndValidate(&req)
 	if err != nil {
 		hlog.CtxWarnf(ctx, "param error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, errno.ParamErr)
 		return
 	}
 
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	relationResponse, err := rpc.FollowerList(ctx, &relation.DouyinRelationFollowerListRequest{
@@ -100,11 +114,15 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, RelationListResponse{UserList: relationResponse.UserList})
+	c.JSON(http.StatusOK, RelationListResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserList:   relationResponse.UserList,
+	})
 }
 
 // FriendList 好友列表
@@ -114,7 +132,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	// 但看了文档觉得这个接口是为消息功能设计的
 	// 因此目前只支持查询当前登录用户的好友
 
-	userId := c.GetInt64("UserID")
+	userId := c.GetInt64("UserID") | 0
 
 	// rpc通信
 	relationResponse, err := rpc.FriendList(ctx, &relation.DouyinRelationFriendListRequest{
@@ -122,9 +140,13 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
-		SendResponse(c, err, nil)
+		SendResponse(c, err)
 		return
 	}
 
-	SendResponse(c, errno.Success, RelationListResponse{UserList: relationResponse.UserList})
+	c.JSON(http.StatusOK, RelationListResponse{
+		StatusCode: errno.Success.ErrCode,
+		StatusMsg:  errno.Success.ErrMsg,
+		UserList:   relationResponse.UserList,
+	})
 }

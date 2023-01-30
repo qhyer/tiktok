@@ -28,7 +28,7 @@ func (f *Favorite) TableName() string {
 // GetFavoriteVideoIdsByUserId get favorite video ids by user id
 func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, error) {
 	res := make([]int64, 0)
-	if err := DB.WithContext(ctx).Select("video_id").Where("user_id = ?", userId).Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Model(&Favorite{}).Select("video_id").Where("user_id = ?", userId).Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil

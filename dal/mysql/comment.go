@@ -49,7 +49,7 @@ func CommentAction(ctx context.Context, comment *Comment) (*Comment, error) {
 		}
 
 		// video 评论数+1
-		res = tx.Model(&Video{}).Where("id = ?", comment.VideoId).Update("comment_count", gorm.Expr("comment_count - ?", 1))
+		res = tx.Model(&Video{}).Where("id = ?", comment.VideoId).Update("comment_count", gorm.Expr("comment_count + ?", 1))
 		if res.Error != nil {
 			return res.Error
 		}

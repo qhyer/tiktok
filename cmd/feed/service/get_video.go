@@ -24,14 +24,23 @@ func NewGetVideoService(ctx context.Context) *GetVideoService {
 
 // GetVideosByVideoIdsAndCurrUserId get videos by video ids and current userid
 func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest) ([]*feed.Video, error) {
+	if len(req.VideoIds) == 0 {
+		return nil, nil
+	}
+
 	vs, err := mysql.MGetVideosByVideoIds(s.ctx, req.VideoIds)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 		return nil, err
 	}
 
+	if len(vs) == 0 {
+		return nil, nil
+	}
+
 	videos, _ := pack.Videos(vs)
 
+	// 给链接签名
 	videos, err = minio.SignFeed(s.ctx, videos)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "minio sign feed failed %v", err)

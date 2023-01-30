@@ -29,6 +29,10 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 		return nil, err
 	}
 
+	if len(fl) == 0 {
+		return nil, nil
+	}
+
 	// rpc通信
 	feedResponse, err := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
 		UserId:   userId,
