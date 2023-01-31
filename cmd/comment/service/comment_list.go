@@ -22,7 +22,10 @@ func NewCommentListService(ctx context.Context) *CommentListService {
 }
 
 func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) ([]*comment.Comment, error) {
-	cs, err := mysql.CommentList(s.ctx, req.VideoId)
+	videoId := req.GetVideoId()
+	userId := req.GetUserId()
+
+	cs, err := mysql.CommentList(s.ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get comment list failed %v", err)
 		return nil, err
@@ -41,7 +44,7 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	}
 
 	users, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
-		UserId:    req.UserId,
+		UserId:    userId,
 		ToUserIds: userIds,
 	})
 	if err != nil {

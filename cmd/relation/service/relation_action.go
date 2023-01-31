@@ -20,7 +20,10 @@ func NewRelationActionService(ctx context.Context) *RelationActionService {
 
 // FollowAction user follow action
 func (s *RelationActionService) FollowAction(req *relation.DouyinRelationActionRequest) error {
-	err := neo4j.FollowAction(s.ctx, req.UserId, req.ToUserId)
+	userId := req.GetUserId()
+	toUserId := req.GetToUserId()
+
+	err := neo4j.FollowAction(s.ctx, userId, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j follow action failed %v", err)
 		return err
@@ -30,7 +33,10 @@ func (s *RelationActionService) FollowAction(req *relation.DouyinRelationActionR
 
 // UnFollowAction user unfollow action
 func (s *RelationActionService) UnFollowAction(req *relation.DouyinRelationActionRequest) error {
-	err := neo4j.UnfollowAction(s.ctx, req.UserId, req.ToUserId)
+	userId := req.GetUserId()
+	toUserId := req.GetToUserId()
+
+	err := neo4j.UnfollowAction(s.ctx, userId, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j unfollow action failed %v", err)
 		return err

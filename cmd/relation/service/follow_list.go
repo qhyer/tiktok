@@ -21,15 +21,18 @@ func NewFollowListService(ctx context.Context) *FollowListService {
 
 // FollowList get list of follow user
 func (s *FollowListService) FollowList(req *relation.DouyinRelationFollowListRequest) ([]*user.User, error) {
+	userId := req.GetUserId()
+	toUserId := req.GetToUserId()
+
 	// 获取目标用户的关注
-	users, err := neo4j.FollowList(s.ctx, req.ToUserId)
+	users, err := neo4j.FollowList(s.ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
 		return nil, err
 	}
 
 	// 当前用户和目标用户相同
-	if req.UserId == req.ToUserId {
+	if userId == toUserId {
 		for i := range users {
 			users[i].IsFollow = true
 		}
@@ -37,7 +40,7 @@ func (s *FollowListService) FollowList(req *relation.DouyinRelationFollowListReq
 	}
 
 	// 获取当前用户的关注
-	followList, err := neo4j.FollowList(s.ctx, req.UserId)
+	followList, err := neo4j.FollowList(s.ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
 		return nil, err

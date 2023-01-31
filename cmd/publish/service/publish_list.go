@@ -22,7 +22,10 @@ func NewPublishListService(ctx context.Context) *PublishListService {
 
 // PublishList get list of video
 func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) ([]*feed.Video, error) {
-	vs, err := mysql.GetPublishedVideoIdsByUserId(s.ctx, req.ToUserId)
+	userId := req.GetUserId()
+	toUserId := req.GetToUserId()
+
+	vs, err := mysql.GetPublishedVideoIdsByUserId(s.ctx, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 		return nil, err
@@ -33,7 +36,7 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 	}
 
 	videoResponse, err := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
-		UserId:   req.UserId,
+		UserId:   userId,
 		VideoIds: vs,
 	})
 	if err != nil {

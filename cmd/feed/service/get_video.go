@@ -25,11 +25,13 @@ func NewGetVideoService(ctx context.Context) *GetVideoService {
 
 // GetVideosByVideoIdsAndCurrUserId get videos by video ids and current userid
 func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest) ([]*feed.Video, error) {
-	if len(req.VideoIds) == 0 {
+	userId := req.GetUserId()
+	videoIds := req.GetVideoIds()
+	if len(videoIds) == 0 {
 		return nil, nil
 	}
 
-	vs, err := mysql.MGetVideosByVideoIds(s.ctx, req.VideoIds)
+	vs, err := mysql.MGetVideosByVideoIds(s.ctx, videoIds)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 		return nil, err
@@ -55,7 +57,7 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 	}
 
 	users, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
-		UserId:    req.UserId,
+		UserId:    userId,
 		ToUserIds: userIds,
 	})
 	if err != nil {
@@ -74,7 +76,7 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 
 	// 查询用户点赞视频
 	favoriteResp, err := rpc.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
-		UserId: req.UserId,
+		UserId: userId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get user favorite list failed %v", err)

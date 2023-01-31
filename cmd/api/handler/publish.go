@@ -108,6 +108,6 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, PublishListResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		VideoList:  publishListResponse.VideoList,
+		VideoList:  publishListResponse.GetVideoList(),
 	})
 }

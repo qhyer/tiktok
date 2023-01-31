@@ -52,13 +52,12 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 		req.LatestTime = time.Now().UnixMilli()
 	}
 
-	var userId int64
-	userId = c.GetInt64("UserID")
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	feedResponse, err := rpc.Feed(ctx, &feed.DouyinFeedRequest{
-		LatestTime: &req.LatestTime,
 		UserId:     userId,
+		LatestTime: &req.LatestTime,
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)
@@ -69,7 +68,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, FeedResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		VideoList:  feedResponse.VideoList,
-		NextTime:   *feedResponse.NextTime,
+		VideoList:  feedResponse.GetVideoList(),
+		NextTime:   feedResponse.GetNextTime(),
 	})
 }

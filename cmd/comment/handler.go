@@ -18,7 +18,7 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	resp = new(comment.DouyinCommentActionResponse)
 	var newComment *comment.Comment
 
-	switch req.ActionType {
+	switch req.GetActionType() {
 	case constants.DoCommentAction:
 		newComment, err = service.NewCommentActionService(ctx).CommentAction(req)
 	case constants.DeleteCommentAction:

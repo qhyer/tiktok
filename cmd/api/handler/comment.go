@@ -70,7 +70,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, CommentActionResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		Comment:    commentResponse.Comment,
+		Comment:    commentResponse.GetComment(),
 	})
 }
 
@@ -110,6 +110,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, CommentListResponse{
 		StatusCode:  errno.Success.ErrCode,
 		StatusMsg:   errno.Success.ErrMsg,
-		CommentList: CommentResponse.CommentList,
+		CommentList: CommentResponse.GetCommentList(),
 	})
 }

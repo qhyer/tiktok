@@ -20,15 +20,17 @@ func NewFriendListService(ctx context.Context) *FriendListService {
 }
 
 func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListRequest) ([]*user.User, error) {
+	userId := req.GetUserId()
+
 	// 获取当前用户的粉丝
-	followerList, err := neo4j.FollowerList(s.ctx, req.UserId)
+	followerList, err := neo4j.FollowerList(s.ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j get follower list failed %v", err)
 		return nil, err
 	}
 
 	// 获取当前用户的关注
-	followList, err := neo4j.FollowList(s.ctx, req.UserId)
+	followList, err := neo4j.FollowList(s.ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
 		return nil, err

@@ -21,6 +21,7 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 		resp = pack.BuildRegisterResp(err)
 		return resp, err
 	}
+
 	resp = pack.BuildRegisterResp(errno.Success)
 	resp.UserId = userId
 	return resp, nil
@@ -35,6 +36,7 @@ func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserLoginReques
 		resp = pack.BuildLoginResp(err)
 		return resp, err
 	}
+
 	resp = pack.BuildLoginResp(errno.Success)
 	resp.UserId = userId
 	return resp, nil
@@ -44,7 +46,7 @@ func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserLoginReques
 func (s *UserSrvImpl) GetUserInfoByUserIds(ctx context.Context, req *user.DouyinUserInfoRequest) (resp *user.DouyinUserInfoResponse, err error) {
 	resp = new(user.DouyinUserInfoResponse)
 
-	if len(req.ToUserIds) == 0 {
+	if len(req.GetToUserIds()) == 0 {
 		resp = pack.BuildUserInfoResp(errno.ParamErr)
 		return resp, errno.ParamErr
 	}
@@ -54,6 +56,7 @@ func (s *UserSrvImpl) GetUserInfoByUserIds(ctx context.Context, req *user.Douyin
 		resp = pack.BuildUserInfoResp(err)
 		return resp, err
 	}
+
 	resp = pack.BuildUserInfoResp(errno.Success)
 	resp.User = users
 	return resp, nil

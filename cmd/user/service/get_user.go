@@ -22,11 +22,13 @@ func NewMGetUserService(ctx context.Context) *MGetUserService {
 
 // MGetUser multiple get list of user info
 func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.User, error) {
-	if len(req.ToUserIds) == 0 {
+	userId := req.GetUserId()
+	toUserIds := req.GetToUserIds()
+	if len(toUserIds) == 0 {
 		return nil, nil
 	}
 
-	us, err := neo4j.MGetUserByUserIds(s.ctx, req.ToUserIds)
+	us, err := neo4j.MGetUserByUserIds(s.ctx, toUserIds)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j get user failed %v", err)
 		return nil, err
@@ -34,19 +36,19 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 
 	// 数据库结果存map 然后返回所有用户
 	userMap := make(map[int64]*user.User, 0)
-	users := make([]*user.User, 0, len(req.ToUserIds))
+	users := make([]*user.User, 0, len(toUserIds))
 	for _, u := range us {
 		userMap[u.Id] = u
 	}
-	for _, u := range req.ToUserIds {
+	for _, u := range toUserIds {
 		users = append(users, userMap[u])
 	}
 
 	// 获取当前用户与这些用户的关注关系
 	followMap := make(map[int64]bool, 0)
 	followResp, err := rpc.FollowList(s.ctx, &relation.DouyinRelationFollowListRequest{
-		UserId:   req.UserId,
-		ToUserId: req.UserId,
+		UserId:   userId,
+		ToUserId: userId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get follow list failed %v", err)
@@ -58,7 +60,11 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 		}
 	}
 	for i, u := range users {
-		users[i].IsFollow = followMap[u.Id]
+		if followMap[u.Id] == true {
+			users[i].IsFollow = true
+		} else {
+			users[i].IsFollow = false
+		}
 	}
 
 	return users, nil

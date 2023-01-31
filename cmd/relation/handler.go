@@ -16,7 +16,7 @@ type RelationSrvImpl struct{}
 // RelationAction implements the RelationSrvImpl interface.
 func (s *RelationSrvImpl) RelationAction(ctx context.Context, req *relation.DouyinRelationActionRequest) (resp *relation.DouyinRelationActionResponse, err error) {
 	resp = new(relation.DouyinRelationActionResponse)
-	switch req.ActionType {
+	switch req.GetActionType() {
 	case constants.DoFollowAction:
 		err = service.NewRelationActionService(ctx).FollowAction(req)
 	case constants.UnfollowAction:

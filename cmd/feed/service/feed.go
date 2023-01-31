@@ -26,7 +26,10 @@ func NewFeedService(ctx context.Context) *FeedService {
 
 // Feed get list of video
 func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, error) {
-	vs, err := mysql.GetVideosByLatestTime(s.ctx, constants.VideoQueryLimit, *req.LatestTime)
+	latestTime := req.GetLatestTime()
+	userId := req.GetUserId()
+
+	vs, err := mysql.GetVideosByLatestTime(s.ctx, constants.VideoQueryLimit, latestTime)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 		return nil, 0, err
@@ -52,7 +55,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	}
 
 	users, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
-		UserId:    req.UserId,
+		UserId:    userId,
 		ToUserIds: userIds,
 	})
 	if err != nil {
@@ -71,7 +74,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 
 	// 查询用户点赞视频
 	favoriteResp, err := rpc.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
-		UserId: req.UserId,
+		UserId: userId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get user favorite list failed %v", err)

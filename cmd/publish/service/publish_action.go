@@ -33,7 +33,9 @@ func NewPublishActionService(ctx context.Context) *PublishActionService {
 
 // PublishAction publish video
 func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionRequest) error {
-	videoData := req.Data
+	videoData := req.GetData()
+	userId := req.GetUserId()
+	title := req.GetTitle()
 
 	// 生成文件名
 	ruid := uuid.NewV4()
@@ -72,10 +74,10 @@ func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionReq
 	// 在db插入结果
 	err = mysql.CreateVideo(s.ctx, []*mysql.Video{
 		{
-			AuthorUserId: req.UserId,
+			AuthorUserId: userId,
 			PlayUrl:      videoUploadInfo.Key,
 			CoverUrl:     coverUploadInfo.Key,
-			Title:        req.Title,
+			Title:        title,
 		},
 	})
 	if err != nil {

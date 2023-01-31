@@ -20,14 +20,17 @@ func NewCommentActionService(ctx context.Context) *CommentActionService {
 
 // CommentAction user comment video action
 func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionRequest) (*comment.Comment, error) {
+	content := req.GetCommentText()
+	userId := req.GetUserId()
+	videoId := req.GetVideoId()
+
 	// 过滤敏感词
-	content := *req.CommentText
 	content = censor.TextCensor.GetFilter().Replace(content, '*')
 
 	// 插入数据
 	c, err := mysql.CommentAction(s.ctx, &mysql.Comment{
-		UserId:  req.UserId,
-		VideoId: req.VideoId,
+		UserId:  userId,
+		VideoId: videoId,
 		Content: content,
 	})
 	if err != nil {
@@ -40,9 +43,12 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 
 // DeleteCommentAction delete user comment action
 func (s *CommentActionService) DeleteCommentAction(req *comment.DouyinCommentActionRequest) error {
+	userId := req.GetUserId()
+	commentId := req.GetCommentId()
+
 	err := mysql.DeleteCommentAction(s.ctx, &mysql.Comment{
-		UserId: req.UserId,
-		Id:     *req.CommentId,
+		UserId: userId,
+		Id:     commentId,
 	})
 	return err
 }

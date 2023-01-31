@@ -49,7 +49,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 根据传回的userId生成token
-	token, err := jwt.GenerateToken(registerResponse.UserId)
+	token, err := jwt.GenerateToken(registerResponse.GetUserId())
 	if err != nil {
 		SendResponse(c, err)
 		return
@@ -58,7 +58,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, RegisterResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		UserId:     registerResponse.UserId,
+		UserId:     registerResponse.GetUserId(),
 		Token:      token,
 	})
 }
@@ -98,7 +98,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 根据传回的userId生成token
-	token, err := jwt.GenerateToken(loginResponse.UserId)
+	token, err := jwt.GenerateToken(loginResponse.GetUserId())
 	if err != nil {
 		hlog.CtxErrorf(ctx, "generate token error %v", err)
 		SendResponse(c, err)
@@ -108,7 +108,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, LoginResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
-		UserId:     loginResponse.UserId,
+		UserId:     loginResponse.GetUserId(),
 		Token:      token,
 	})
 }
@@ -147,12 +147,14 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, err)
 		return
 	}
-	if len(getUserInfoResponse.User) == 0 {
+
+	// 获取用户信息
+	if len(getUserInfoResponse.GetUser()) == 0 {
 		hlog.CtxWarnf(ctx, "user not exist error %v", err)
 		SendResponse(c, errno.UserNotExistErr)
 		return
 	}
-	usr := getUserInfoResponse.User[0]
+	usr := getUserInfoResponse.GetUser()[0]
 
 	c.JSON(http.StatusOK, GetUserInfoResponse{
 		StatusCode: errno.Success.ErrCode,

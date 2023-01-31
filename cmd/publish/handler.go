@@ -29,6 +29,7 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 // PublishList implements the PublishSrvImpl interface.
 func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (resp *publish.DouyinPublishListResponse, err error) {
 	resp = new(publish.DouyinPublishListResponse)
+
 	videos, err := service.NewPublishListService(ctx).PublishList(req)
 	if err != nil {
 		resp = pack.BuildPublishListResp(err)

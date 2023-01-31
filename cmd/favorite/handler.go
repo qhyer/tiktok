@@ -17,7 +17,7 @@ type FavoriteSrvImpl struct{}
 func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.DouyinFavoriteActionRequest) (resp *favorite.DouyinFavoriteActionResponse, err error) {
 	resp = new(favorite.DouyinFavoriteActionResponse)
 
-	switch req.ActionType {
+	switch req.GetActionType() {
 	case constants.DoFavoriteAction:
 		err = service.NewFavoriteActionService(ctx).FavoriteAction(req)
 	case constants.CancelFavoriteAction:
