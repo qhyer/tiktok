@@ -28,13 +28,13 @@ func TestFollowerListService_FollowerList(t *testing.T) {
 		{
 			name:    "no follower",
 			fields:  fields{ctx: context.Background()},
-			args:    args{req: &relation.DouyinRelationFollowerListRequest{UserId: 1}},
+			args:    args{req: &relation.DouyinRelationFollowerListRequest{UserId: 1, ToUserId: 7}},
 			wantErr: false,
 		},
 		{
 			name:    "ok",
 			fields:  fields{ctx: context.Background()},
-			args:    args{req: &relation.DouyinRelationFollowerListRequest{UserId: 2}},
+			args:    args{req: &relation.DouyinRelationFollowerListRequest{UserId: 1, ToUserId: 5}},
 			wantErr: false,
 		},
 	}

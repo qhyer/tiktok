@@ -5,6 +5,8 @@ import (
 
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type FavoriteActionService struct {
@@ -25,7 +27,12 @@ func (s *FavoriteActionService) FavoriteAction(req *favorite.DouyinFavoriteActio
 		UserId:  userId,
 		VideoId: videoId,
 	})
-	return err
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "db create favorite failed %v", err)
+		return err
+	}
+
+	return nil
 }
 
 // CancelFavoriteAction cancel favorite video action
@@ -37,5 +44,10 @@ func (s *FavoriteActionService) CancelFavoriteAction(req *favorite.DouyinFavorit
 		UserId:  userId,
 		VideoId: videoId,
 	})
-	return err
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "db delete favorite failed %v", err)
+		return err
+	}
+
+	return nil
 }

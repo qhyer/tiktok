@@ -40,6 +40,9 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	// 查询用户信息
 	userIds := make([]int64, 0, len(comments))
 	for _, v := range comments {
+		if v == nil || v.User == nil {
+			continue
+		}
 		userIds = append(userIds, v.User.Id)
 	}
 
@@ -55,6 +58,9 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	// 加入用户信息
 	us := users.GetUser()
 	for i := range comments {
+		if us[i] == nil {
+			continue
+		}
 		comments[i].User = us[i]
 	}
 

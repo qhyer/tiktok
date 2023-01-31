@@ -53,6 +53,9 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 	// 查询用户信息
 	userIds := make([]int64, 0, len(videos))
 	for _, v := range videos {
+		if v == nil || v.Author == nil {
+			continue
+		}
 		userIds = append(userIds, v.Author.Id)
 	}
 
@@ -88,10 +91,11 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 	for _, f := range vids {
 		favoriteMap[f] = true
 	}
-	if favoriteMap != nil {
-		for i, v := range videos {
-			videos[i].IsFavorite = favoriteMap[v.Id]
+	for i, v := range videos {
+		if v == nil {
+			continue
 		}
+		videos[i].IsFavorite = favoriteMap[v.Id]
 	}
 
 	return videos, nil

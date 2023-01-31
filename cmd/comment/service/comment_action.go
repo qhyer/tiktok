@@ -7,6 +7,8 @@ import (
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/censor"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type CommentActionService struct {
@@ -34,11 +36,12 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 		Content: content,
 	})
 	if err != nil {
+		klog.CtxErrorf(s.ctx, "db create comment failed %v", err)
 		return nil, err
 	}
 
 	com := pack.Comment(c)
-	return com, err
+	return com, nil
 }
 
 // DeleteCommentAction delete user comment action
@@ -50,5 +53,10 @@ func (s *CommentActionService) DeleteCommentAction(req *comment.DouyinCommentAct
 		UserId: userId,
 		Id:     commentId,
 	})
-	return err
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "db delete comment failed %v", err)
+		return err
+	}
+
+	return nil
 }
