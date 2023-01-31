@@ -51,7 +51,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		}
 	}
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	commentResponse, err := rpc.CommentAction(ctx, &comment.DouyinCommentActionRequest{
@@ -94,7 +94,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, errno.ParamErr)
 		return
 	}
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	CommentResponse, err := rpc.CommentList(ctx, &comment.DouyinCommentListRequest{

@@ -48,3 +48,16 @@ func (s *FavoriteSrvImpl) FavoriteList(ctx context.Context, req *favorite.Douyin
 	resp.VideoList = videos
 	return resp, nil
 }
+
+// GetUserFavoriteVideoIds implements the FavoriteSrvImpl interface.
+func (s *FavoriteSrvImpl) GetUserFavoriteVideoIds(ctx context.Context, req *favorite.DouyinGetUserFavoriteVideoIdsRequest) (resp *favorite.DouyinGetUserFavoriteVideoIdsResponse, err error) {
+	resp = new(favorite.DouyinGetUserFavoriteVideoIdsResponse)
+
+	videoIds, err := service.NewFavoriteListService(ctx).GetUserFavoriteVideoIds(req)
+	if err != nil {
+		return resp, err
+	}
+
+	resp.VideoIds = videoIds
+	return resp, nil
+}

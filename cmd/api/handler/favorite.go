@@ -28,7 +28,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, errno.ParamErr)
 		return
 	}
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	_, err = rpc.FavoriteAction(ctx, &favorite.DouyinFavoriteActionRequest{
@@ -66,9 +66,12 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	userId := c.GetInt64("UserID")
+
 	// rpc通信
 	favoriteResponse, err := rpc.FavoriteList(ctx, &favorite.DouyinFavoriteListRequest{
-		UserId: req.userId,
+		UserId:   userId,
+		ToUserId: req.userId,
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc response error %v", err)

@@ -29,7 +29,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// 两个用户不能相同
 	if req.ToUserId == userId {
@@ -74,7 +74,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	relationResponse, err := rpc.FollowList(ctx, &relation.DouyinRelationFollowListRequest{
@@ -105,7 +105,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	relationResponse, err := rpc.FollowerList(ctx, &relation.DouyinRelationFollowerListRequest{
@@ -132,7 +132,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	// 但看了文档觉得这个接口是为消息功能设计的
 	// 因此目前只支持查询当前登录用户的好友
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	relationResponse, err := rpc.FriendList(ctx, &relation.DouyinRelationFriendListRequest{

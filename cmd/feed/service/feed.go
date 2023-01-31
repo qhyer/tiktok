@@ -5,6 +5,7 @@ import (
 
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
+	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
@@ -61,7 +62,25 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 
 	// 加入用户信息
 	for i := range videos {
+		if users.User[i] == nil {
+			klog.CtxWarnf(s.ctx, "video author is nil")
+			continue
+		}
 		videos[i].Author = users.User[i]
+	}
+
+	// 查询用户点赞
+	favoriteResp, err := rpc.FavoriteList(s.ctx, &favorite.DouyinFavoriteListRequest{
+		UserId:   req.UserId,
+		ToUserId: req.UserId,
+	})
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "rpc get user favorite list failed %v", err)
+		return nil, 0, err
+	}
+	favoriteMap := make(map[int64]bool, 0)
+	for _, f := range favoriteResp.VideoList {
+		favoriteMap[f.Id] = true
 	}
 
 	return videos, nextTime, nil

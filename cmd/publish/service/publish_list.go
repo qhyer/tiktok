@@ -32,7 +32,7 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 		return nil, nil
 	}
 
-	videoResponse, _ := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
+	videoResponse, err := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
 		UserId:   req.UserId,
 		VideoIds: vs,
 	})

@@ -133,7 +133,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, errno.ParamErr)
 		return
 	}
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	var userIds []int64

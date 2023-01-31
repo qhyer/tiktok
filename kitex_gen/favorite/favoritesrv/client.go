@@ -13,6 +13,7 @@ import (
 type Client interface {
 	FavoriteAction(ctx context.Context, Req *favorite.DouyinFavoriteActionRequest, callOptions ...callopt.Option) (r *favorite.DouyinFavoriteActionResponse, err error)
 	FavoriteList(ctx context.Context, Req *favorite.DouyinFavoriteListRequest, callOptions ...callopt.Option) (r *favorite.DouyinFavoriteListResponse, err error)
+	GetUserFavoriteVideoIds(ctx context.Context, Req *favorite.DouyinGetUserFavoriteVideoIdsRequest, callOptions ...callopt.Option) (r *favorite.DouyinGetUserFavoriteVideoIdsResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -52,4 +53,9 @@ func (p *kFavoriteSrvClient) FavoriteAction(ctx context.Context, Req *favorite.D
 func (p *kFavoriteSrvClient) FavoriteList(ctx context.Context, Req *favorite.DouyinFavoriteListRequest, callOptions ...callopt.Option) (r *favorite.DouyinFavoriteListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.FavoriteList(ctx, Req)
+}
+
+func (p *kFavoriteSrvClient) GetUserFavoriteVideoIds(ctx context.Context, Req *favorite.DouyinGetUserFavoriteVideoIdsRequest, callOptions ...callopt.Option) (r *favorite.DouyinGetUserFavoriteVideoIdsResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserFavoriteVideoIds(ctx, Req)
 }

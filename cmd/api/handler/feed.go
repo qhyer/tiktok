@@ -51,7 +51,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	if req.LatestTime == 0 {
 		req.LatestTime = time.Now().UnixMilli()
 	}
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// rpc通信
 	feedResponse, err := rpc.Feed(ctx, &feed.DouyinFeedRequest{

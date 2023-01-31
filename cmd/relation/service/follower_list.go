@@ -30,6 +30,10 @@ func (s *FollowerListService) FollowerList(req *relation.DouyinRelationFollowerL
 
 	// 获取当前用户的关注
 	followList, err := neo4j.FollowList(s.ctx, req.UserId)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
+		return nil, err
+	}
 	userFollowMap := make(map[int64]bool, 0)
 	for _, u := range followList {
 		userFollowMap[u.Id] = true

@@ -23,7 +23,8 @@ func NewFavoriteListService(ctx context.Context) *FavoriteListService {
 // FavoriteList get user favorite list
 func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListRequest) ([]*feed.Video, error) {
 	userId := req.UserId
-	fl, err := mysql.GetFavoriteVideoIdsByUserId(s.ctx, userId)
+	toUserId := req.ToUserId
+	fl, err := mysql.GetFavoriteVideoIdsByUserId(s.ctx, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get favorite list failed %v", err)
 		return nil, err
@@ -44,4 +45,14 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 	}
 
 	return feedResponse.VideoList, nil
+}
+
+func (s *FavoriteListService) GetUserFavoriteVideoIds(req *favorite.DouyinGetUserFavoriteVideoIdsRequest) ([]int64, error) {
+	fl, err := mysql.GetFavoriteVideoIdsByUserId(s.ctx, req.UserId)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "mysql get favorite list failed %v", err)
+		return nil, err
+	}
+
+	return fl, err
 }

@@ -17,6 +17,7 @@ func Router() {
 	h := server.New(
 		server.WithHostPorts("127.0.0.1:8080"),
 		server.WithHandleMethodNotAllowed(true),
+		server.WithMaxRequestBodySize(104857600), // 100MB
 	)
 	h.Use(recovery.Recovery(recovery.WithRecoveryHandler(
 		func(ctx context.Context, c *app.RequestContext, err interface{}, stack []byte) {

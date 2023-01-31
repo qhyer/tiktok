@@ -42,7 +42,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 
 	// 读取视频
 	videoFile, err := req.Data.Open()
@@ -91,7 +91,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	userId := c.GetInt64("UserID") | 0
+	userId := c.GetInt64("UserID")
 	toUserId := req.UserId
 
 	// rpc通信

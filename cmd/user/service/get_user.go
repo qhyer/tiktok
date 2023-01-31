@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"tiktok/dal/neo4j"
+	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
+	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -38,6 +40,23 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 	}
 	for _, u := range req.ToUserIds {
 		users = append(users, userMap[u])
+	}
+
+	// 获取当前用户与这些用户的关注关系
+	followMap := make(map[int64]bool, 0)
+	follows, err := rpc.FollowList(s.ctx, &relation.DouyinRelationFollowListRequest{
+		UserId:   req.UserId,
+		ToUserId: req.UserId,
+	})
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "rpc get follow list failed %v", err)
+		return nil, err
+	}
+	for _, u := range follows.UserList {
+		followMap[u.Id] = true
+	}
+	for i, u := range users {
+		users[i].IsFollow = followMap[u.Id]
 	}
 
 	return users, nil

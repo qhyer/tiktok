@@ -88,6 +88,7 @@ func queryUserInfoByUserIds(ctx context.Context, tx neo4j.ManagedTransaction, us
 			Name:          username,
 			FollowCount:   &followCount,
 			FollowerCount: &followerCount,
+			IsFollow:      false,
 		})
 	}
 	return users, nil
