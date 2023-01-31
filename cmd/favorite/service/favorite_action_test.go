@@ -73,8 +73,8 @@ func TestFavoriteActionService_FavoriteAction(t *testing.T) {
 			name:   "ok",
 			fields: fields{context.Background()},
 			args: args{req: &favorite.DouyinFavoriteActionRequest{
-				UserId:     1,
-				VideoId:    1,
+				UserId:     7,
+				VideoId:    6,
 				ActionType: 1,
 			}},
 			wantErr: false,

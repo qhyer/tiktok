@@ -62,3 +62,11 @@ func FavoriteList(ctx context.Context, req *favorite.DouyinFavoriteListRequest) 
 	}
 	return resp, err
 }
+
+func GetUserFavoriteVideoIds(ctx context.Context, req *favorite.DouyinGetUserFavoriteVideoIdsRequest) (*favorite.DouyinGetUserFavoriteVideoIdsResponse, error) {
+	resp, err := favoriteClient.GetUserFavoriteVideoIds(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}

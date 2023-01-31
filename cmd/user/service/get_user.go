@@ -44,7 +44,7 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 
 	// 获取当前用户与这些用户的关注关系
 	followMap := make(map[int64]bool, 0)
-	follows, err := rpc.FollowList(s.ctx, &relation.DouyinRelationFollowListRequest{
+	followResp, err := rpc.FollowList(s.ctx, &relation.DouyinRelationFollowListRequest{
 		UserId:   req.UserId,
 		ToUserId: req.UserId,
 	})
@@ -52,8 +52,10 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 		klog.CtxErrorf(s.ctx, "rpc get follow list failed %v", err)
 		return nil, err
 	}
-	for _, u := range follows.UserList {
-		followMap[u.Id] = true
+	if followResp != nil && followResp.UserList != nil {
+		for _, u := range followResp.UserList {
+			followMap[u.Id] = true
+		}
 	}
 	for i, u := range users {
 		users[i].IsFollow = followMap[u.Id]

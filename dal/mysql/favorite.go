@@ -38,15 +38,16 @@ func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, er
 func FavoriteAction(ctx context.Context, favorite *Favorite) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 用户新增喜欢
-		res := tx.Clauses(clause.OnConflict{
-			UpdateAll: true,
+		res := tx.Model(&Favorite{}).Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"deleted_at"}),
 		}).Create(favorite)
 		if res.Error != nil {
 			return res.Error
 		}
 
 		// 创建失败
-		if res.RowsAffected != 1 {
+		if res.RowsAffected == 0 {
 			return errno.DBOperationFailedErr
 		}
 

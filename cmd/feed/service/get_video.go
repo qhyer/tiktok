@@ -72,18 +72,22 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 		videos[i].Author = users.User[i]
 	}
 
-	// 查询用户点赞
-	favoriteResp, err := rpc.FavoriteList(s.ctx, &favorite.DouyinFavoriteListRequest{
-		UserId:   req.UserId,
-		ToUserId: req.UserId,
+	// 查询用户点赞视频
+	favoriteResp, err := rpc.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
+		UserId: req.UserId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get user favorite list failed %v", err)
 		return nil, err
 	}
 	favoriteMap := make(map[int64]bool, 0)
-	for _, f := range favoriteResp.VideoList {
-		favoriteMap[f.Id] = true
+	if favoriteResp != nil && favoriteResp.VideoIds != nil {
+		for _, f := range favoriteResp.VideoIds {
+			favoriteMap[f] = true
+		}
+	}
+	for i, v := range videos {
+		videos[i].IsFavorite = favoriteMap[v.Id]
 	}
 
 	return videos, nil

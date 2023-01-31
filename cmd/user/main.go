@@ -4,9 +4,9 @@ import (
 	"net"
 
 	"tiktok/dal"
-	"tiktok/pkg/bound"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
+	"tiktok/pkg/rpc"
 
 	user "tiktok/kitex_gen/user/usersrv"
 	tracer2 "tiktok/pkg/tracer"
@@ -21,6 +21,7 @@ import (
 func Init() {
 	tracer2.InitJaeger(constants.UserServiceName)
 	dal.Init()
+	rpc.InitRelationRpc()
 }
 
 func main() {
@@ -39,10 +40,10 @@ func main() {
 		server.WithMiddleware(middleware.ServerMiddleware),
 		server.WithServiceAddr(addr), // address
 		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(),                           // Multiplex
-		server.WithSuite(trace.NewDefaultServerSuite()),     // tracer
-		server.WithBoundHandler(bound.NewCpuLimitHandler()), // BoundHandler
-		server.WithRegistry(r),                              // registry
+		server.WithMuxTransport(),                       // Multiplex
+		server.WithSuite(trace.NewDefaultServerSuite()), // tracer
+		//server.WithBoundHandler(bound.NewCpuLimitHandler()), // BoundHandler
+		server.WithRegistry(r), // registry
 	)
 	err = svr.Run()
 	if err != nil {

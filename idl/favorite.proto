@@ -34,6 +34,9 @@ message douyin_get_user_favorite_video_ids_response {
   repeated int64 video_ids = 1; // 视频id
 }
 
+message Favorite {
+  int64 video_id = 1; // 视频id
+}
 
 service FavoriteSrv {
   rpc FavoriteAction(douyin_favorite_action_request) returns (douyin_favorite_action_response) {}

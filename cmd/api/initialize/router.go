@@ -27,11 +27,13 @@ func Router() {
 
 	// 接口路由
 	apiRouter := h.Group("/douyin/")
+	// 中间件
+	apiRouter.Use(middleware.Common())
 
 	// 需要鉴权的接口路由
 	authRouter := apiRouter.Group("/")
 	// 中间件鉴权
-	authRouter.Use(middleware.JWT())
+	authRouter.Use(middleware.Auth())
 
 	{
 		// 视频流

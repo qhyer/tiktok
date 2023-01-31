@@ -44,7 +44,7 @@ func CommentAction(ctx context.Context, comment *Comment) (*Comment, error) {
 		}
 
 		// 创建失败
-		if res.RowsAffected != 1 {
+		if res.RowsAffected == 0 {
 			return errno.DBOperationFailedErr
 		}
 
