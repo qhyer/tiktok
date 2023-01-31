@@ -53,8 +53,9 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	}
 
 	// 加入用户信息
+	us := users.GetUser()
 	for i := range comments {
-		comments[i].User = users.User[i]
+		comments[i].User = us[i]
 	}
 
 	return comments, nil

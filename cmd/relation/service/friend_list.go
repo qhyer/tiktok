@@ -40,21 +40,24 @@ func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListReq
 		userFollowMap[u.Id] = true
 	}
 
-	// 交集就是朋友
 	friends := make([]*user.User, 0)
-	for _, u := range followerList {
-		// 用户没有关注他
-		if !userFollowMap[u.Id] {
-			continue
+	if userFollowMap != nil {
+		// 交集就是朋友
+		for _, u := range followerList {
+			// 用户没有关注他
+			if !userFollowMap[u.Id] {
+				continue
+			}
+			friends = append(friends, &user.User{
+				Id:            u.Id,
+				Name:          u.Name,
+				FollowCount:   u.FollowCount,
+				FollowerCount: u.FollowerCount,
+				IsFollow:      true,
+			})
 		}
-		friends = append(friends, &user.User{
-			Id:            u.Id,
-			Name:          u.Name,
-			FollowCount:   u.FollowCount,
-			FollowerCount: u.FollowerCount,
-			IsFollow:      true,
-		})
 	}
+
 	return friends, err
 
 }

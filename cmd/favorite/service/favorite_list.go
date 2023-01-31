@@ -45,7 +45,7 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 		return nil, err
 	}
 
-	return feedResponse.VideoList, nil
+	return feedResponse.GetVideoList(), nil
 }
 
 func (s *FavoriteListService) GetUserFavoriteVideoIds(req *favorite.DouyinGetUserFavoriteVideoIdsRequest) ([]int64, error) {

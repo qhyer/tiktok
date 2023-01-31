@@ -50,9 +50,11 @@ func (s *FollowListService) FollowList(req *relation.DouyinRelationFollowListReq
 		userFollowMap[u.Id] = true
 	}
 
-	// 设置粉丝列表中当前用户的关注关系
-	for i, u := range users {
-		users[i].IsFollow = userFollowMap[u.Id]
+	if userFollowMap != nil {
+		// 设置粉丝列表中当前用户的关注关系
+		for i, u := range users {
+			users[i].IsFollow = userFollowMap[u.Id]
+		}
 	}
 
 	return users, err

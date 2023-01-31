@@ -43,5 +43,5 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 		klog.CtxErrorf(s.ctx, "rpc get video failed %v", err)
 	}
 
-	return videoResponse.VideoList, nil
+	return videoResponse.GetVideoList(), nil
 }

@@ -65,13 +65,14 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 		return nil, err
 	}
 
+	us := users.GetUser()
 	// 加入用户信息
 	for i := range videos {
-		if users.User[i] == nil {
+		if us[i] == nil {
 			klog.CtxWarnf(s.ctx, "video author is nil")
 			continue
 		}
-		videos[i].Author = users.User[i]
+		videos[i].Author = us[i]
 	}
 
 	// 查询用户点赞视频
@@ -83,13 +84,14 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 		return nil, err
 	}
 	favoriteMap := make(map[int64]bool, 0)
-	if favoriteResp != nil && favoriteResp.VideoIds != nil {
-		for _, f := range favoriteResp.VideoIds {
-			favoriteMap[f] = true
-		}
+	vids := favoriteResp.GetVideoIds()
+	for _, f := range vids {
+		favoriteMap[f] = true
 	}
-	for i, v := range videos {
-		videos[i].IsFavorite = favoriteMap[v.Id]
+	if favoriteMap != nil {
+		for i, v := range videos {
+			videos[i].IsFavorite = favoriteMap[v.Id]
+		}
 	}
 
 	return videos, nil

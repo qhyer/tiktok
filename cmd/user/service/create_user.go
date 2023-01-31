@@ -2,6 +2,10 @@ package service
 
 import (
 	"context"
+	"crypto/md5"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
 
 	"tiktok/dal/mysql"
 	"tiktok/dal/neo4j"
@@ -10,7 +14,7 @@ import (
 	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 type CreateUserService struct {
@@ -24,7 +28,9 @@ func NewCreateUserService(ctx context.Context) *CreateUserService {
 
 // CreateUser create user info.
 func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int64, error) {
-	users, err := mysql.QueryUser(s.ctx, req.Username)
+	username := req.GetUsername()
+	password := req.GetPassword()
+	users, err := mysql.QueryUser(s.ctx, username)
 	if err != nil {
 		return 0, err
 	}
@@ -33,18 +39,14 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 	}
 
 	// 对密码加盐
-	passWord, err := HashPassword(req.Password)
-	if err != nil {
-		klog.CtxErrorf(s.ctx, "hash password failed %v", err)
-		return 0, err
-	}
+	password = hashPassword(username, password)
 
 	// TODO 延时队列check是否在neo4j中创建用户成功
 
 	// 创建用户
 	us, err := mysql.CreateUser(s.ctx, []*mysql.User{{
-		UserName: req.Username,
-		Password: passWord,
+		UserName: username,
+		Password: password,
 	}})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql create user failed %v", err)
@@ -68,7 +70,19 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 	return userId, nil
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+func hashPassword(username, password string) string {
+	// 迭代次数
+	iterations := 320000
+
+	// 盐为用户名的md5
+	salt := fmt.Sprintf("%x", md5.Sum([]byte(username)))
+
+	// pbkdf2加密
+	hash := pbkdf2.Key([]byte(password), []byte(salt), iterations, sha256.Size, sha256.New)
+
+	// base64编码
+	b64Hash := base64.StdEncoding.EncodeToString(hash)
+
+	// 拼接最终密码
+	return fmt.Sprintf("%s$%d$%s$%s", "pbkdf2_sha256", iterations, salt, b64Hash)
 }
