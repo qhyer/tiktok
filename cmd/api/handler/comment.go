@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"tiktok/cmd/rpc"
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -26,6 +26,16 @@ type CommentActionResponse struct {
 	Comment    *comment.Comment `json:"comment"`
 }
 
+type CommentListParam struct {
+	VideoId int64 `query:"video_id" vd:"$>0"`
+}
+
+type CommentListResponse struct {
+	StatusCode  int32              `json:"status_code"`
+	StatusMsg   string             `json:"status_msg"`
+	CommentList []*comment.Comment `json:"comment_list"`
+}
+
 // CommentAction 评论和删除评论
 func CommentAction(ctx context.Context, c *app.RequestContext) {
 	var req CommentActionParam
@@ -37,7 +47,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	switch req.ActionType {
-	case constants.DoCommentAction:
+	case constants.CreateCommentAction:
 		if len(req.CommentText) == 0 {
 			hlog.CtxWarnf(ctx, "param comment_text error %v", req.CommentText)
 			SendResponse(c, errno.ParamErr)
@@ -74,16 +84,6 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-type CommentListParam struct {
-	VideoId int64 `query:"video_id" vd:"$>0"`
-}
-
-type CommentListResponse struct {
-	StatusCode  int32              `json:"status_code"`
-	StatusMsg   string             `json:"status_msg"`
-	CommentList []*comment.Comment `json:"comment_list"`
-}
-
 // CommentList 获取视频的评论列表
 func CommentList(ctx context.Context, c *app.RequestContext) {
 	var req CommentListParam
@@ -97,7 +97,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	CommentResponse, err := rpc.CommentList(ctx, &comment.DouyinCommentListRequest{
+	commentResponse, err := rpc.CommentList(ctx, &comment.DouyinCommentListRequest{
 		UserId:  userId,
 		VideoId: req.VideoId,
 	})
@@ -110,6 +110,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, CommentListResponse{
 		StatusCode:  errno.Success.ErrCode,
 		StatusMsg:   errno.Success.ErrMsg,
-		CommentList: CommentResponse.GetCommentList(),
+		CommentList: commentResponse.GetCommentList(),
 	})
 }

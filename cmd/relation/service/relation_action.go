@@ -18,8 +18,8 @@ func NewRelationActionService(ctx context.Context) *RelationActionService {
 	return &RelationActionService{ctx: ctx}
 }
 
-// FollowAction user follow action
-func (s *RelationActionService) FollowAction(req *relation.DouyinRelationActionRequest) error {
+// Follow user follow action
+func (s *RelationActionService) Follow(req *relation.DouyinRelationActionRequest) error {
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 
@@ -31,8 +31,8 @@ func (s *RelationActionService) FollowAction(req *relation.DouyinRelationActionR
 	return nil
 }
 
-// UnFollowAction user unfollow action
-func (s *RelationActionService) UnFollowAction(req *relation.DouyinRelationActionRequest) error {
+// Unfollow user unfollow action
+func (s *RelationActionService) Unfollow(req *relation.DouyinRelationActionRequest) error {
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 

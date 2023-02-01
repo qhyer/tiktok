@@ -16,7 +16,7 @@ func Comment(com *mysql.Comment) *comment.Comment {
 	return &comment.Comment{
 		Id:         com.Id,
 		Content:    com.Content,
-		CreateDate: com.UpdatedAt.In(time.FixedZone("CST", 8*3600)).Format("01-02"),
+		CreateDate: com.CreatedAt.In(time.FixedZone("CST", 8*3600)).Format("01-02"),
 		User:       &user.User{Id: com.UserId},
 	}
 }

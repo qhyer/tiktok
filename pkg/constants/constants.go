@@ -9,6 +9,7 @@ const (
 	VideoTableName    = "video"
 	FavoriteTableName = "favorite"
 	CommentTableName  = "comment"
+	MessageTableName  = "message"
 
 	ApiServiceName      = "api"
 	UserServiceName     = "user"
@@ -17,15 +18,18 @@ const (
 	FavoriteServiceName = "favorite"
 	CommentServiceName  = "comment"
 	RelationServiceName = "relation"
+	MessageServiceName  = "message"
 
-	DoCommentAction     = 1
+	CreateCommentAction = 1
 	DeleteCommentAction = 2
 
-	DoFavoriteAction     = 1
+	CreateFavoriteAction = 1
 	CancelFavoriteAction = 2
 
-	DoFollowAction = 1
+	FollowAction   = 1
 	UnfollowAction = 2
+
+	SendMessageAction = 1
 
 	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(119.91.157.116:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
 	VideoQueryLimit = 30
@@ -45,4 +49,6 @@ const (
 	OSSAccessKeyID     = "tiktok"
 	OSSSecretAccessKey = "ZqRNq8vd;9KLjx=9"
 	OSSDefaultExpiry   = time.Hour
+
+	DefaultAvatarUrl = "https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_442293a2db8f4c719ecbd8fb6e35ae21.jpeg"
 )

@@ -22,8 +22,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "PublishSrv"
 	handlerType := (*publish.PublishSrv)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"PublishAction": kitex.NewMethodInfo(publishActionHandler, newPublishActionArgs, newPublishActionResult, false),
-		"PublishList":   kitex.NewMethodInfo(publishListHandler, newPublishListArgs, newPublishListResult, false),
+		"PublishVideo": kitex.NewMethodInfo(publishActionHandler, newPublishActionArgs, newPublishActionResult, false),
+		"PublishList":  kitex.NewMethodInfo(publishListHandler, newPublishListArgs, newPublishListResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "publish",
@@ -343,7 +343,7 @@ func (p *kClient) PublishAction(ctx context.Context, Req *publish.DouyinPublishA
 	var _args PublishActionArgs
 	_args.Req = Req
 	var _result PublishActionResult
-	if err = p.c.Call(ctx, "PublishAction", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "PublishVideo", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

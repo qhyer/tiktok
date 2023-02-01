@@ -5,7 +5,7 @@ import (
 
 	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/relation"
-	"tiktok/kitex_gen/user"
+	"tiktok/pkg/constants"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -19,7 +19,7 @@ func NewFriendListService(ctx context.Context) *FriendListService {
 	return &FriendListService{ctx: ctx}
 }
 
-func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListRequest) ([]*user.User, error) {
+func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListRequest) ([]*relation.FriendUser, error) {
 	userId := req.GetUserId()
 
 	// 获取当前用户的粉丝
@@ -43,7 +43,7 @@ func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListReq
 		userFollowMap[u.Id] = true
 	}
 
-	friends := make([]*user.User, 0)
+	friends := make([]*relation.FriendUser, 0)
 	// 交集就是朋友
 	for _, u := range followerList {
 		if u == nil {
@@ -53,14 +53,17 @@ func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListReq
 		if !userFollowMap[u.Id] {
 			continue
 		}
-		friends = append(friends, &user.User{
+		friends = append(friends, &relation.FriendUser{
 			Id:            u.Id,
 			Name:          u.Name,
 			FollowCount:   u.FollowCount,
 			FollowerCount: u.FollowerCount,
 			IsFollow:      true,
+			Avatar:        constants.DefaultAvatarUrl, // 没有找到上传头像的地方 先返回一个固定头像
 		})
 	}
+
+	// 查询和朋友的最新消息
 
 	return friends, nil
 }

@@ -55,13 +55,13 @@ func TestCommentActionService_CommentAction(t *testing.T) {
 			s := &CommentActionService{
 				ctx: tt.fields.ctx,
 			}
-			got, err := s.CommentAction(tt.args.req)
+			got, err := s.CreateComment(tt.args.req)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CommentAction() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("CreateComment() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CommentAction() got = %v, want %v", got, tt.want)
+				t.Errorf("CreateComment() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -118,8 +118,8 @@ func TestCommentActionService_DeleteCommentAction(t *testing.T) {
 			s := &CommentActionService{
 				ctx: tt.fields.ctx,
 			}
-			if err := s.DeleteCommentAction(tt.args.req); (err != nil) != tt.wantErr {
-				t.Errorf("DeleteCommentAction() error = %v, wantErr %v", err, tt.wantErr)
+			if err := s.DeleteComment(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("DeleteComment() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

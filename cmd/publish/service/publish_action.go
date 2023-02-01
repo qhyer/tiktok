@@ -31,8 +31,8 @@ func NewPublishActionService(ctx context.Context) *PublishActionService {
 	return &PublishActionService{ctx: ctx}
 }
 
-// PublishAction publish video
-func (s *PublishActionService) PublishAction(req *publish.DouyinPublishActionRequest) error {
+// PublishVideo publish video
+func (s *PublishActionService) PublishVideo(req *publish.DouyinPublishActionRequest) error {
 	videoData := req.GetData()
 	userId := req.GetUserId()
 	title := req.GetTitle()

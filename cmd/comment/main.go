@@ -3,12 +3,12 @@ package main
 import (
 	"net"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal"
 	comment "tiktok/kitex_gen/comment/commentsrv"
 	"tiktok/pkg/censor"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
-	"tiktok/pkg/rpc"
 	tracer2 "tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"

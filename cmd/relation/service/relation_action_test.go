@@ -38,8 +38,8 @@ func TestFollowActionService_FollowAction(t *testing.T) {
 			s := &RelationActionService{
 				ctx: tt.fields.ctx,
 			}
-			if err := s.FollowAction(tt.args.req); (err != nil) != tt.wantErr {
-				t.Errorf("FollowAction() error = %v, wantErr %v", err, tt.wantErr)
+			if err := s.Follow(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("Follow() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -75,8 +75,8 @@ func TestFollowActionService_UnFollowAction(t *testing.T) {
 			s := &RelationActionService{
 				ctx: tt.fields.ctx,
 			}
-			if err := s.UnFollowAction(tt.args.req); (err != nil) != tt.wantErr {
-				t.Errorf("UnFollowAction() error = %v, wantErr %v", err, tt.wantErr)
+			if err := s.Unfollow(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("Unfollow() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

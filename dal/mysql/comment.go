@@ -25,8 +25,8 @@ func (c *Comment) TableName() string {
 	return constants.CommentTableName
 }
 
-// CommentList get list of video comment
-func CommentList(ctx context.Context, videoId int64) ([]*Comment, error) {
+// GetCommentListByVideoId get list of video comment
+func GetCommentListByVideoId(ctx context.Context, videoId int64) ([]*Comment, error) {
 	res := make([]*Comment, 0)
 	if err := DB.WithContext(ctx).Where("video_id = ?", videoId).Order("created_at desc").Find(&res).Error; err != nil {
 		return nil, err
@@ -34,8 +34,8 @@ func CommentList(ctx context.Context, videoId int64) ([]*Comment, error) {
 	return res, nil
 }
 
-// CommentAction user comment video
-func CommentAction(ctx context.Context, comment *Comment) (*Comment, error) {
+// CreateComment user comment video
+func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 	return comment, DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 新增评论
 		res := tx.Create(comment)
@@ -63,8 +63,8 @@ func CommentAction(ctx context.Context, comment *Comment) (*Comment, error) {
 	})
 }
 
-// DeleteCommentAction delete video comment action
-func DeleteCommentAction(ctx context.Context, comment *Comment) error {
+// DeleteComment delete video comment action
+func DeleteComment(ctx context.Context, comment *Comment) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 找到要删除的评论
 		delCom := tx.Where("id = ? and user_id = ?", comment.Id, comment.UserId).Take(&comment)

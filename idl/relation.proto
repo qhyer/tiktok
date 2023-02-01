@@ -44,7 +44,27 @@ message douyin_relation_friend_list_request {
 message douyin_relation_friend_list_response {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   optional string status_msg = 2; // 返回状态描述
-  repeated user.User user_list = 3; // 用户列表
+  repeated FriendUser user_list = 3; // 用户列表
+}
+
+message douyin_relation_is_friend_request {
+  int64 user_id = 1; // 用户id
+  int64 to_user_id = 2; // 对方id
+}
+
+message douyin_relation_is_friend_response {
+  bool is_friend = 1; // 是否为好友
+}
+
+message FriendUser {
+  int64 id = 1; // 用户id
+  string name = 2; // 用户名称
+  optional int64 follow_count = 3; // 关注总数
+  optional int64 follower_count = 4; // 粉丝总数
+  bool is_follow = 5; // true-已关注，false-未关注
+  string avatar = 6; // 用户头像Url
+  optional string message = 7; // 和好友的最新聊天信息
+  int64 msgType = 8; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 service RelationSrv {
@@ -52,4 +72,5 @@ service RelationSrv {
   rpc RelationFollowList(douyin_relation_follow_list_request) returns (douyin_relation_follow_list_response) {}
   rpc RelationFollowerList(douyin_relation_follower_list_request) returns (douyin_relation_follower_list_response) {}
   rpc RelationFriendList(douyin_relation_friend_list_request) returns (douyin_relation_friend_list_response) {}
+  rpc RelationIsFriend(douyin_relation_is_friend_request) returns (douyin_relation_is_friend_response) {}
 }

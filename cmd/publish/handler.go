@@ -16,7 +16,7 @@ type PublishSrvImpl struct{}
 func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest) (resp *publish.DouyinPublishActionResponse, err error) {
 	resp = new(publish.DouyinPublishActionResponse)
 
-	err = service.NewPublishActionService(ctx).PublishAction(req)
+	err = service.NewPublishActionService(ctx).PublishVideo(req)
 	if err != nil {
 		resp = pack.BuildPublishActionResp(err)
 		return resp, err

@@ -18,10 +18,10 @@ func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.Douy
 	resp = new(favorite.DouyinFavoriteActionResponse)
 
 	switch req.GetActionType() {
-	case constants.DoFavoriteAction:
-		err = service.NewFavoriteActionService(ctx).FavoriteAction(req)
+	case constants.CreateFavoriteAction:
+		err = service.NewFavoriteActionService(ctx).CreateFavorite(req)
 	case constants.CancelFavoriteAction:
-		err = service.NewFavoriteActionService(ctx).CancelFavoriteAction(req)
+		err = service.NewFavoriteActionService(ctx).CancelFavorite(req)
 	default:
 		err = errno.ParamErr
 	}

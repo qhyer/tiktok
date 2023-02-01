@@ -7,10 +7,10 @@ import (
 	"mime/multipart"
 	"net/http"
 
+	"tiktok/cmd/rpc"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/errno"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

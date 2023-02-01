@@ -1,11 +1,12 @@
 package rpc
 
+import "C"
 import (
 	"context"
 	"time"
 
-	"tiktok/kitex_gen/feed"
-	"tiktok/kitex_gen/feed/feedsrv"
+	"tiktok/kitex_gen/comment"
+	"tiktok/kitex_gen/comment/commentsrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/middleware"
@@ -16,20 +17,20 @@ import (
 	trace "github.com/kitex-contrib/tracer-opentracing"
 )
 
-var feedClient feedsrv.Client
+var commentClient commentsrv.Client
 
-func InitFeedRpc() {
+func InitCommentRpc() {
 	r, err := etcd.NewEtcdResolver([]string{constants.EtcdAddress})
 	if err != nil {
 		panic(err)
 	}
 
-	c, err := feedsrv.NewClient(
-		constants.FeedServiceName,
+	c, err := commentsrv.NewClient(
+		constants.CommentServiceName,
 		client.WithMiddleware(middleware.CommonMiddleware),
 		client.WithInstanceMW(middleware.ClientMiddleware),
-		//client.WithMuxConnection(1),                       // mux
-		client.WithRPCTimeout(3*time.Second),              // rpc timeout
+		client.WithMuxConnection(100),                     // mux
+		client.WithRPCTimeout(10*time.Second),             // rpc timeout
 		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
 		client.WithSuite(trace.NewDefaultClientSuite()),   // tracer
@@ -38,11 +39,11 @@ func InitFeedRpc() {
 	if err != nil {
 		panic(err)
 	}
-	feedClient = c
+	commentClient = c
 }
 
-func Feed(ctx context.Context, req *feed.DouyinFeedRequest) (*feed.DouyinFeedResponse, error) {
-	resp, err := feedClient.Feed(ctx, req)
+func CommentAction(ctx context.Context, req *comment.DouyinCommentActionRequest) (*comment.DouyinCommentActionResponse, error) {
+	resp, err := commentClient.CommentAction(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +53,8 @@ func Feed(ctx context.Context, req *feed.DouyinFeedRequest) (*feed.DouyinFeedRes
 	return resp, err
 }
 
-func GetVideosByVideoIdsAndCurrentUserId(ctx context.Context, req *feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest) (*feed.DouyinGetVideosByVideoIdsAndCurrentUserIdResponse, error) {
-	resp, err := feedClient.GetVideosByVideoIdsAndCurrentUserId(ctx, req)
+func CommentList(ctx context.Context, req *comment.DouyinCommentListRequest) (*comment.DouyinCommentListResponse, error) {
+	resp, err := commentClient.CommentList(ctx, req)
 	if err != nil {
 		return nil, err
 	}

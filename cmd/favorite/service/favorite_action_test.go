@@ -48,8 +48,8 @@ func TestFavoriteActionService_CancelFavoriteAction(t *testing.T) {
 			s := &FavoriteActionService{
 				ctx: tt.fields.ctx,
 			}
-			if err := s.CancelFavoriteAction(tt.args.req); (err != nil) != tt.wantErr {
-				t.Errorf("CancelFavoriteAction() error = %v, wantErr %v", err, tt.wantErr)
+			if err := s.CancelFavorite(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("DeleteFavorite() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -95,8 +95,8 @@ func TestFavoriteActionService_FavoriteAction(t *testing.T) {
 			s := &FavoriteActionService{
 				ctx: tt.fields.ctx,
 			}
-			if err := s.FavoriteAction(tt.args.req); (err != nil) != tt.wantErr {
-				t.Errorf("FavoriteAction() error = %v, wantErr %v", err, tt.wantErr)
+			if err := s.CreateFavorite(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("CreateFavorite() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

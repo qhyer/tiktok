@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"tiktok/cmd/rpc"
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -16,6 +16,22 @@ import (
 type RelationActionParam struct {
 	ToUserId   int64 `query:"to_user_id" vd:"$>0"`
 	ActionType int32 `query:"action_type" vd:"$==1||$==2"`
+}
+
+type RelationListParam struct {
+	ToUserId int64 `query:"user_id" vd:"$>0"`
+}
+
+type RelationListResponse struct {
+	StatusCode int32        `json:"status_code"`
+	StatusMsg  string       `json:"status_msg"`
+	UserList   []*user.User `json:"user_list"`
+}
+
+type FriendListResponse struct {
+	StatusCode int32                  `json:"status_code"`
+	StatusMsg  string                 `json:"status_msg"`
+	UserList   []*relation.FriendUser `json:"user_list"`
 }
 
 // RelationAction 关注、取关操作
@@ -51,16 +67,6 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	SendResponse(c, errno.Success)
-}
-
-type RelationListParam struct {
-	ToUserId int64 `query:"user_id" vd:"$>0"`
-}
-
-type RelationListResponse struct {
-	StatusCode int32        `json:"status_code"`
-	StatusMsg  string       `json:"status_msg"`
-	UserList   []*user.User `json:"user_list"`
 }
 
 // FollowList 关注列表
@@ -144,7 +150,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, RelationListResponse{
+	c.JSON(http.StatusOK, FriendListResponse{
 		StatusCode: errno.Success.ErrCode,
 		StatusMsg:  errno.Success.ErrMsg,
 		UserList:   relationResponse.GetUserList(),

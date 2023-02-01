@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
-	"tiktok/pkg/rpc"
 )
 
 func TestFeedService_Feed(t *testing.T) {

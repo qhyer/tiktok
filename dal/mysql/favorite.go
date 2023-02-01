@@ -34,8 +34,8 @@ func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, er
 	return res, nil
 }
 
-// FavoriteAction user favorite video
-func FavoriteAction(ctx context.Context, favorite *Favorite) error {
+// CreateFavorite user favorite video
+func CreateFavorite(ctx context.Context, favorite *Favorite) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 用户新增喜欢
 		res := tx.Model(&Favorite{}).Clauses(clause.OnConflict{
@@ -66,8 +66,8 @@ func FavoriteAction(ctx context.Context, favorite *Favorite) error {
 	})
 }
 
-// CancelFavoriteAction user cancel favorite video
-func CancelFavoriteAction(ctx context.Context, favorite *Favorite) error {
+// DeleteFavorite user cancel favorite video
+func DeleteFavorite(ctx context.Context, favorite *Favorite) error {
 	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 用户取消喜欢
 		res := tx.Where("video_id = ? and user_id = ?", favorite.VideoId, favorite.UserId).Delete(&favorite)

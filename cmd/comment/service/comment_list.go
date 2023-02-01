@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/comment"
 	"tiktok/kitex_gen/user"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -25,7 +25,7 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	videoId := req.GetVideoId()
 	userId := req.GetUserId()
 
-	cs, err := mysql.CommentList(s.ctx, videoId)
+	cs, err := mysql.GetCommentListByVideoId(s.ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get comment list failed %v", err)
 		return nil, err
@@ -34,7 +34,7 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	comments := pack.Comments(cs)
 
 	if len(comments) == 0 {
-		return nil, nil
+		return comments, nil
 	}
 
 	// 查询用户信息

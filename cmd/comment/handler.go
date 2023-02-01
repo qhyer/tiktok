@@ -19,10 +19,10 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	var newComment *comment.Comment
 
 	switch req.GetActionType() {
-	case constants.DoCommentAction:
-		newComment, err = service.NewCommentActionService(ctx).CommentAction(req)
+	case constants.CreateCommentAction:
+		newComment, err = service.NewCommentActionService(ctx).CreateComment(req)
 	case constants.DeleteCommentAction:
-		err = service.NewCommentActionService(ctx).DeleteCommentAction(req)
+		err = service.NewCommentActionService(ctx).DeleteComment(req)
 	default:
 		err = errno.ParamErr
 	}

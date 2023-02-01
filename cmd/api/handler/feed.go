@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"tiktok/cmd/rpc"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

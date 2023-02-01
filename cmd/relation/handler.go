@@ -17,10 +17,10 @@ type RelationSrvImpl struct{}
 func (s *RelationSrvImpl) RelationAction(ctx context.Context, req *relation.DouyinRelationActionRequest) (resp *relation.DouyinRelationActionResponse, err error) {
 	resp = new(relation.DouyinRelationActionResponse)
 	switch req.GetActionType() {
-	case constants.DoFollowAction:
-		err = service.NewRelationActionService(ctx).FollowAction(req)
+	case constants.FollowAction:
+		err = service.NewRelationActionService(ctx).Follow(req)
 	case constants.UnfollowAction:
-		err = service.NewRelationActionService(ctx).UnFollowAction(req)
+		err = service.NewRelationActionService(ctx).Unfollow(req)
 	default:
 		err = errno.ParamErr
 	}

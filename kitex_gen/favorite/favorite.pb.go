@@ -499,10 +499,10 @@ var file_idl_favorite_proto_goTypes = []interface{}{
 }
 var file_idl_favorite_proto_depIdxs = []int32{
 	7, // 0: favorite.douyin_favorite_list_response.video_list:type_name -> feed.Video
-	0, // 1: favorite.FavoriteSrv.FavoriteAction:input_type -> favorite.douyin_favorite_action_request
+	0, // 1: favorite.FavoriteSrv.CreateFavorite:input_type -> favorite.douyin_favorite_action_request
 	2, // 2: favorite.FavoriteSrv.FavoriteList:input_type -> favorite.douyin_favorite_list_request
 	4, // 3: favorite.FavoriteSrv.GetUserFavoriteVideoIds:input_type -> favorite.douyin_get_user_favorite_video_ids_request
-	1, // 4: favorite.FavoriteSrv.FavoriteAction:output_type -> favorite.douyin_favorite_action_response
+	1, // 4: favorite.FavoriteSrv.CreateFavorite:output_type -> favorite.douyin_favorite_action_response
 	3, // 5: favorite.FavoriteSrv.FavoriteList:output_type -> favorite.douyin_favorite_list_response
 	5, // 6: favorite.FavoriteSrv.GetUserFavoriteVideoIds:output_type -> favorite.douyin_get_user_favorite_video_ids_response
 	4, // [4:7] is the sub-list for method output_type

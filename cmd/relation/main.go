@@ -3,12 +3,12 @@ package main
 import (
 	"net"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal"
 	relation "tiktok/kitex_gen/relation/relationsrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
 	"tiktok/pkg/minio"
-	"tiktok/pkg/rpc"
 	tracer2 "tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -22,6 +22,7 @@ func Init() {
 	tracer2.InitJaeger(constants.RelationServiceName)
 	dal.Init()
 	rpc.InitFeedRpc()
+	rpc.InitMessageRpc()
 	minio.Init()
 }
 

@@ -22,7 +22,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "FavoriteSrv"
 	handlerType := (*favorite.FavoriteSrv)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"FavoriteAction":          kitex.NewMethodInfo(favoriteActionHandler, newFavoriteActionArgs, newFavoriteActionResult, false),
+		"CreateFavorite":          kitex.NewMethodInfo(favoriteActionHandler, newFavoriteActionArgs, newFavoriteActionResult, false),
 		"FavoriteList":            kitex.NewMethodInfo(favoriteListHandler, newFavoriteListArgs, newFavoriteListResult, false),
 		"GetUserFavoriteVideoIds": kitex.NewMethodInfo(getUserFavoriteVideoIdsHandler, newGetUserFavoriteVideoIdsArgs, newGetUserFavoriteVideoIdsResult, false),
 	}
@@ -489,7 +489,7 @@ func (p *kClient) FavoriteAction(ctx context.Context, Req *favorite.DouyinFavori
 	var _args FavoriteActionArgs
 	_args.Req = Req
 	var _result FavoriteActionResult
-	if err = p.c.Call(ctx, "FavoriteAction", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "CreateFavorite", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

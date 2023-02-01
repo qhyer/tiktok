@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
-	"tiktok/pkg/rpc"
 )
 
 func TestFavoriteListService_FavoriteList(t *testing.T) {

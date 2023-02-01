@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
-	"tiktok/pkg/rpc"
 )
 
 func TestGetVideoService_GetVideosByVideoIdsAndCurrUserId(t *testing.T) {

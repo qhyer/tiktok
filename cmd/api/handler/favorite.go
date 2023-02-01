@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"tiktok/cmd/rpc"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/pkg/errno"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -16,6 +16,16 @@ import (
 type FavoriteActionParam struct {
 	VideoId    int64 `query:"video_id" vd:"$>0"`
 	ActionType int32 `query:"action_type" vd:"$==1||$==2"`
+}
+
+type FavoriteListParam struct {
+	userId int64 `query:"user_id" vd:"$>0"`
+}
+
+type FavoriteListResponse struct {
+	StatusCode int32         `json:"status_code"`
+	StatusMsg  string        `json:"status_msg"`
+	VideoList  []*feed.Video `json:"video_list"`
 }
 
 // FavoriteAction 关注、取关
@@ -43,16 +53,6 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	SendResponse(c, errno.Success)
-}
-
-type FavoriteListParam struct {
-	userId int64 `query:"user_id" vd:"$>0"`
-}
-
-type FavoriteListResponse struct {
-	StatusCode int32         `json:"status_code"`
-	StatusMsg  string        `json:"status_msg"`
-	VideoList  []*feed.Video `json:"video_list"`
 }
 
 // FavoriteList 获取个人点赞列表

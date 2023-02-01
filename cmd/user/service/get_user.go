@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )

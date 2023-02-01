@@ -2,12 +2,12 @@ syntax = "proto3";
 package message;
 option go_package = "message";
 
-message douyin_message_chat_request {
+message douyin_message_list_request {
   int64 user_id = 1; // 用户id
   int64 to_user_id = 2; // 对方用户id
 }
 
-message douyin_message_chat_response {
+message douyin_message_list_response {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   optional string status_msg = 2; // 返回状态描述
   repeated Message message_list = 3; // 消息列表
@@ -35,5 +35,5 @@ message Message {
 
 service MessageSrv {
   rpc MessageAction(douyin_message_action_request) returns (douyin_message_action_response) {}
-  rpc ChatList(douyin_message_chat_request) returns (douyin_message_chat_response) {}
+  rpc MessageList(douyin_message_list_request) returns (douyin_message_list_response) {}
 }

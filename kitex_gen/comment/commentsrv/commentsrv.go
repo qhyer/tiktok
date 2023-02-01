@@ -22,7 +22,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "CommentSrv"
 	handlerType := (*comment.CommentSrv)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"CommentAction": kitex.NewMethodInfo(commentActionHandler, newCommentActionArgs, newCommentActionResult, false),
+		"CreateComment": kitex.NewMethodInfo(commentActionHandler, newCommentActionArgs, newCommentActionResult, false),
 		"CommentList":   kitex.NewMethodInfo(commentListHandler, newCommentListArgs, newCommentListResult, false),
 	}
 	extra := map[string]interface{}{
@@ -343,7 +343,7 @@ func (p *kClient) CommentAction(ctx context.Context, Req *comment.DouyinCommentA
 	var _args CommentActionArgs
 	_args.Req = Req
 	var _result CommentActionResult
-	if err = p.c.Call(ctx, "CommentAction", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "CreateComment", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

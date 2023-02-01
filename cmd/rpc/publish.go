@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"tiktok/kitex_gen/user"
-	"tiktok/kitex_gen/user/usersrv"
+	"tiktok/kitex_gen/publish"
+	"tiktok/kitex_gen/publish/publishsrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/middleware"
@@ -16,20 +16,20 @@ import (
 	trace "github.com/kitex-contrib/tracer-opentracing"
 )
 
-var userClient usersrv.Client
+var publishClient publishsrv.Client
 
-func InitUserRpc() {
+func InitPublishRpc() {
 	r, err := etcd.NewEtcdResolver([]string{constants.EtcdAddress})
 	if err != nil {
 		panic(err)
 	}
 
-	c, err := usersrv.NewClient(
-		constants.UserServiceName,
+	c, err := publishsrv.NewClient(
+		constants.PublishServiceName,
 		client.WithMiddleware(middleware.CommonMiddleware),
 		client.WithInstanceMW(middleware.ClientMiddleware),
-		//client.WithMuxConnection(1),                       // mux
-		client.WithRPCTimeout(3*time.Second),              // rpc timeout
+		client.WithMuxConnection(100),                     // mux
+		client.WithRPCTimeout(30*time.Second),             // rpc timeout
 		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
 		client.WithSuite(trace.NewDefaultClientSuite()),   // tracer
@@ -38,33 +38,21 @@ func InitUserRpc() {
 	if err != nil {
 		panic(err)
 	}
-	userClient = c
+	publishClient = c
 }
 
-func Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (*user.DouyinUserRegisterResponse, error) {
-	resp, err := userClient.Register(ctx, req)
+func PublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest) (*publish.DouyinPublishActionResponse, error) {
+	resp, err := publishClient.PublishAction(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode != 0 {
 		return nil, errno.NewErrNo(resp.StatusCode, *resp.StatusMsg)
 	}
-	return resp, nil
+	return resp, err
 }
-
-func Login(ctx context.Context, req *user.DouyinUserLoginRequest) (*user.DouyinUserLoginResponse, error) {
-	resp, err := userClient.Login(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.StatusCode, *resp.StatusMsg)
-	}
-	return resp, nil
-}
-
-func UserInfo(ctx context.Context, req *user.DouyinUserInfoRequest) (*user.DouyinUserInfoResponse, error) {
-	resp, err := userClient.GetUserInfoByUserIds(ctx, req)
+func PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (*publish.DouyinPublishListResponse, error) {
+	resp, err := publishClient.PublishList(ctx, req)
 	if err != nil {
 		return nil, err
 	}

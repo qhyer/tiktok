@@ -450,9 +450,9 @@ var file_idl_comment_proto_depIdxs = []int32{
 	4, // 0: comment.douyin_comment_action_response.comment:type_name -> comment.Comment
 	4, // 1: comment.douyin_comment_list_response.comment_list:type_name -> comment.Comment
 	5, // 2: comment.Comment.user:type_name -> user.User
-	0, // 3: comment.CommentSrv.CommentAction:input_type -> comment.douyin_comment_action_request
+	0, // 3: comment.CommentSrv.CreateComment:input_type -> comment.douyin_comment_action_request
 	2, // 4: comment.CommentSrv.CommentList:input_type -> comment.douyin_comment_list_request
-	1, // 5: comment.CommentSrv.CommentAction:output_type -> comment.douyin_comment_action_response
+	1, // 5: comment.CommentSrv.CreateComment:output_type -> comment.douyin_comment_action_response
 	3, // 6: comment.CommentSrv.CommentList:output_type -> comment.douyin_comment_list_response
 	5, // [5:7] is the sub-list for method output_type
 	3, // [3:5] is the sub-list for method input_type

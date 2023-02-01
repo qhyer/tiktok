@@ -1,6 +1,8 @@
 package initialize
 
-import "tiktok/pkg/rpc"
+import (
+	"tiktok/cmd/rpc"
+)
 
 func Rpc() {
 	rpc.InitUserRpc()
@@ -9,4 +11,5 @@ func Rpc() {
 	rpc.InitFavoriteRpc()
 	rpc.InitCommentRpc()
 	rpc.InitRelationRpc()
+	rpc.InitMessageRpc()
 }

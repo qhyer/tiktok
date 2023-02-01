@@ -40,7 +40,7 @@ func TestCommentListService_CommentList(t *testing.T) {
 			}
 			_, err := s.CommentList(tt.args.req)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CommentList() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetCommentListByVideoId() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 		})

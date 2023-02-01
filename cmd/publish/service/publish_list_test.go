@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
-	"tiktok/pkg/rpc"
 )
 
 func TestPublishListService_PublishList(t *testing.T) {

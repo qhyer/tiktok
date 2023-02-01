@@ -20,8 +20,8 @@ func NewCommentActionService(ctx context.Context) *CommentActionService {
 	return &CommentActionService{ctx: ctx}
 }
 
-// CommentAction user comment video action
-func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionRequest) (*comment.Comment, error) {
+// CreateComment user comment video action
+func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionRequest) (*comment.Comment, error) {
 	content := req.GetCommentText()
 	userId := req.GetUserId()
 	videoId := req.GetVideoId()
@@ -30,7 +30,7 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 	content = censor.TextCensor.GetFilter().Replace(content, '*')
 
 	// 插入数据
-	c, err := mysql.CommentAction(s.ctx, &mysql.Comment{
+	c, err := mysql.CreateComment(s.ctx, &mysql.Comment{
 		UserId:  userId,
 		VideoId: videoId,
 		Content: content,
@@ -44,12 +44,12 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 	return com, nil
 }
 
-// DeleteCommentAction delete user comment action
-func (s *CommentActionService) DeleteCommentAction(req *comment.DouyinCommentActionRequest) error {
+// DeleteComment delete user comment action
+func (s *CommentActionService) DeleteComment(req *comment.DouyinCommentActionRequest) error {
 	userId := req.GetUserId()
 	commentId := req.GetCommentId()
 
-	err := mysql.DeleteCommentAction(s.ctx, &mysql.Comment{
+	err := mysql.DeleteComment(s.ctx, &mysql.Comment{
 		UserId: userId,
 		Id:     commentId,
 	})

@@ -18,12 +18,12 @@ func NewFavoriteActionService(ctx context.Context) *FavoriteActionService {
 	return &FavoriteActionService{ctx: ctx}
 }
 
-// FavoriteAction user do favorite video action
-func (s *FavoriteActionService) FavoriteAction(req *favorite.DouyinFavoriteActionRequest) error {
+// CreateFavorite user do favorite video action
+func (s *FavoriteActionService) CreateFavorite(req *favorite.DouyinFavoriteActionRequest) error {
 	userId := req.GetUserId()
 	videoId := req.GetVideoId()
 
-	err := mysql.FavoriteAction(s.ctx, &mysql.Favorite{
+	err := mysql.CreateFavorite(s.ctx, &mysql.Favorite{
 		UserId:  userId,
 		VideoId: videoId,
 	})
@@ -35,12 +35,12 @@ func (s *FavoriteActionService) FavoriteAction(req *favorite.DouyinFavoriteActio
 	return nil
 }
 
-// CancelFavoriteAction cancel favorite video action
-func (s *FavoriteActionService) CancelFavoriteAction(req *favorite.DouyinFavoriteActionRequest) error {
+// CancelFavorite cancel favorite video action
+func (s *FavoriteActionService) CancelFavorite(req *favorite.DouyinFavoriteActionRequest) error {
 	userId := req.GetUserId()
 	videoId := req.GetVideoId()
 
-	err := mysql.CancelFavoriteAction(s.ctx, &mysql.Favorite{
+	err := mysql.DeleteFavorite(s.ctx, &mysql.Favorite{
 		UserId:  userId,
 		VideoId: videoId,
 	})

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	rpc2 "tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/favorite"
@@ -10,7 +11,6 @@ import (
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/minio"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -36,9 +36,8 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	}
 
 	videos, nextTime := pack.Videos(vs)
-
 	if len(videos) == 0 {
-		return nil, 0, nil
+		return videos, 0, nil
 	}
 
 	// 对链接签名
@@ -57,7 +56,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		userIds = append(userIds, v.Author.Id)
 	}
 
-	users, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
+	users, err := rpc2.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
 		UserId:    userId,
 		ToUserIds: userIds,
 	})
@@ -77,7 +76,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	}
 
 	// 查询用户点赞视频
-	favoriteResp, err := rpc.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
+	favoriteResp, err := rpc2.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
 		UserId: userId,
 	})
 	if err != nil {

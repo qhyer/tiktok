@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"tiktok/cmd/rpc"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/jwt"
-	"tiktok/pkg/rpc"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -24,6 +24,28 @@ type RegisterResponse struct {
 	StatusMsg  string `json:"status_msg"`
 	UserId     int64  `json:"user_id"`
 	Token      string `json:"token"`
+}
+
+type LoginParam struct {
+	Username string `query:"username" vd:"len($)>=1&&len($)<=32"`
+	Password string `query:"password" vd:"len($)>=6&&len($)<=32"`
+}
+
+type LoginResponse struct {
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	UserId     int64  `json:"user_id"`
+	Token      string `json:"token"`
+}
+
+type GetUserInfoParam struct {
+	UserId int64 `query:"user_id" vd:"$>0"`
+}
+
+type GetUserInfoResponse struct {
+	StatusCode int32      `json:"status_code"`
+	StatusMsg  string     `json:"status_msg"`
+	User       *user.User `json:"user"`
 }
 
 // Register 用户注册
@@ -63,18 +85,6 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-type LoginParam struct {
-	Username string `query:"username" vd:"len($)>=1&&len($)<=32"`
-	Password string `query:"password" vd:"len($)>=6&&len($)<=32"`
-}
-
-type LoginResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-	UserId     int64  `json:"user_id"`
-	Token      string `json:"token"`
-}
-
 // Login 用户登录
 func Login(ctx context.Context, c *app.RequestContext) {
 	var req LoginParam
@@ -111,16 +121,6 @@ func Login(ctx context.Context, c *app.RequestContext) {
 		UserId:     loginResponse.GetUserId(),
 		Token:      token,
 	})
-}
-
-type GetUserInfoParam struct {
-	UserId int64 `query:"user_id" vd:"$>0"`
-}
-
-type GetUserInfoResponse struct {
-	StatusCode int32      `json:"status_code"`
-	StatusMsg  string     `json:"status_msg"`
-	User       *user.User `json:"user"`
 }
 
 // GetUserInfo 获取用户信息

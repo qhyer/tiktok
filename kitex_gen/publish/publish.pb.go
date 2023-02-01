@@ -332,9 +332,9 @@ var file_idl_publish_proto_goTypes = []interface{}{
 }
 var file_idl_publish_proto_depIdxs = []int32{
 	4, // 0: publish.douyin_publish_list_response.video_list:type_name -> feed.Video
-	0, // 1: publish.PublishSrv.PublishAction:input_type -> publish.douyin_publish_action_request
+	0, // 1: publish.PublishSrv.PublishVideo:input_type -> publish.douyin_publish_action_request
 	2, // 2: publish.PublishSrv.PublishList:input_type -> publish.douyin_publish_list_request
-	1, // 3: publish.PublishSrv.PublishAction:output_type -> publish.douyin_publish_action_response
+	1, // 3: publish.PublishSrv.PublishVideo:output_type -> publish.douyin_publish_action_response
 	3, // 4: publish.PublishSrv.PublishList:output_type -> publish.douyin_publish_list_response
 	3, // [3:5] is the sub-list for method output_type
 	1, // [1:3] is the sub-list for method input_type

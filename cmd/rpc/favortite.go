@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"tiktok/kitex_gen/publish"
-	"tiktok/kitex_gen/publish/publishsrv"
+	"tiktok/kitex_gen/favorite"
+	"tiktok/kitex_gen/favorite/favoritesrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/middleware"
@@ -16,20 +16,20 @@ import (
 	trace "github.com/kitex-contrib/tracer-opentracing"
 )
 
-var publishClient publishsrv.Client
+var favoriteClient favoritesrv.Client
 
-func InitPublishRpc() {
+func InitFavoriteRpc() {
 	r, err := etcd.NewEtcdResolver([]string{constants.EtcdAddress})
 	if err != nil {
 		panic(err)
 	}
 
-	c, err := publishsrv.NewClient(
-		constants.PublishServiceName,
+	c, err := favoritesrv.NewClient(
+		constants.FavoriteServiceName,
 		client.WithMiddleware(middleware.CommonMiddleware),
 		client.WithInstanceMW(middleware.ClientMiddleware),
-		//client.WithMuxConnection(1),                       // mux
-		client.WithRPCTimeout(30*time.Second),             // rpc timeout
+		client.WithMuxConnection(100),                     // mux
+		client.WithRPCTimeout(10*time.Second),             // rpc timeout
 		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
 		client.WithSuite(trace.NewDefaultClientSuite()),   // tracer
@@ -38,11 +38,11 @@ func InitPublishRpc() {
 	if err != nil {
 		panic(err)
 	}
-	publishClient = c
+	favoriteClient = c
 }
 
-func PublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest) (*publish.DouyinPublishActionResponse, error) {
-	resp, err := publishClient.PublishAction(ctx, req)
+func FavoriteAction(ctx context.Context, req *favorite.DouyinFavoriteActionRequest) (*favorite.DouyinFavoriteActionResponse, error) {
+	resp, err := favoriteClient.FavoriteAction(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +51,22 @@ func PublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest)
 	}
 	return resp, err
 }
-func PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (*publish.DouyinPublishListResponse, error) {
-	resp, err := publishClient.PublishList(ctx, req)
+
+func FavoriteList(ctx context.Context, req *favorite.DouyinFavoriteListRequest) (*favorite.DouyinFavoriteListResponse, error) {
+	resp, err := favoriteClient.FavoriteList(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode != 0 {
 		return nil, errno.NewErrNo(resp.StatusCode, *resp.StatusMsg)
+	}
+	return resp, err
+}
+
+func GetUserFavoriteVideoIds(ctx context.Context, req *favorite.DouyinGetUserFavoriteVideoIdsRequest) (*favorite.DouyinGetUserFavoriteVideoIdsResponse, error) {
+	resp, err := favoriteClient.GetUserFavoriteVideoIds(ctx, req)
+	if err != nil {
+		return nil, err
 	}
 	return resp, err
 }
