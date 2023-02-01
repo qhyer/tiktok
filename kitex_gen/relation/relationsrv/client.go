@@ -15,6 +15,7 @@ type Client interface {
 	RelationFollowList(ctx context.Context, Req *relation.DouyinRelationFollowListRequest, callOptions ...callopt.Option) (r *relation.DouyinRelationFollowListResponse, err error)
 	RelationFollowerList(ctx context.Context, Req *relation.DouyinRelationFollowerListRequest, callOptions ...callopt.Option) (r *relation.DouyinRelationFollowerListResponse, err error)
 	RelationFriendList(ctx context.Context, Req *relation.DouyinRelationFriendListRequest, callOptions ...callopt.Option) (r *relation.DouyinRelationFriendListResponse, err error)
+	RelationIsFriend(ctx context.Context, Req *relation.DouyinRelationIsFriendRequest, callOptions ...callopt.Option) (r *relation.DouyinRelationIsFriendResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -64,4 +65,9 @@ func (p *kRelationSrvClient) RelationFollowerList(ctx context.Context, Req *rela
 func (p *kRelationSrvClient) RelationFriendList(ctx context.Context, Req *relation.DouyinRelationFriendListRequest, callOptions ...callopt.Option) (r *relation.DouyinRelationFriendListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.RelationFriendList(ctx, Req)
+}
+
+func (p *kRelationSrvClient) RelationIsFriend(ctx context.Context, Req *relation.DouyinRelationIsFriendRequest, callOptions ...callopt.Option) (r *relation.DouyinRelationIsFriendResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.RelationIsFriend(ctx, Req)
 }

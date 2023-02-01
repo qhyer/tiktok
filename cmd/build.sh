@@ -25,3 +25,6 @@ cd ..
 cd ./user
 sh build.sh
 cd ..
+
+cd ./message
+sh build.sh

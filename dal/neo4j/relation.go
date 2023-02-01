@@ -109,6 +109,28 @@ func FollowerList(ctx context.Context, userId int64) (users []*user.User, err er
 	return users, nil
 }
 
+// IsFriend query is friend relation
+func IsFriend(ctx context.Context, uid1 int64, uid2 int64) (isFriend bool, err error) {
+	session := driver.NewSession(ctx, neo4j.SessionConfig{
+		AccessMode: neo4j.AccessModeWrite,
+	})
+	defer func() {
+		err = session.Close(ctx)
+	}()
+	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		res, err := queryFriendRelation(ctx, tx, uid1, uid2)
+		if err != nil {
+			return false, err
+		}
+		return res, nil
+	})
+	if err != nil {
+		return false, err
+	}
+	isFriend = res.(bool)
+	return isFriend, nil
+}
+
 func updateFollowNum(ctx context.Context, tx neo4j.ManagedTransaction, userId int64, addNum int64) (interface{}, error) {
 	query := "MATCH (a:User {id: $userId}) " +
 		"SET a.follow_count = a.follow_count + $addNum RETURN a;"
@@ -295,4 +317,27 @@ func queryUserFollower(ctx context.Context, tx neo4j.ManagedTransaction, userId 
 		})
 	}
 	return users, nil
+}
+
+func queryFriendRelation(ctx context.Context, tx neo4j.ManagedTransaction, uid1 int64, uid2 int64) (bool, error) {
+	query := "MATCH (a:User)-[r:Follow]->(b:User)-[:Follow]->(a:User)" +
+		"WHERE a.id = $uid1 AND b.id = $uid2 " +
+		"RETURN r;"
+	parameters := map[string]interface{}{
+		"uid1": uid1,
+		"uid2": uid2,
+	}
+	res, err := tx.Run(ctx, query, parameters)
+	if err != nil {
+		return false, err
+	}
+	record, err := res.Single(ctx)
+	if err != nil {
+		return false, err
+	}
+	_, found := record.Get("r")
+	if !found {
+		return false, errno.DBOperationFailedErr
+	}
+	return true, err
 }

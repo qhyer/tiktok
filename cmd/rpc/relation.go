@@ -85,3 +85,11 @@ func FriendList(ctx context.Context, req *relation.DouyinRelationFriendListReque
 	}
 	return resp, err
 }
+
+func IsFriendRelation(ctx context.Context, req *relation.DouyinRelationIsFriendRequest) (*relation.DouyinRelationIsFriendResponse, error) {
+	resp, err := relationClient.RelationIsFriend(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}

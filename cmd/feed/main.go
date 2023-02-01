@@ -3,13 +3,13 @@ package main
 import (
 	"net"
 
-	rpc2 "tiktok/cmd/rpc"
+	"tiktok/cmd/rpc"
 	"tiktok/dal"
 	feed "tiktok/kitex_gen/feed/feedsrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
 	"tiktok/pkg/minio"
-	tracer2 "tiktok/pkg/tracer"
+	"tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -19,10 +19,10 @@ import (
 )
 
 func Init() {
-	tracer2.InitJaeger(constants.FeedServiceName)
+	tracer.InitJaeger(constants.FeedServiceName)
 	dal.Init()
-	rpc2.InitUserRpc()
-	rpc2.InitFavoriteRpc()
+	rpc.InitUserRpc()
+	rpc.InitFavoriteRpc()
 	minio.Init()
 }
 

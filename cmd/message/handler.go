@@ -6,6 +6,7 @@ import (
 	"tiktok/cmd/message/service"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/message"
+	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 )
 
@@ -16,7 +17,12 @@ type MessageSrvImpl struct{}
 func (s *MessageSrvImpl) MessageAction(ctx context.Context, req *message.DouyinMessageActionRequest) (resp *message.DouyinMessageActionResponse, err error) {
 	resp = new(message.DouyinMessageActionResponse)
 
-	err = service.NewMessageActionService(ctx).SendMessage(req)
+	switch req.GetActionType() {
+	case constants.SendMessageAction:
+		err = service.NewMessageActionService(ctx).SendMessage(req)
+	default:
+		err = errno.ParamErr
+	}
 	if err != nil {
 		resp = pack.BuildMessageActionResp(err)
 		return resp, err

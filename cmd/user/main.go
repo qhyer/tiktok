@@ -8,7 +8,7 @@ import (
 	user "tiktok/kitex_gen/user/usersrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
-	tracer2 "tiktok/pkg/tracer"
+	"tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -18,7 +18,7 @@ import (
 )
 
 func Init() {
-	tracer2.InitJaeger(constants.UserServiceName)
+	tracer.InitJaeger(constants.UserServiceName)
 	dal.Init()
 	rpc.InitRelationRpc()
 }

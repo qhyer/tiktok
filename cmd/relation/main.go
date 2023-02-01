@@ -9,7 +9,7 @@ import (
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
 	"tiktok/pkg/minio"
-	tracer2 "tiktok/pkg/tracer"
+	"tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -19,7 +19,7 @@ import (
 )
 
 func Init() {
-	tracer2.InitJaeger(constants.RelationServiceName)
+	tracer.InitJaeger(constants.RelationServiceName)
 	dal.Init()
 	rpc.InitFeedRpc()
 	rpc.InitMessageRpc()

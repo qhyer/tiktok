@@ -22,9 +22,10 @@ func NewMessageListService(ctx context.Context) *MessageListService {
 func (s *MessageListService) MessageList(req *message.DouyinMessageListRequest) ([]*message.Message, error) {
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
+	limit := int(req.GetLimit())
 
 	// 获取聊天消息记录
-	msgs, err := mysql.MessageList(s.ctx, userId, toUserId)
+	msgs, err := mysql.MessageList(s.ctx, userId, toUserId, limit)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "db get message list failed %v", err)
 		return nil, err

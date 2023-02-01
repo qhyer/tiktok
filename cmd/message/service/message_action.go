@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/message"
+	"tiktok/kitex_gen/relation"
 	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -25,8 +27,16 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 	toUserId := req.GetToUserId()
 	content := req.GetContent()
 
-	// TODO 查询好友关系
-	isFriend := false
+	// 获取两个用户是不是朋友关系
+	relationResp, err := rpc.IsFriendRelation(s.ctx, &relation.DouyinRelationIsFriendRequest{
+		UserId:   userId,
+		ToUserId: toUserId,
+	})
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "rpc get friend relation failed %v", err)
+		return err
+	}
+	isFriend := relationResp.GetIsFriend()
 
 	if isFriend {
 		err := mysql.CreateMessage(s.ctx, []*mysql.Message{{

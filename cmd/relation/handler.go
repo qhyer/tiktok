@@ -76,3 +76,17 @@ func (s *RelationSrvImpl) RelationFriendList(ctx context.Context, req *relation.
 	resp.UserList = users
 	return resp, nil
 }
+
+// RelationIsFriend implements the RelationSrvImpl interface.
+func (s *RelationSrvImpl) RelationIsFriend(ctx context.Context, req *relation.DouyinRelationIsFriendRequest) (resp *relation.DouyinRelationIsFriendResponse, err error) {
+	resp = new(relation.DouyinRelationIsFriendResponse)
+
+	isFriend, err := service.NewQueryRelationService(ctx).IsFriend(req)
+	if err != nil {
+		resp.IsFriend = false
+		return resp, err
+	}
+
+	resp.IsFriend = isFriend
+	return resp, err
+}

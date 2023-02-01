@@ -8,7 +8,7 @@ import (
 	favorite "tiktok/kitex_gen/favorite/favoritesrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
-	tracer2 "tiktok/pkg/tracer"
+	"tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -18,7 +18,7 @@ import (
 )
 
 func Init() {
-	tracer2.InitJaeger(constants.FavoriteServiceName)
+	tracer.InitJaeger(constants.FavoriteServiceName)
 	dal.Init()
 	rpc.InitFeedRpc()
 }
