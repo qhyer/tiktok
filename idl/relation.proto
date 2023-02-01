@@ -47,15 +47,6 @@ message douyin_relation_friend_list_response {
   repeated FriendUser user_list = 3; // 用户列表
 }
 
-message douyin_relation_is_friend_request {
-  int64 user_id = 1; // 用户id
-  int64 to_user_id = 2; // 对方id
-}
-
-message douyin_relation_is_friend_response {
-  bool is_friend = 1; // 是否为好友
-}
-
 message FriendUser {
   int64 id = 1; // 用户id
   string name = 2; // 用户名称
@@ -72,5 +63,4 @@ service RelationSrv {
   rpc RelationFollowList(douyin_relation_follow_list_request) returns (douyin_relation_follow_list_response) {}
   rpc RelationFollowerList(douyin_relation_follower_list_request) returns (douyin_relation_follower_list_response) {}
   rpc RelationFriendList(douyin_relation_friend_list_request) returns (douyin_relation_friend_list_response) {}
-  rpc RelationIsFriend(douyin_relation_is_friend_request) returns (douyin_relation_is_friend_response) {}
 }

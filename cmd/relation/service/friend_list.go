@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"tiktok/dal/neo4j"
+	"tiktok/kitex_gen/message"
 	"tiktok/kitex_gen/relation"
 	"tiktok/pkg/constants"
 
@@ -22,48 +23,61 @@ func NewFriendListService(ctx context.Context) *FriendListService {
 func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListRequest) ([]*relation.FriendUser, error) {
 	userId := req.GetUserId()
 
-	// 获取当前用户的粉丝
-	followerList, err := neo4j.FollowerList(s.ctx, userId)
+	// 获取当前用户的朋友
+	friends, err := neo4j.FriendList(s.ctx, userId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "neo4j get follower list failed %v", err)
+		klog.CtxErrorf(s.ctx, "neo4j get friend list failed %v", err)
 		return nil, err
 	}
 
-	// 获取当前用户的关注
-	followList, err := neo4j.FollowList(s.ctx, userId)
+	if len(friends) == 0 {
+		return friends, nil
+	}
+
+	userIds := make([]int64, 0, len(friends))
+	for _, f := range friends {
+		if f == nil {
+			continue
+		}
+		userIds = append(userIds, f.Id)
+	}
+
+	// 获取最新消息
+	chats, err := neo4j.MQueryLastMessage(s.ctx, userId, userIds)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
+		klog.CtxErrorf(s.ctx, "neo4j query last message error %v", err)
 		return nil, err
 	}
-	userFollowMap := make(map[int64]bool, 0)
-	for _, u := range followList {
-		if u == nil {
-			continue
+	if chats != nil {
+		chatMap := make(map[int64]*message.Message, 0)
+		for _, c := range chats {
+			if c == nil {
+				continue
+			}
+			// 是发送者
+			if c.FromUserId == userId {
+				chatMap[c.ToUserId] = c
+			} else {
+				chatMap[c.FromUserId] = c
+			}
 		}
-		userFollowMap[u.Id] = true
+
+		// 添加最新消息
+		for i, u := range friends {
+			if u == nil {
+				continue
+			}
+			chat := chatMap[u.Id]
+			if chat == nil {
+				continue
+			}
+			friends[i].Message = &chat.Content
+			if chat.FromUserId == userId {
+				friends[i].MsgType = constants.Sender
+			} else {
+				friends[i].MsgType = constants.Receiver
+			}
+		}
 	}
-
-	friends := make([]*relation.FriendUser, 0)
-	// 交集就是朋友
-	for _, u := range followerList {
-		if u == nil {
-			continue
-		}
-		// 用户没有关注他
-		if !userFollowMap[u.Id] {
-			continue
-		}
-		friends = append(friends, &relation.FriendUser{
-			Id:            u.Id,
-			Name:          u.Name,
-			FollowCount:   u.FollowCount,
-			FollowerCount: u.FollowerCount,
-			IsFollow:      true,
-			Avatar:        constants.DefaultAvatarUrl, // 没有找到上传头像的地方 先返回一个固定头像
-		})
-	}
-
-	// 查询和朋友的最新消息
-
 	return friends, nil
 }

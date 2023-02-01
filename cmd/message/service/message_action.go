@@ -3,10 +3,9 @@ package service
 import (
 	"context"
 
-	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
+	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/message"
-	"tiktok/kitex_gen/relation"
 	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -27,18 +26,14 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 	toUserId := req.GetToUserId()
 	content := req.GetContent()
 
-	// 获取两个用户是不是朋友关系
-	relationResp, err := rpc.IsFriendRelation(s.ctx, &relation.DouyinRelationIsFriendRequest{
-		UserId:   userId,
-		ToUserId: toUserId,
-	})
+	// 关系中插入最后一条消息 这里会判断是否为好友关系
+	ok, err := neo4j.UpsertLastMessage(s.ctx, userId, toUserId, content)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "rpc get friend relation failed %v", err)
+		klog.CtxErrorf(s.ctx, "neo4j upsert last message failed %v", err)
 		return err
 	}
-	isFriend := relationResp.GetIsFriend()
 
-	if isFriend {
+	if ok {
 		err := mysql.CreateMessage(s.ctx, []*mysql.Message{{
 			UserId:   userId,
 			ToUserId: toUserId,

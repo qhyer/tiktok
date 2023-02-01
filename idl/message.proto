@@ -5,7 +5,6 @@ option go_package = "message";
 message douyin_message_list_request {
   int64 user_id = 1; // 用户id
   int64 to_user_id = 2; // 对方用户id
-  int32 limit = 3; // 限制返回数量 不限制时为-1
 }
 
 message douyin_message_list_response {

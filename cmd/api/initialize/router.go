@@ -79,7 +79,7 @@ func Router() {
 		// 发送消息
 		authRouter.POST("/message/action/", handler.MessageAction)
 		// 聊天记录
-		authRouter.POST("/message/chat/", handler.MessageList)
+		authRouter.GET("/message/chat/", handler.MessageList)
 	}
 
 	h.Spin()

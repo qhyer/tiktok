@@ -30,7 +30,6 @@ func TestMessageListService_MessageList(t *testing.T) {
 			args: args{&message.DouyinMessageListRequest{
 				UserId:   9,
 				ToUserId: 8,
-				Limit:    -1,
 			}},
 			wantErr: false,
 		},

@@ -26,8 +26,8 @@ func TestFollowActionService_FollowAction(t *testing.T) {
 			name:   "ok",
 			fields: fields{ctx: context.Background()},
 			args: args{&relation.DouyinRelationActionRequest{
-				UserId:     1,
-				ToUserId:   2,
+				UserId:     10,
+				ToUserId:   8,
 				ActionType: 1,
 			}},
 			wantErr: false,

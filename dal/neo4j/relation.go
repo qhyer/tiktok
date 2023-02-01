@@ -3,6 +3,7 @@ package neo4j
 import (
 	"context"
 
+	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
 
@@ -109,8 +110,8 @@ func FollowerList(ctx context.Context, userId int64) (users []*user.User, err er
 	return users, nil
 }
 
-// IsFriend query is friend relation
-func IsFriend(ctx context.Context, uid1 int64, uid2 int64) (isFriend bool, err error) {
+// FriendList get user friend lsit
+func FriendList(ctx context.Context, userId int64) (users []*relation.FriendUser, err error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{
 		AccessMode: neo4j.AccessModeWrite,
 	})
@@ -118,17 +119,17 @@ func IsFriend(ctx context.Context, uid1 int64, uid2 int64) (isFriend bool, err e
 		err = session.Close(ctx)
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		res, err := queryFriendRelation(ctx, tx, uid1, uid2)
+		users, err := queryUserFriend(ctx, tx, userId)
 		if err != nil {
-			return false, err
+			return nil, err
 		}
-		return res, nil
+		return users, nil
 	})
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	isFriend = res.(bool)
-	return isFriend, nil
+	users = res.([]*relation.FriendUser)
+	return users, nil
 }
 
 func updateFollowNum(ctx context.Context, tx neo4j.ManagedTransaction, userId int64, addNum int64) (interface{}, error) {
@@ -319,7 +320,60 @@ func queryUserFollower(ctx context.Context, tx neo4j.ManagedTransaction, userId 
 	return users, nil
 }
 
-func queryFriendRelation(ctx context.Context, tx neo4j.ManagedTransaction, uid1 int64, uid2 int64) (bool, error) {
+func queryUserFriend(ctx context.Context, tx neo4j.ManagedTransaction, userId int64) ([]*relation.FriendUser, error) {
+	result, err := tx.Run(ctx,
+		"MATCH (a:User)-[:Follow]->(b:User)-[:Follow]->(a:User) "+
+			"WHERE a.id = $userId "+
+			"RETURN b;",
+		map[string]interface{}{
+			"userId": userId,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	records, err := result.Collect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*relation.FriendUser, 0, len(records))
+	for _, r := range records {
+		// 获取好友
+		u, ok := r.Get("b")
+		if !ok {
+			continue
+		}
+		node := u.(neo4j.Node)
+		uid, err := neo4j.GetProperty[int64](node, "id")
+		if err != nil {
+			continue
+		}
+		username, err := neo4j.GetProperty[string](node, "username")
+		if err != nil {
+			continue
+		}
+		followCount, err := neo4j.GetProperty[int64](node, "follow_count")
+		if err != nil {
+			continue
+		}
+		followerCount, err := neo4j.GetProperty[int64](node, "follower_count")
+		if err != nil {
+			continue
+		}
+
+		users = append(users, &relation.FriendUser{
+			Id:            uid,
+			Name:          username,
+			FollowCount:   &followCount,
+			FollowerCount: &followerCount,
+			IsFollow:      true,
+		})
+	}
+
+	return users, nil
+}
+
+func isFriendRelation(ctx context.Context, tx neo4j.ManagedTransaction, uid1 int64, uid2 int64) (bool, error) {
 	query := "MATCH (a:User)-[r:Follow]->(b:User)-[:Follow]->(a:User)" +
 		"WHERE a.id = $uid1 AND b.id = $uid2 " +
 		"RETURN r;"

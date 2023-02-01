@@ -29,6 +29,9 @@ const (
 	FollowAction   = 1
 	UnfollowAction = 2
 
+	Receiver = 0
+	Sender   = 1
+
 	SendMessageAction = 1
 
 	MySQLDefaultDSN = "root:DFNFoTdxTfPY3B7X@tcp(119.91.157.116:3306)/tiktok?charset=utf8&parseTime=True&loc=Local"
