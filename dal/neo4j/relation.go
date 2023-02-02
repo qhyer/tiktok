@@ -150,7 +150,7 @@ func updateFollowNum(ctx context.Context, tx neo4j.ManagedTransaction, userId in
 	}
 	_, found := record.Get("a")
 	if !found {
-		return nil, errno.DBOperationFailedErr
+		return nil, errno.DatabaseOperationFailedErr
 	}
 	return res, err
 }
@@ -172,7 +172,7 @@ func updateFollowerNum(ctx context.Context, tx neo4j.ManagedTransaction, userId 
 	}
 	_, found := record.Get("a")
 	if !found {
-		return nil, errno.DBOperationFailedErr
+		return nil, errno.DatabaseOperationFailedErr
 	}
 	return res, err
 }
@@ -195,7 +195,7 @@ func addFollow(ctx context.Context, tx neo4j.ManagedTransaction, userId int64, t
 	}
 	_, found := record.Get("r")
 	if !found {
-		return nil, errno.DBOperationFailedErr
+		return nil, errno.DatabaseOperationFailedErr
 	}
 	return res, err
 }
@@ -218,7 +218,7 @@ func deleteFollow(ctx context.Context, tx neo4j.ManagedTransaction, userId int64
 	}
 	_, found := record.Get("r")
 	if !found {
-		return nil, errno.DBOperationFailedErr
+		return nil, errno.DatabaseOperationFailedErr
 	}
 	return res, err
 }
@@ -393,7 +393,7 @@ func isFriendRelation(ctx context.Context, tx neo4j.ManagedTransaction, uid1 int
 	}
 	_, found := record.Get("r")
 	if !found {
-		return false, errno.DBOperationFailedErr
+		return false, errno.DatabaseOperationFailedErr
 	}
 	return true, err
 }

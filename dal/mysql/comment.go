@@ -45,7 +45,7 @@ func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 
 		// 创建失败
 		if res.RowsAffected == 0 {
-			return errno.DBOperationFailedErr
+			return errno.CommentExistErr
 		}
 
 		// video 评论数+1
@@ -56,7 +56,7 @@ func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 
 		// 更新评论数失败
 		if res.RowsAffected != 1 {
-			return errno.DBOperationFailedErr
+			return errno.DatabaseOperationFailedErr
 		}
 
 		return nil
@@ -69,29 +69,29 @@ func DeleteComment(ctx context.Context, comment *Comment) error {
 		// 找到要删除的评论
 		delCom := tx.Where("id = ? and user_id = ?", comment.Id, comment.UserId).Take(&comment)
 		if delCom.Error != nil {
-			return delCom.Error
+			return errno.CommentNotExistErr
 		}
 
 		// 删除评论
 		res := tx.Where("id = ?", comment.Id).Delete(&comment)
 		if res.Error != nil {
-			return res.Error
+			return errno.DatabaseOperationFailedErr
 		}
 
 		// 删除失败
 		if res.RowsAffected != 1 {
-			return errno.DBOperationFailedErr
+			return errno.DatabaseOperationFailedErr
 		}
 
 		// video 评论数-1
 		res = tx.Model(&Video{}).Where("id = ?", comment.VideoId).Update("comment_count", gorm.Expr("comment_count - ?", 1))
 		if res.Error != nil {
-			return res.Error
+			return errno.DatabaseOperationFailedErr
 		}
 
 		// 更新评论数失败
 		if res.RowsAffected != 1 {
-			return errno.DBOperationFailedErr
+			return errno.DatabaseOperationFailedErr
 		}
 
 		return nil

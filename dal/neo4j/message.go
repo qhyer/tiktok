@@ -127,7 +127,7 @@ func upsertLastMessage(ctx context.Context, tx neo4j.ManagedTransaction, userId 
 	}
 	_, found := record.Get("m")
 	if !found {
-		return false, errno.DBOperationFailedErr
+		return false, errno.DatabaseOperationFailedErr
 	}
 	return true, err
 }

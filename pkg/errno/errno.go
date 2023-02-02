@@ -14,6 +14,10 @@ const (
 	AuthorizationFailedErrCode = 10005
 	OSSUploadFailedErrCode     = 10006
 	DBOperationFailedErrCode   = 10007
+	CommentExistErrCode        = 10008
+	CommentNotExistErrCode     = 10009
+	FavoriteExistErrCode       = 10010
+	FavoriteNotExistErrCode    = 10011
 )
 
 type ErrNo struct {
@@ -35,14 +39,18 @@ func (e ErrNo) WithMessage(msg string) ErrNo {
 }
 
 var (
-	Success                = NewErrNo(SuccessCode, "Success")
-	ServiceErr             = NewErrNo(ServiceErrCode, "Service is unable to start successfully")
-	ParamErr               = NewErrNo(ParamErrCode, "Wrong Parameter has been given")
-	UserAlreadyExistErr    = NewErrNo(UserAlreadyExistErrCode, "User already exists")
-	UserNotExistErr        = NewErrNo(UserNotExistErrCode, "User not exists")
-	AuthorizationFailedErr = NewErrNo(AuthorizationFailedErrCode, "Authorization failed")
-	OSSUploadFailedErr     = NewErrNo(OSSUploadFailedErrCode, "Upload file to oss failed")
-	DBOperationFailedErr   = NewErrNo(DBOperationFailedErrCode, "Database operation error")
+	Success                    = NewErrNo(SuccessCode, "Success")
+	ServiceErr                 = NewErrNo(ServiceErrCode, "Service is unable to start successfully")
+	ParamErr                   = NewErrNo(ParamErrCode, "Wrong Parameter has been given")
+	UserAlreadyExistErr        = NewErrNo(UserAlreadyExistErrCode, "User already exists")
+	UserNotExistErr            = NewErrNo(UserNotExistErrCode, "User not exists")
+	AuthorizationFailedErr     = NewErrNo(AuthorizationFailedErrCode, "Authorization failed")
+	OSSUploadFailedErr         = NewErrNo(OSSUploadFailedErrCode, "Upload file to oss failed")
+	DatabaseOperationFailedErr = NewErrNo(DBOperationFailedErrCode, "Database operation error")
+	CommentExistErr            = NewErrNo(CommentExistErrCode, "Comment already exists")
+	CommentNotExistErr         = NewErrNo(CommentNotExistErrCode, "Comment not exists")
+	FavoriteExistErr           = NewErrNo(FavoriteExistErrCode, "Favorite already exists")
+	FavoriteNotExistErr        = NewErrNo(FavoriteNotExistErrCode, "Favorite not exists")
 )
 
 // ConvertErr convert error to Errno

@@ -44,7 +44,7 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 			Content:  content,
 		}})
 		if err != nil {
-			return errno.DBOperationFailedErr
+			return errno.DatabaseOperationFailedErr
 		}
 		return nil
 	} else {

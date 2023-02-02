@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	rpc2 "tiktok/cmd/rpc"
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/favorite"
@@ -56,7 +56,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		userIds = append(userIds, v.Author.Id)
 	}
 
-	users, err := rpc2.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
+	users, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
 		UserId:    userId,
 		ToUserIds: userIds,
 	})
@@ -76,7 +76,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	}
 
 	// 查询用户点赞视频
-	favoriteResp, err := rpc2.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
+	favoriteResp, err := rpc.GetUserFavoriteVideoIds(s.ctx, &favorite.DouyinGetUserFavoriteVideoIdsRequest{
 		UserId: userId,
 	})
 	if err != nil {
