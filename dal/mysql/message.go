@@ -27,7 +27,7 @@ func (c *Message) TableName() string {
 // MessageList get list of video message
 func MessageList(ctx context.Context, uid1 int64, uid2 int64) ([]*Message, error) {
 	res := make([]*Message, 0)
-	if err := DB.WithContext(ctx).Where("user_id = ? and to_user_id = ?", uid1, uid2).Or("user_id = ? and to_user_id = ?", uid2, uid1).Order("created_at desc").Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Where("user_id = ? and to_user_id = ?", uid1, uid2).Or("user_id = ? and to_user_id = ?", uid2, uid1).Order("created_at asc").Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil

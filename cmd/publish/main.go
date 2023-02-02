@@ -6,6 +6,7 @@ import (
 	"tiktok/cmd/rpc"
 	"tiktok/dal"
 	publish "tiktok/kitex_gen/publish/publishsrv"
+	"tiktok/pkg/censor"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
 	"tiktok/pkg/minio"
@@ -23,6 +24,7 @@ func Init() {
 	dal.Init()
 	rpc.InitFeedRpc()
 	minio.Init()
+	censor.Init()
 }
 
 func main() {

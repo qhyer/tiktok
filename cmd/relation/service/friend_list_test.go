@@ -5,6 +5,7 @@ import (
 	"log"
 	"testing"
 
+	"tiktok/dal"
 	"tiktok/kitex_gen/relation"
 )
 
@@ -15,6 +16,7 @@ func TestFriendListService_FriendList(t *testing.T) {
 	type args struct {
 		req *relation.DouyinRelationFriendListRequest
 	}
+	dal.Init()
 	tests := []struct {
 		name    string
 		fields  fields
@@ -25,7 +27,7 @@ func TestFriendListService_FriendList(t *testing.T) {
 		{
 			name:    "ok",
 			fields:  fields{context.Background()},
-			args:    args{&relation.DouyinRelationFriendListRequest{UserId: 8}},
+			args:    args{&relation.DouyinRelationFriendListRequest{UserId: 11}},
 			wantErr: false,
 		},
 	}

@@ -6,6 +6,7 @@ import (
 	"tiktok/dal/mysql"
 	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/message"
+	"tiktok/pkg/censor"
 	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -25,6 +26,9 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 	content := req.GetContent()
+
+	// 过滤敏感词
+	content = censor.TextCensor.GetFilter().Replace(content, '*')
 
 	// 关系中插入最后一条消息 这里会判断是否为好友关系
 	ok, err := neo4j.UpsertLastMessage(s.ctx, userId, toUserId, content)

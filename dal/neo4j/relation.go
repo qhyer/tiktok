@@ -5,6 +5,7 @@ import (
 
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
+	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
@@ -367,6 +368,7 @@ func queryUserFriend(ctx context.Context, tx neo4j.ManagedTransaction, userId in
 			FollowCount:   &followCount,
 			FollowerCount: &followerCount,
 			IsFollow:      true,
+			Avatar:        constants.DefaultAvatarUrl, // 没上传头像的地方 返回默认头像
 		})
 	}
 

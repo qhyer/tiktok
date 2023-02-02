@@ -8,7 +8,6 @@ import (
 	relation "tiktok/kitex_gen/relation/relationsrv"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
-	"tiktok/pkg/minio"
 	"tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -22,8 +21,6 @@ func Init() {
 	tracer.InitJaeger(constants.RelationServiceName)
 	dal.Init()
 	rpc.InitFeedRpc()
-	rpc.InitMessageRpc()
-	minio.Init()
 }
 
 func main() {

@@ -13,6 +13,7 @@ import (
 
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/publish"
+	"tiktok/pkg/censor"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/errno"
 	"tiktok/pkg/minio"
@@ -36,6 +37,9 @@ func (s *PublishActionService) PublishVideo(req *publish.DouyinPublishActionRequ
 	videoData := req.GetData()
 	userId := req.GetUserId()
 	title := req.GetTitle()
+
+	// 替换标题中的敏感词
+	title = censor.TextCensor.GetFilter().Replace(title, '*')
 
 	// 生成文件名
 	ruid := uuid.NewV4()

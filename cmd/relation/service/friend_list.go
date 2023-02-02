@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/message"
@@ -49,6 +50,7 @@ func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListReq
 		return nil, err
 	}
 	if chats != nil {
+		log.Print(chats)
 		chatMap := make(map[int64]*message.Message, 0)
 		for _, c := range chats {
 			if c == nil {
