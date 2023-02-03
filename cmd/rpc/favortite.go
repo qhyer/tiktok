@@ -12,14 +12,32 @@ import (
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
-	etcd "github.com/kitex-contrib/registry-etcd"
+	"github.com/kitex-contrib/registry-nacos/resolver"
 	trace "github.com/kitex-contrib/tracer-opentracing"
+	nacos "github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
 var favoriteClient favoritesrv.Client
 
 func InitFavoriteRpc() {
-	r, err := etcd.NewEtcdResolver([]string{constants.EtcdAddress})
+	sc := []constant.ServerConfig{
+		*constant.NewServerConfig(constants.NacosAddress, constants.NacosPort),
+	}
+	cc := constant.ClientConfig{
+		NamespaceId:         "public",
+		TimeoutMs:           5000,
+		NotLoadCacheAtStart: true,
+		Username:            constants.NacosUsername,
+		Password:            constants.NacosPassword,
+	}
+	cli, err := nacos.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &cc,
+			ServerConfigs: sc,
+		},
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -28,12 +46,12 @@ func InitFavoriteRpc() {
 		constants.FavoriteServiceName,
 		client.WithMiddleware(middleware.CommonMiddleware),
 		client.WithInstanceMW(middleware.ClientMiddleware),
-		client.WithMuxConnection(100),                     // mux
-		client.WithRPCTimeout(10*time.Second),             // rpc timeout
-		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
-		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
-		client.WithSuite(trace.NewDefaultClientSuite()),   // tracer
-		client.WithResolver(r),                            // resolver
+		client.WithMuxConnection(100),                       // mux
+		client.WithRPCTimeout(10*time.Second),               // rpc timeout
+		client.WithConnectTimeout(50*time.Millisecond),      // conn timeout
+		client.WithFailureRetry(retry.NewFailurePolicy()),   // retry
+		client.WithSuite(trace.NewDefaultClientSuite()),     // tracer
+		client.WithResolver(resolver.NewNacosResolver(cli)), // resolver
 	)
 	if err != nil {
 		panic(err)

@@ -6,18 +6,19 @@ import (
 )
 
 const (
-	SuccessCode                = 0
-	ServiceErrCode             = 10001
-	ParamErrCode               = 10002
-	UserAlreadyExistErrCode    = 10003
-	UserNotExistErrCode        = 10004
-	AuthorizationFailedErrCode = 10005
-	OSSUploadFailedErrCode     = 10006
-	DBOperationFailedErrCode   = 10007
-	CommentExistErrCode        = 10008
-	CommentNotExistErrCode     = 10009
-	FavoriteExistErrCode       = 10010
-	FavoriteNotExistErrCode    = 10011
+	SuccessCode                 = 0
+	ServiceErrCode              = 10001
+	ParamErrCode                = 10002
+	UserAlreadyExistErrCode     = 10003
+	UserNotExistErrCode         = 10004
+	AuthorizationFailedErrCode  = 10005
+	OSSUploadFailedErrCode      = 10006
+	DBOperationFailedErrCode    = 10007
+	CommentExistErrCode         = 10008
+	CommentNotExistErrCode      = 10009
+	FavoriteExistErrCode        = 10010
+	FavoriteNotExistErrCode     = 10011
+	RedisOperationFailedErrCode = 10012
 )
 
 type ErrNo struct {

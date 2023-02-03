@@ -32,7 +32,7 @@ func TestMGetUserService_MGetUser(t *testing.T) {
 			args: args{
 				&user.DouyinUserInfoRequest{
 					UserId:    1,
-					ToUserIds: []int64{1, 2},
+					ToUserIds: []int64{11, 12},
 				},
 			},
 			wantErr: false,

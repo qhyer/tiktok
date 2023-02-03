@@ -15,8 +15,11 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	etcd "github.com/kitex-contrib/registry-etcd"
+	"github.com/kitex-contrib/registry-nacos/registry"
 	trace "github.com/kitex-contrib/tracer-opentracing"
+	nacos "github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
 func Init() {
@@ -28,7 +31,22 @@ func Init() {
 }
 
 func main() {
-	r, err := etcd.NewEtcdRegistry([]string{constants.EtcdAddress})
+	sc := []constant.ServerConfig{
+		*constant.NewServerConfig(constants.NacosAddress, constants.NacosPort),
+	}
+	cc := constant.ClientConfig{
+		NamespaceId:         "public",
+		TimeoutMs:           5000,
+		NotLoadCacheAtStart: true,
+		Username:            constants.NacosUsername,
+		Password:            constants.NacosPassword,
+	}
+	cli, err := nacos.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &cc,
+			ServerConfigs: sc,
+		},
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +64,7 @@ func main() {
 		server.WithMuxTransport(),                       // Multiplex
 		server.WithSuite(trace.NewDefaultServerSuite()), // tracer
 		//server.WithBoundHandler(bound.NewCpuLimitHandler()), // BoundHandler
-		server.WithRegistry(r), // registry
+		server.WithRegistry(registry.NewNacosRegistry(cli)), // registry
 	)
 	err = svr.Run()
 	if err != nil {
