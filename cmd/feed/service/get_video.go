@@ -6,6 +6,7 @@ import (
 	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
@@ -31,19 +32,53 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 		return nil, nil
 	}
 
-	vs, err := mysql.MGetVideosByVideoIds(s.ctx, videoIds)
-	if err != nil {
-		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
-		return nil, err
+	videoMap := make(map[int64]*feed.Video, 0)
+	videos := make([]*feed.Video, 0, len(videoIds))
+	// 缓存中查视频详情
+	vs, notInCacheVideoIds := redis.MGetVideoInfoByVideoId(s.ctx, videoIds)
+	redisVideos, _ := pack.Videos(vs)
+	for _, v := range redisVideos {
+		if v == nil {
+			continue
+		}
+		videoMap[v.Id] = v
 	}
 
-	videos, _ := pack.Videos(vs)
-	if len(videos) == 0 {
-		return videos, nil
+	// 缓存没找到 查库
+	if len(notInCacheVideoIds) > 0 {
+		vs, err := mysql.MGetVideosByVideoIds(s.ctx, videoIds)
+		if err != nil {
+			klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
+			return nil, err
+		}
+
+		// 把视频加入缓存
+		err = redis.MSetVideoInfo(s.ctx, vs)
+		if err != nil {
+			klog.CtxErrorf(s.ctx, "redis set video list failed %v", err)
+		}
+
+		// 把视频放入map中
+		vds, _ := pack.Videos(vs)
+		for _, v := range vds {
+			if v == nil {
+				continue
+			}
+			videoMap[v.Id] = v
+		}
+	}
+
+	// 合并视频
+	for _, i := range videoIds {
+		res := videoMap[i]
+		if res == nil {
+			continue
+		}
+		videos = append(videos, res)
 	}
 
 	// 给链接签名
-	videos, err = minio.SignFeed(s.ctx, videos)
+	videos, err := minio.SignFeed(s.ctx, videos)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "minio sign feed failed %v", err)
 		return nil, err
@@ -70,11 +105,12 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 	us := users.GetUser()
 	// 加入用户信息
 	for i := range videos {
-		if us[i] == nil {
+		res := us[i]
+		if res == nil {
 			klog.CtxWarnf(s.ctx, "video author is nil")
 			continue
 		}
-		videos[i].Author = us[i]
+		videos[i].Author = res
 	}
 
 	// 查询用户点赞视频

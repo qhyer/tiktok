@@ -11,14 +11,14 @@ import (
 
 type Video struct {
 	gorm.Model
-	Id            int64          `gorm:"column:id;primaryKey"`
-	AuthorUserId  int64          `gorm:"column:author_user_id;index:idx_author_user_id"`
-	PlayUrl       string         `gorm:"column:play_url"`
-	CoverUrl      string         `gorm:"column:cover_url"`
-	FavoriteCount int64          `gorm:"column:favorite_count;default:0"`
-	CommentCount  int64          `gorm:"column:comment_count;default:0"`
-	Title         string         `gorm:"column:title"`
-	CreatedAt     time.Time      `gorm:"column:created_at;index:idx_created_at"`
+	Id            int64          `gorm:"column:id;primaryKey" redis:"id"`
+	AuthorUserId  int64          `gorm:"column:author_user_id;index:idx_author_user_id" redis:"author_user_id"`
+	PlayUrl       string         `gorm:"column:play_url" redis:"play_url"`
+	CoverUrl      string         `gorm:"column:cover_url" redis:"cover_url"`
+	FavoriteCount int64          `gorm:"column:favorite_count;default:0" redis:"favorite_count"`
+	CommentCount  int64          `gorm:"column:comment_count;default:0" redis:"comment_count"`
+	Title         string         `gorm:"column:title" redis:"title"`
+	CreatedAt     time.Time      `gorm:"column:created_at;index:idx_created_at" redis:"created_at"`
 	UpdatedAt     time.Time      `gorm:"column:updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"column:deleted_at"`
 }

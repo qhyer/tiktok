@@ -48,9 +48,9 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 		}
 
 		// 查库结果加入缓存
-		err = redis.MAddUserInfo(s.ctx, us)
+		err = redis.MSetUserInfo(s.ctx, us)
 		if err != nil {
-			klog.CtxErrorf(s.ctx, "redis add userinfo failed %v", err)
+			klog.CtxErrorf(s.ctx, "redis set userinfo failed %v", err)
 		}
 
 		// 结果加入map

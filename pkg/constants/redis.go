@@ -11,12 +11,16 @@ const (
 // 缓存key
 
 const (
-	RedisUserKey = "USER:%d"
+	RedisUserKey        = "USER:%d"
+	RedisVideoKey       = "VIDEO:%d"
+	RedisFeedKey        = "FEED"
+	RedisCommentListKey = "COMMENT_LIST:%d"
 )
 
 // 超时时间
 
 const (
 	MaxRandExpireSecond = 300
-	UserinfoExpiry      = 10 * time.Minute
+	UserInfoExpiry      = 10 * time.Minute
+	VideoInfoExpiry     = 10 * time.Minute
 )

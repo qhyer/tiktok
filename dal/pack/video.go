@@ -27,22 +27,24 @@ func Video(video *mysql.Video) *feed.Video {
 
 // Videos pack list of video
 func Videos(vs []*mysql.Video) ([]*feed.Video, int64) {
-	var nextTime int64
 	videos := make([]*feed.Video, 0, len(vs))
 
 	if len(vs) == 0 {
 		return videos, 0
 	}
 
-	// 找到最后一个视频的创建时间
-	nextTime = vs[len(vs)-1].CreatedAt.UnixMilli()
+	earliestTime := vs[0].CreatedAt.UnixMilli()
 
 	// pack video
 	for _, v := range vs {
 		if vp := Video(v); vp != nil {
+			ts := v.CreatedAt.UnixMilli()
+			if ts < earliestTime {
+				earliestTime = ts
+			}
 			videos = append(videos, vp)
 		}
 	}
 
-	return videos, nextTime
+	return videos, earliestTime
 }

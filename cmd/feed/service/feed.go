@@ -6,6 +6,7 @@ import (
 	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
@@ -29,13 +30,64 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	latestTime := req.GetLatestTime()
 	userId := req.GetUserId()
 
-	vs, err := mysql.GetVideosByLatestTime(s.ctx, constants.VideoQueryLimit, latestTime)
+	// 从缓存中读视频id列表
+	videoIds, err := redis.GetVideoIdsByLatestTime(s.ctx, latestTime, constants.VideoQueryLimit)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
-		return nil, 0, err
+		klog.CtxErrorf(s.ctx, "redis read latest video ids failed %v", err)
 	}
 
-	videos, nextTime := pack.Videos(vs)
+	videoMap := make(map[int64]*feed.Video, 0)
+	videos := make([]*feed.Video, 0)
+	nextTime := latestTime
+
+	// 缓存中查视频详情
+	rvs, notInCacheVideoIds := redis.MGetVideoInfoByVideoId(s.ctx, videoIds)
+	redisVideos, nts := pack.Videos(rvs)
+	if nts < nextTime {
+		nextTime = nts
+	}
+	for _, v := range redisVideos {
+		if v == nil {
+			continue
+		}
+		videoMap[v.Id] = v
+	}
+
+	// 缓存没找到 查库
+	if len(notInCacheVideoIds) > 0 {
+		vs, err := mysql.MGetVideosByVideoIds(s.ctx, videoIds)
+		if err != nil {
+			klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
+			return nil, 0, err
+		}
+
+		// 把视频加入缓存
+		err = redis.MSetVideoInfo(s.ctx, vs)
+		if err != nil {
+			klog.CtxErrorf(s.ctx, "redis set video list failed %v", err)
+		}
+
+		// 把视频放入map中
+		vds, nts := pack.Videos(vs)
+		if nts < nextTime {
+			nextTime = nts
+		}
+		for _, v := range vds {
+			if v == nil {
+				continue
+			}
+			videoMap[v.Id] = v
+		}
+	}
+
+	// 合并视频
+	for _, i := range videoIds {
+		res := videoMap[i]
+		if res == nil {
+			continue
+		}
+		videos = append(videos, res)
+	}
 	if len(videos) == 0 {
 		return videos, 0, nil
 	}
@@ -68,11 +120,12 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	us := users.GetUser()
 	// 加入用户信息
 	for i := range videos {
-		if us[i] == nil {
+		res := us[i]
+		if res == nil {
 			klog.CtxWarnf(s.ctx, "video author is nil")
 			continue
 		}
-		videos[i].Author = us[i]
+		videos[i].Author = res
 	}
 
 	// 查询用户点赞视频

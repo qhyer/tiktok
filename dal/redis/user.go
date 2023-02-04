@@ -9,7 +9,6 @@ import (
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
-	"tiktok/pkg/errno"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/u2takey/go-utils/rand"
@@ -24,7 +23,7 @@ func GetUserInfoByUserId(ctx context.Context, userId int64) (*user.User, error) 
 		if err != nil {
 			return err
 		}
-		pipeliner.Expire(ctx, userKey, constants.UserinfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
+		pipeliner.Expire(ctx, userKey, constants.UserInfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
 		return nil
 	})
 	if err != nil {
@@ -33,24 +32,6 @@ func GetUserInfoByUserId(ctx context.Context, userId int64) (*user.User, error) 
 
 	usr := pack.User(&us)
 	return usr, nil
-}
-
-func AddUserInfo(ctx context.Context, usr *user.User) error {
-	userId := usr.GetId()
-
-	if userId == 0 {
-		return errno.ParamErr
-	}
-
-	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
-
-	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-		pipeliner.HMSet(ctx, userKey, "id", usr.Id, "name", usr.Name, "follow_count", *usr.FollowCount, "follower_count", *usr.FollowerCount)
-		pipeliner.Expire(ctx, userKey, constants.UserinfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
-		return nil
-	})
-
-	return err
 }
 
 func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.User, notInCacheUserIds []int64) {
@@ -65,15 +46,20 @@ func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.U
 	return
 }
 
-func MAddUserInfo(ctx context.Context, users []*user.User) error {
+func MSetUserInfo(ctx context.Context, users []*user.User) error {
 	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
 		for _, usr := range users {
 			if usr == nil {
 				continue
 			}
-			userKey := fmt.Sprintf(constants.RedisUserKey, usr.Id)
-			pipeliner.HMSet(ctx, userKey, "id", usr.Id, "name", usr.Name, "follow_count", *usr.FollowCount, "follower_count", *usr.FollowerCount)
-			pipeliner.Expire(ctx, userKey, constants.UserinfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
+			userKey := fmt.Sprintf(constants.RedisUserKey, usr.GetId())
+			pipeliner.HMSet(ctx, userKey,
+				"id", usr.GetId(),
+				"name", usr.GetName(),
+				"follow_count", usr.GetFollowCount(),
+				"follower_count", usr.GetFollowerCount(),
+			)
+			pipeliner.Expire(ctx, userKey, constants.UserInfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
 		}
 		return nil
 	})
