@@ -54,8 +54,8 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	}
 
 	// 缓存没找到 查库
-	if len(notInCacheVideoIds) > 0 {
-		vs, err := mysql.MGetVideosByVideoIds(s.ctx, videoIds)
+	if len(videoIds) == 0 || len(notInCacheVideoIds) > 0 {
+		vs, err := mysql.MGetVideosByVideoIds(s.ctx, notInCacheVideoIds)
 		if err != nil {
 			klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
 			return nil, 0, err
@@ -65,6 +65,12 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		err = redis.MSetVideoInfo(s.ctx, vs)
 		if err != nil {
 			klog.CtxErrorf(s.ctx, "redis set video list failed %v", err)
+		}
+
+		// 把视频id加入缓存
+		err = redis.MAddVideoIdToFeed(s.ctx, vs)
+		if err != nil {
+			klog.CtxErrorf(s.ctx, "redis add video id to feed failed %v", err)
 		}
 
 		// 把视频放入map中

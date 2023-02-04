@@ -88,13 +88,13 @@ func GetVideoIdsByLatestTime(ctx context.Context, latestTime int64, limit int64)
 }
 
 func updateFeed(ctx context.Context) error {
-	count, err := RDB.Exists(ctx, constants.RedisFeedKey).Result()
+	res, err := RDB.Exists(ctx, constants.RedisFeedKey).Result()
 	if err != nil {
 		return err
 	}
 
 	// 不存在feed
-	if count == 0 {
+	if res == 0 {
 		videoList, err := mysql.GetVideosByLatestTime(ctx, 100, time.Now().UnixMilli())
 		if err != nil {
 			klog.CtxErrorf(ctx, "mysql get latest videos failed %v", err)

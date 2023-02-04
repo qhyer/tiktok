@@ -4,11 +4,6 @@ import (
 	"context"
 )
 
-// CreateVideo create video
-func CreateVideo(ctx context.Context, video []*Video) error {
-	return DB.WithContext(ctx).Create(video).Error
-}
-
 // GetPublishedVideoIdsByUserId get list of published video ids
 func GetPublishedVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, error) {
 	res := make([]int64, 0)

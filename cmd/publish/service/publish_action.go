@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"tiktok/dal/mysql"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/publish"
 	"tiktok/pkg/censor"
 	"tiktok/pkg/constants"
@@ -76,7 +77,7 @@ func (s *PublishActionService) PublishVideo(req *publish.DouyinPublishActionRequ
 	}
 
 	// 在db插入结果
-	err = mysql.CreateVideo(s.ctx, []*mysql.Video{
+	res, err := mysql.CreateVideo(s.ctx, []*mysql.Video{
 		{
 			AuthorUserId: userId,
 			PlayUrl:      videoUploadInfo.Key,
@@ -87,6 +88,17 @@ func (s *PublishActionService) PublishVideo(req *publish.DouyinPublishActionRequ
 	if err != nil {
 		klog.CtxFatalf(s.ctx, "mysql create video failed %v", err)
 		return err
+	}
+
+	// 在redis中插入结果
+	err = redis.MSetVideoInfo(s.ctx, res)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis set video info failed %v", err)
+	}
+
+	err = redis.MAddVideoIdToFeed(s.ctx, res)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis add video id to feed failed %v", err)
 	}
 
 	return nil

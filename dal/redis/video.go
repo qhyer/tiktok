@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -12,26 +13,6 @@ import (
 
 	"github.com/redis/go-redis/v9"
 )
-
-func GetVideoInfoByVideoId(ctx context.Context, videoId int64) (*mysql.Video, error) {
-	videoKey := fmt.Sprintf(constants.RedisVideoKey, videoId)
-
-	var v mysql.Video
-	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-		err := pipeliner.HMGet(ctx, videoKey, "id", "author_user_id", "play_url", "cover_url",
-			"favorite_count", "comment_count", "title", "created_at").Scan(&v)
-		if err != nil {
-			return err
-		}
-		pipeliner.Expire(ctx, videoKey, constants.UserInfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &v, nil
-}
 
 func SetVideoInfo(ctx context.Context, video *mysql.Video) error {
 	videoId := video.Id
@@ -59,14 +40,32 @@ func SetVideoInfo(ctx context.Context, video *mysql.Video) error {
 }
 
 func MGetVideoInfoByVideoId(ctx context.Context, videoIds []int64) (videos []*mysql.Video, notInCacheVideoIds []int64) {
-	for _, vid := range videoIds {
-		res, err := GetVideoInfoByVideoId(ctx, vid)
-		if err != nil || res == nil {
-			notInCacheVideoIds = append(notInCacheVideoIds, vid)
-		} else {
-			videos = append(videos, res)
+	res, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		for _, vid := range videoIds {
+			videoKey := fmt.Sprintf(constants.RedisVideoKey, vid)
+			pipeliner.HGetAll(ctx, videoKey)
+			pipeliner.Expire(ctx, videoKey, constants.VideoInfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, videoIds
+	}
+
+	// 处理getall结果
+	for i, l := range res {
+		if i%2 == 0 {
+			var v mysql.Video
+			err := MustScan(l.(*redis.MapStringStringCmd), &v)
+			if err != nil {
+				log.Print(err)
+				notInCacheVideoIds = append(notInCacheVideoIds, videoIds[i/2])
+				continue
+			}
+			videos = append(videos, &v)
 		}
 	}
+
 	return
 }
 

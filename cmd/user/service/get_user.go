@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"tiktok/cmd/rpc"
 	"tiktok/dal/neo4j"
@@ -32,6 +33,8 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 	userMap := make(map[int64]*user.User, 0)
 	// 先从redis中读
 	redisUsers, notInRedisUserIds := redis.MGetUserInfoByUserId(s.ctx, toUserIds)
+	log.Print(redisUsers)
+	log.Print(notInRedisUserIds)
 	for _, u := range redisUsers {
 		if u == nil {
 			continue
@@ -46,7 +49,7 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 			klog.CtxErrorf(s.ctx, "neo4j get user failed %v", err)
 			return nil, err
 		}
-
+		log.Print(us)
 		// 查库结果加入缓存
 		err = redis.MSetUserInfo(s.ctx, us)
 		if err != nil {

@@ -1,6 +1,8 @@
 package pack
 
 import (
+	"time"
+
 	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
@@ -33,15 +35,21 @@ func Videos(vs []*mysql.Video) ([]*feed.Video, int64) {
 		return videos, 0
 	}
 
-	earliestTime := vs[0].CreatedAt.UnixMilli()
+	earliestTime := time.Now().UnixMilli()
 
 	// pack video
 	for _, v := range vs {
 		if vp := Video(v); vp != nil {
 			ts := v.CreatedAt.UnixMilli()
-			if ts < earliestTime {
+			if ts != 0 && ts < earliestTime {
 				earliestTime = ts
 			}
+
+			ts = v.CreatedTimestamp
+			if ts != 0 && ts < earliestTime {
+				earliestTime = ts
+			}
+
 			videos = append(videos, vp)
 		}
 	}

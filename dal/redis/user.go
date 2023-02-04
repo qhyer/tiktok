@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"tiktok/dal/mysql"
-	"tiktok/dal/pack"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
 
@@ -14,35 +13,38 @@ import (
 	"github.com/u2takey/go-utils/rand"
 )
 
-func GetUserInfoByUserId(ctx context.Context, userId int64) (*user.User, error) {
-	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
-
-	var us mysql.User
-	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-		err := pipeliner.HMGet(ctx, userKey, "id", "name", "follow_count", "follower_count").Scan(&us)
-		if err != nil {
-			return err
+func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.User, notInCacheUserIds []int64) {
+	res, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		for _, uid := range userIds {
+			userKey := fmt.Sprintf(constants.RedisUserKey, uid)
+			pipeliner.HGetAll(ctx, userKey)
+			pipeliner.Expire(ctx, userKey, constants.UserInfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
 		}
-		pipeliner.Expire(ctx, userKey, constants.UserInfoExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, userIds
 	}
 
-	usr := pack.User(&us)
-	return usr, nil
-}
-
-func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.User, notInCacheUserIds []int64) {
-	for _, uid := range userIds {
-		res, err := GetUserInfoByUserId(ctx, uid)
-		if err != nil || res == nil {
-			notInCacheUserIds = append(notInCacheUserIds, uid)
-		} else {
-			users = append(users, res)
+	// 处理getall结果
+	for i, l := range res {
+		if i%2 == 0 {
+			var us mysql.User
+			err := MustScan(l.(*redis.MapStringStringCmd), &us)
+			if err != nil {
+				notInCacheUserIds = append(notInCacheUserIds, userIds[i/2])
+				continue
+			}
+			usr := &user.User{
+				Id:            us.Id,
+				Name:          us.UserName,
+				FollowCount:   &us.FollowCount,
+				FollowerCount: &us.FollowerCount,
+			}
+			users = append(users, usr)
 		}
 	}
+
 	return
 }
 
