@@ -14,6 +14,7 @@ const (
 	RedisUserKey        = "USER:%d"
 	RedisVideoKey       = "VIDEO:%d"
 	RedisFeedKey        = "FEED"
+	RedisCommentKey     = "COMMENT:%d"
 	RedisCommentListKey = "COMMENT_LIST:%d"
 )
 
@@ -23,4 +24,5 @@ const (
 	MaxRandExpireSecond = 300
 	UserInfoExpiry      = 10 * time.Minute
 	VideoInfoExpiry     = 10 * time.Minute
+	CommentExpiry       = 30 * time.Minute
 )

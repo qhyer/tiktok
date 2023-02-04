@@ -41,12 +41,12 @@ func Videos(vs []*mysql.Video) ([]*feed.Video, int64) {
 	for _, v := range vs {
 		if vp := Video(v); vp != nil {
 			ts := v.CreatedAt.UnixMilli()
-			if ts != 0 && ts < earliestTime {
+			if ts > 0 && ts < earliestTime {
 				earliestTime = ts
 			}
 
 			ts = v.CreatedTimestamp
-			if ts != 0 && ts < earliestTime {
+			if ts > 0 && ts < earliestTime {
 				earliestTime = ts
 			}
 

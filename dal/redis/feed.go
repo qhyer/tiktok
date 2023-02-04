@@ -14,7 +14,7 @@ import (
 )
 
 func AddVideoIdToFeed(ctx context.Context, video *mysql.Video) {
-	// 判断feed是否为空，为空则读库创建列表
+	// 判断feed是否存在，不存在则读库创建列表
 	err := updateFeed(ctx)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update feed failed %v", err)
@@ -30,7 +30,7 @@ func AddVideoIdToFeed(ctx context.Context, video *mysql.Video) {
 }
 
 func MAddVideoIdToFeed(ctx context.Context, videos []*mysql.Video) error {
-	// 判断feed是否为空，为空则读库创建列表
+	// 判断feed是否存在，不存在则读库创建列表
 	err := updateFeed(ctx)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update feed failed %v", err)
@@ -58,7 +58,7 @@ func MAddVideoIdToFeed(ctx context.Context, videos []*mysql.Video) error {
 func GetVideoIdsByLatestTime(ctx context.Context, latestTime int64, limit int64) ([]int64, error) {
 	feedKey := constants.RedisFeedKey
 
-	// 判断feed是否为空，为空则读库创建列表
+	// 判断feed是否存在，不存在则读库创建列表
 	err := updateFeed(ctx)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update feed failed %v", err)
@@ -121,7 +121,8 @@ func updateFeed(ctx context.Context) error {
 		// 把视频加入缓存
 		err = MSetVideoInfo(ctx, videoList)
 		if err != nil {
-			klog.CtxErrorf(ctx, "redis add video info failed %v", err)
+			klog.CtxErrorf(ctx, "redis set video info failed %v", err)
+			return err
 		}
 
 		// 把视频id加入缓存
