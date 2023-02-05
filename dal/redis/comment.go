@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"tiktok/dal/mysql"
@@ -24,6 +25,7 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment, vid
 		return nil
 	}
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
+	videoKey := fmt.Sprintf(constants.RedisVideoKey, videoId)
 	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
 		// 把评论加入list
 		if err := RDB.ZAdd(ctx, commentListKey, redis.Z{
@@ -33,7 +35,15 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment, vid
 			return err
 		}
 		// 评论数+1
-		if err := RDB.HIncrBy(ctx, commentListKey, "comment_count", 1).Err(); err != nil {
+		incrBy := redis.NewScript(`
+					if redis.call("Exists", KEYS[1]) > 0 then
+						redis.call("HIncrBy", KEYS[1], "comment_count", 1)
+						return true
+					end
+					return false
+					`)
+		keys := []string{videoKey}
+		if ret, err := incrBy.Run(ctx, RDB, keys).Result(); err != nil || ret != true {
 			return err
 		}
 		return nil
@@ -53,17 +63,23 @@ func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment, v
 	}
 
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
+	videoKey := fmt.Sprintf(constants.RedisVideoKey, videoId)
 	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
 		// 把评论从list中删除
-		if err := RDB.ZRem(ctx, commentListKey, redis.Z{
-			Score:  float64(comment.CreatedAt.UnixMilli()),
-			Member: comment.Id,
-		}).Err(); err != nil {
+		if err := RDB.ZRem(ctx, commentListKey, comment.Id).Err(); err != nil {
 			return err
 		}
 
 		// 评论数-1
-		if err := RDB.HIncrBy(ctx, commentListKey, "comment_count", -1).Err(); err != nil {
+		incrBy := redis.NewScript(`
+					if redis.call("Exists", KEYS[1]) > 0 then
+						redis.call("HIncrBy", KEYS[1], "comment_count", -1)
+						return true
+					end
+					return false
+					`)
+		keys := []string{videoKey}
+		if ret, err := incrBy.Run(ctx, RDB, keys).Result(); err != nil || ret != true {
 			return err
 		}
 		return nil
@@ -193,8 +209,12 @@ func GetCommentIdListByVideoId(ctx context.Context, videoId int64) ([]*mysql.Com
 	// 把评论id和时间加入结果
 	commentList := make([]*mysql.Comment, 0, len(res))
 	for _, c := range res {
+		cid, err := strconv.ParseInt(c.Member.(string), 10, 64)
+		if err != nil {
+			continue
+		}
 		com := &mysql.Comment{
-			Id:        c.Member.(int64),
+			Id:        cid,
 			CreatedAt: time.UnixMilli(int64(c.Score)),
 		}
 		commentList = append(commentList, com)

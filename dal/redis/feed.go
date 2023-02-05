@@ -53,7 +53,7 @@ func GetVideoIdsByLatestTime(ctx context.Context, latestTime int64, limit int64)
 	// 查询视频列表
 	res, err := RDB.ZRevRangeByScore(ctx, feedKey, &redis.ZRangeBy{
 		Min:    "0",
-		Max:    fmt.Sprintf("%d", latestTime),
+		Max:    fmt.Sprintf("%d", latestTime-1),
 		Offset: 0,
 		Count:  limit,
 	}).Result()

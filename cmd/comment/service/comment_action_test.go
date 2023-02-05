@@ -74,7 +74,7 @@ func TestCommentActionService_DeleteCommentAction(t *testing.T) {
 	type args struct {
 		req *comment.DouyinCommentActionRequest
 	}
-	commentIds := []int64{1, 0, 2}
+	commentIds := []int64{16, 0, 2}
 	tests := []struct {
 		name    string
 		fields  fields

@@ -3,7 +3,6 @@ package redis
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 
@@ -25,14 +24,12 @@ func MGetVideoInfoByVideoId(ctx context.Context, videoIds []int64) (videos []*my
 	if err != nil {
 		return nil, videoIds
 	}
-
 	// 处理getall结果
 	for i, l := range res {
 		if i%2 == 0 {
 			var v mysql.Video
 			err := MustScan(l.(*redis.MapStringStringCmd), &v)
 			if err != nil {
-				log.Print(err)
 				notInCacheVideoIds = append(notInCacheVideoIds, videoIds[i/2])
 				continue
 			}

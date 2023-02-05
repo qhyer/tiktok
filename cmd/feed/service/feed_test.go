@@ -36,7 +36,7 @@ func TestFeedService_Feed(t *testing.T) {
 				UserId:     0,
 			}},
 			want:    []*feed.Video{},
-			want1:   1674726762000,
+			want1:   1675320637000,
 			wantErr: false,
 		},
 	}

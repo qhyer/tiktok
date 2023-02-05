@@ -65,7 +65,7 @@ func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 
 // DeleteComment delete video comment action
 func DeleteComment(ctx context.Context, comment *Comment) (*Comment, error) {
-	return comment, DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 找到要删除的评论
 		delCom := tx.Where("id = ? and user_id = ?", comment.Id, comment.UserId).Take(&comment)
 		if delCom.Error != nil {
@@ -96,4 +96,5 @@ func DeleteComment(ctx context.Context, comment *Comment) (*Comment, error) {
 
 		return nil
 	})
+	return comment, err
 }
