@@ -13,17 +13,117 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment, videoId int64) error {
+	// 判断评论列表是否存在，不存在则创建列表
+	err := updateCommentList(ctx, videoId)
+	if err != nil {
+		return err
+	}
+
+	if comment == nil {
+		return nil
+	}
+	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
+	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		// 把评论加入list
+		if err := RDB.ZAdd(ctx, commentListKey, redis.Z{
+			Score:  float64(comment.CreatedAt.UnixMilli()),
+			Member: comment.Id,
+		}).Err(); err != nil {
+			return err
+		}
+		// 评论数+1
+		if err := RDB.HIncrBy(ctx, commentListKey, "comment_count", 1).Err(); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment, videoId int64) error {
+	// 判断评论列表是否存在，不存在则创建列表
+	err := updateCommentList(ctx, videoId)
+	if err != nil {
+		return err
+	}
+
+	if comment == nil {
+		return nil
+	}
+
+	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
+	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		// 把评论从list中删除
+		if err := RDB.ZRem(ctx, commentListKey, redis.Z{
+			Score:  float64(comment.CreatedAt.UnixMilli()),
+			Member: comment.Id,
+		}).Err(); err != nil {
+			return err
+		}
+
+		// 评论数-1
+		if err := RDB.HIncrBy(ctx, commentListKey, "comment_count", -1).Err(); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+func MAddCommentIdToCommentList(ctx context.Context, comments []*mysql.Comment, videoId int64) error {
+	// 判断评论列表是否存在，不存在则创建列表
+	err := updateCommentList(ctx, videoId)
+	if err != nil {
+		return err
+	}
+
+	if len(comments) == 0 {
+		return nil
+	}
+
+	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
+	commentIds := make([]redis.Z, 0, len(comments))
+	for _, c := range comments {
+		if c == nil {
+			continue
+		}
+		commentIds = append(commentIds, redis.Z{
+			Score:  float64(c.CreatedAt.UnixMilli()),
+			Member: c.Id,
+		})
+	}
+	err = RDB.ZAdd(ctx, commentListKey, commentIds...).Err()
+
+	return err
+}
+
+func SetComment(ctx context.Context, comment *mysql.Comment) error {
+	if comment == nil {
+		return nil
+	}
+	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		commentKey := fmt.Sprintf(constants.RedisCommentKey, comment.Id)
+		pipeliner.HMSet(ctx, commentKey,
+			"user_id", comment.UserId,
+			"content", comment.Content,
+		)
+		pipeliner.Expire(ctx, commentKey, constants.CommentExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
+		return nil
+	})
+	return err
+}
+
 func MSetComment(ctx context.Context, comments []*mysql.Comment) error {
 	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-		for _, comment := range comments {
-			if comment == nil {
+		for _, c := range comments {
+			if c == nil {
 				continue
 			}
-			commentKey := fmt.Sprintf(constants.RedisCommentKey, comment.Id)
+			commentKey := fmt.Sprintf(constants.RedisCommentKey, c.Id)
 			pipeliner.HMSet(ctx, commentKey,
-				"id", comment.Id,
-				"user_id", comment.UserId,
-				"content", comment.Content,
+				"user_id", c.UserId,
+				"content", c.Content,
 			)
 			pipeliner.Expire(ctx, commentKey, constants.CommentExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
 		}
@@ -32,17 +132,60 @@ func MSetComment(ctx context.Context, comments []*mysql.Comment) error {
 	return err
 }
 
+func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment) (comments []*mysql.Comment, notInCacheCommentIds []int64) {
+	res, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		for _, c := range redisComments {
+			commentKey := fmt.Sprintf(constants.RedisCommentKey, c.Id)
+			pipeliner.HGetAll(ctx, commentKey)
+			pipeliner.Expire(ctx, commentKey, constants.CommentExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
+		}
+		return nil
+	})
+	if err != nil {
+		// 出错 把所有id都加入未找到
+		for _, c := range redisComments {
+			notInCacheCommentIds = append(notInCacheCommentIds, c.Id)
+		}
+		return nil, notInCacheCommentIds
+	}
+
+	// 处理getall结果
+	for i, l := range res {
+		if i%2 == 0 {
+			var c mysql.Comment
+			err := MustScan(l.(*redis.MapStringStringCmd), &c)
+			if err != nil {
+				notInCacheCommentIds = append(notInCacheCommentIds, redisComments[i/2].Id)
+				continue
+			}
+			com := &mysql.Comment{
+				Id:        redisComments[i/2].Id,
+				UserId:    c.UserId,
+				Content:   c.Content,
+				CreatedAt: redisComments[i/2].CreatedAt,
+			}
+			comments = append(comments, com)
+		}
+	}
+
+	return
+}
+
 func GetCommentIdListByVideoId(ctx context.Context, videoId int64) ([]*mysql.Comment, error) {
 	// 判断commentList是否存在 不存在则读库创建列表
 	err := updateCommentList(ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
+		return nil, err
 	}
 
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
 
 	// 查询评论id列表
-	res, err := RDB.ZRevRangeByScoreWithScores(ctx, commentListKey, &redis.ZRangeBy{}).Result()
+	res, err := RDB.ZRevRangeByScoreWithScores(ctx, commentListKey, &redis.ZRangeBy{
+		Min: "0",
+		Max: fmt.Sprintf("%d", time.Now().UnixMilli()),
+	}).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +209,7 @@ func updateCommentList(ctx context.Context, videoId int64) error {
 		return err
 	}
 
-	// 不存在评论列表
+	// 不存在评论列表 查库
 	if res == 0 {
 		commentList, err := mysql.GetCommentListByVideoId(ctx, videoId)
 		if err != nil {
@@ -100,7 +243,18 @@ func updateCommentList(ctx context.Context, videoId int64) error {
 
 		// 把评论id加入缓存
 		err = RDB.ZAdd(ctx, commentListKey, commentIds...).Err()
-		return err
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis add comment id to list failed %v", err)
+			return err
+		}
+
+		// 设置list的过期时间
+		err = RDB.Expire(ctx, commentListKey, constants.CommentListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis set comment list expire failed %v", err)
+			return err
+		}
+		return nil
 	}
 	return nil
 }

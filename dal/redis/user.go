@@ -36,7 +36,6 @@ func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.U
 				continue
 			}
 			usr := &user.User{
-				Id:            us.Id,
 				Name:          us.UserName,
 				FollowCount:   &us.FollowCount,
 				FollowerCount: &us.FollowerCount,
@@ -56,7 +55,6 @@ func MSetUserInfo(ctx context.Context, users []*user.User) error {
 			}
 			userKey := fmt.Sprintf(constants.RedisUserKey, usr.GetId())
 			pipeliner.HMSet(ctx, userKey,
-				"id", usr.GetId(),
 				"name", usr.GetName(),
 				"follow_count", usr.GetFollowCount(),
 				"follower_count", usr.GetFollowerCount(),

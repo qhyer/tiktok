@@ -16,6 +16,7 @@ const (
 	RedisFeedKey        = "FEED"
 	RedisCommentKey     = "COMMENT:%d"
 	RedisCommentListKey = "COMMENT_LIST:%d"
+	RedisPublishListKey = "PUBLISH_LIST:%d"
 )
 
 // 超时时间
@@ -25,4 +26,6 @@ const (
 	UserInfoExpiry      = 10 * time.Minute
 	VideoInfoExpiry     = 10 * time.Minute
 	CommentExpiry       = 30 * time.Minute
+	CommentListExpiry   = 5 * time.Minute
+	PublishListExpiry   = 15 * time.Minute
 )

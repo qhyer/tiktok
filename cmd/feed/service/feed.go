@@ -30,10 +30,11 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	latestTime := req.GetLatestTime()
 	userId := req.GetUserId()
 
-	// 从缓存中读视频id列表
+	// 从缓存中读视频id列表 其中没读到缓存会查库
 	videoIds, err := redis.GetVideoIdsByLatestTime(s.ctx, latestTime, constants.VideoQueryLimit)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "redis read latest video ids failed %v", err)
+		klog.CtxErrorf(s.ctx, "redis get latest video ids failed %v", err)
+		return nil, 0, err
 	}
 
 	videoMap := make(map[int64]*feed.Video, 0)

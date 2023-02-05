@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"tiktok/cmd/rpc"
-	"tiktok/dal/mysql"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
 
@@ -25,19 +25,20 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 
-	vs, err := mysql.GetPublishedVideoIdsByUserId(s.ctx, toUserId)
+	// 查缓存，缓存中没有会读库
+	videoIds, err := redis.GetPublishedVideoIdsByUserId(s.ctx, toUserId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
+		klog.CtxErrorf(s.ctx, "redis get video failed %v", err)
 		return nil, err
 	}
 
-	if len(vs) == 0 {
+	if len(videoIds) == 0 {
 		return nil, nil
 	}
 
 	videoResponse, err := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
 		UserId:   userId,
-		VideoIds: vs,
+		VideoIds: videoIds,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get video failed %v", err)

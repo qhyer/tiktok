@@ -13,9 +13,9 @@ import (
 type Comment struct {
 	gorm.Model
 	Id        int64          `gorm:"column:id;primaryKey"`
-	UserId    int64          `gorm:"column:user_id"`
+	UserId    int64          `gorm:"column:user_id" redis:"user_id"`
 	VideoId   int64          `gorm:"column:video_id;index:idx_video_id"`
-	Content   string         `gorm:"column:content"`
+	Content   string         `gorm:"column:content" redis:"content"`
 	CreatedAt time.Time      `gorm:"column:created_at;index:idx_created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"`
@@ -64,8 +64,8 @@ func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 }
 
 // DeleteComment delete video comment action
-func DeleteComment(ctx context.Context, comment *Comment) error {
-	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+func DeleteComment(ctx context.Context, comment *Comment) (*Comment, error) {
+	return comment, DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 找到要删除的评论
 		delCom := tx.Where("id = ? and user_id = ?", comment.Id, comment.UserId).Take(&comment)
 		if delCom.Error != nil {

@@ -90,15 +90,22 @@ func (s *PublishActionService) PublishVideo(req *publish.DouyinPublishActionRequ
 		return err
 	}
 
-	// 在redis中插入结果
+	// 缓存中插入视频
 	err = redis.MSetVideoInfo(s.ctx, res)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis set video info failed %v", err)
 	}
 
+	// 缓存feed流加入视频id
 	err = redis.MAddVideoIdToFeed(s.ctx, res)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis add video id to feed failed %v", err)
+	}
+
+	// 缓存中作者发布列表加入视频
+	err = redis.MAddVideoIdToPublishList(s.ctx, res, userId)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis add video id to publish list failed %v", err)
 	}
 
 	return nil

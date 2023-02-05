@@ -5,6 +5,7 @@ import (
 
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/comment"
 	"tiktok/pkg/censor"
 
@@ -29,7 +30,7 @@ func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionReq
 	// 过滤敏感词
 	content = censor.TextCensor.GetFilter().Replace(content, '*')
 
-	// 插入数据
+	// 数据库中插入数据
 	c, err := mysql.CreateComment(s.ctx, &mysql.Comment{
 		UserId:  userId,
 		VideoId: videoId,
@@ -41,6 +42,19 @@ func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionReq
 	}
 
 	com := pack.Comment(c)
+
+	// 在缓存中加入评论数据
+	err = redis.SetComment(s.ctx, c)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis set comment failed %v", err)
+	}
+
+	// 更新缓存评论列表
+	err = redis.AddNewCommentToCommentList(s.ctx, c, videoId)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis add new comment failed %v", err)
+	}
+
 	return com, nil
 }
 
@@ -49,13 +63,20 @@ func (s *CommentActionService) DeleteComment(req *comment.DouyinCommentActionReq
 	userId := req.GetUserId()
 	commentId := req.GetCommentId()
 
-	err := mysql.DeleteComment(s.ctx, &mysql.Comment{
+	// 在数据库中删除评论
+	com, err := mysql.DeleteComment(s.ctx, &mysql.Comment{
 		UserId: userId,
 		Id:     commentId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "db delete comment failed %v", err)
 		return err
+	}
+
+	// 从缓存中删除评论
+	err = redis.DeleteCommentFromCommentList(s.ctx, com, com.VideoId)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis delete comment from comment list failed %v", err)
 	}
 
 	return nil

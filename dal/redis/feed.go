@@ -13,22 +13,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func AddVideoIdToFeed(ctx context.Context, video *mysql.Video) {
-	// 判断feed是否存在，不存在则读库创建列表
-	err := updateFeed(ctx)
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis update feed failed %v", err)
-	}
-
-	// 加入当前视频
-	err = RDB.ZAdd(ctx, constants.RedisFeedKey, redis.Z{
-		Score:  float64(video.CreatedAt.UnixMilli()),
-		Member: video.Id,
-	}).Err()
-
-	return
-}
-
 func MAddVideoIdToFeed(ctx context.Context, videos []*mysql.Video) error {
 	// 判断feed是否存在，不存在则读库创建列表
 	err := updateFeed(ctx)
@@ -58,10 +42,12 @@ func MAddVideoIdToFeed(ctx context.Context, videos []*mysql.Video) error {
 func GetVideoIdsByLatestTime(ctx context.Context, latestTime int64, limit int64) ([]int64, error) {
 	feedKey := constants.RedisFeedKey
 
+	videoIds := make([]int64, 0, limit)
 	// 判断feed是否存在，不存在则读库创建列表
 	err := updateFeed(ctx)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update feed failed %v", err)
+		return videoIds, err
 	}
 
 	// 查询视频列表
@@ -72,11 +58,10 @@ func GetVideoIdsByLatestTime(ctx context.Context, latestTime int64, limit int64)
 		Count:  limit,
 	}).Result()
 	if err != nil {
-		return nil, err
+		return videoIds, err
 	}
 
 	// 把视频id加入结果
-	videoIds := make([]int64, 0, len(res))
 	for _, v := range res {
 		id, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
@@ -127,7 +112,11 @@ func updateFeed(ctx context.Context) error {
 
 		// 把视频id加入缓存
 		err = RDB.ZAdd(ctx, constants.RedisFeedKey, videoIds...).Err()
-		return err
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis add video ids to feed failed %v", err)
+			return err
+		}
+		return nil
 	}
 	return nil
 }
