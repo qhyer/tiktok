@@ -72,7 +72,7 @@ func updatePublishList(ctx context.Context, userId int64) error {
 
 	// 不存在发布视频列表 查库
 	if res == 0 {
-		publishList, err := mysql.GetPublishedVideoIdsByUserId(ctx, userId)
+		publishList, err := mysql.GetPublishedVideosByUserId(ctx, userId)
 		if err != nil {
 			klog.CtxErrorf(ctx, "mysql get user published video ids failed %v", err)
 			return err

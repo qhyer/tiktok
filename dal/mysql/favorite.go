@@ -26,17 +26,17 @@ func (f *Favorite) TableName() string {
 }
 
 // GetFavoriteVideoIdsByUserId get favorite video ids by user id
-func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, error) {
-	res := make([]int64, 0)
-	if err := DB.WithContext(ctx).Model(&Favorite{}).Select("video_id").Where("user_id = ?", userId).Find(&res).Error; err != nil {
+func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]*Favorite, error) {
+	res := make([]*Favorite, 0)
+	if err := DB.WithContext(ctx).Model(&Favorite{}).Select("video_id", "created_at").Where("user_id = ?", userId).Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
 // CreateFavorite user favorite video
-func CreateFavorite(ctx context.Context, favorite *Favorite) error {
-	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+func CreateFavorite(ctx context.Context, favorite *Favorite) (*Favorite, error) {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 用户新增喜欢
 		res := tx.Model(&Favorite{}).Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "id"}},
@@ -64,11 +64,12 @@ func CreateFavorite(ctx context.Context, favorite *Favorite) error {
 
 		return nil
 	})
+	return favorite, err
 }
 
 // DeleteFavorite user cancel favorite video
-func DeleteFavorite(ctx context.Context, favorite *Favorite) error {
-	return DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+func DeleteFavorite(ctx context.Context, favorite *Favorite) (*Favorite, error) {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 用户取消喜欢
 		res := tx.Where("video_id = ? and user_id = ?", favorite.VideoId, favorite.UserId).Delete(&favorite)
 		if res.Error != nil {
@@ -93,4 +94,5 @@ func DeleteFavorite(ctx context.Context, favorite *Favorite) error {
 
 		return nil
 	})
+	return favorite, err
 }

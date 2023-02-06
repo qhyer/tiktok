@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"tiktok/dal/mysql"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -23,12 +24,20 @@ func (s *FavoriteActionService) CreateFavorite(req *favorite.DouyinFavoriteActio
 	userId := req.GetUserId()
 	videoId := req.GetVideoId()
 
-	err := mysql.CreateFavorite(s.ctx, &mysql.Favorite{
+	// 数据库中创建喜欢
+	fav, err := mysql.CreateFavorite(s.ctx, &mysql.Favorite{
 		UserId:  userId,
 		VideoId: videoId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "db create favorite failed %v", err)
+		return err
+	}
+
+	// 缓存中加入视频 喜欢数+1
+	err = redis.AddNewFavoriteToFavoriteList(s.ctx, fav)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis update favorite num failed %v", err)
 		return err
 	}
 
@@ -40,12 +49,20 @@ func (s *FavoriteActionService) CancelFavorite(req *favorite.DouyinFavoriteActio
 	userId := req.GetUserId()
 	videoId := req.GetVideoId()
 
-	err := mysql.DeleteFavorite(s.ctx, &mysql.Favorite{
+	// 数据库中删除喜欢
+	fav, err := mysql.DeleteFavorite(s.ctx, &mysql.Favorite{
 		UserId:  userId,
 		VideoId: videoId,
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "db delete favorite failed %v", err)
+		return err
+	}
+
+	// 缓存中移除视频 喜欢数-1
+	err = redis.DeleteFavoriteFromFavoriteList(s.ctx, fav)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis update favorite num failed %v", err)
 		return err
 	}
 

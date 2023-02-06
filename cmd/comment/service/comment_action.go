@@ -50,7 +50,7 @@ func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionReq
 	}
 
 	// 更新缓存评论列表
-	err = redis.AddNewCommentToCommentList(s.ctx, c, videoId)
+	err = redis.AddNewCommentToCommentList(s.ctx, c)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis add new comment failed %v", err)
 	}
@@ -74,7 +74,7 @@ func (s *CommentActionService) DeleteComment(req *comment.DouyinCommentActionReq
 	}
 
 	// 从缓存中删除评论
-	err = redis.DeleteCommentFromCommentList(s.ctx, com, com.VideoId)
+	err = redis.DeleteCommentFromCommentList(s.ctx, com)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis delete comment from comment list failed %v", err)
 	}

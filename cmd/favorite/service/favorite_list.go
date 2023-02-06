@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"tiktok/cmd/rpc"
-	"tiktok/dal/mysql"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
 
@@ -25,7 +25,8 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 
-	fl, err := mysql.GetFavoriteVideoIdsByUserId(s.ctx, toUserId)
+	// 从缓存中读列表，缓存中没有会读库
+	fl, err := redis.GetFavoriteVideoIdsByUserId(s.ctx, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get favorite list failed %v", err)
 		return nil, err
@@ -51,7 +52,8 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 func (s *FavoriteListService) GetUserFavoriteVideoIds(req *favorite.DouyinGetUserFavoriteVideoIdsRequest) ([]int64, error) {
 	userId := req.GetUserId()
 
-	fl, err := mysql.GetFavoriteVideoIdsByUserId(s.ctx, userId)
+	// 从缓存中读列表，缓存中没有会读库
+	fl, err := redis.GetFavoriteVideoIdsByUserId(s.ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "mysql get favorite list failed %v", err)
 		return nil, err

@@ -17,9 +17,12 @@ func FollowAction(ctx context.Context, userId int64, toUserId int64) (err error)
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
-	if _, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (interface{}, error) {
+	if _, err = session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (interface{}, error) {
 		_, err = updateFollowNum(ctx, tx, userId, 1)
 		if err != nil {
 			return nil, err
@@ -45,9 +48,12 @@ func UnfollowAction(ctx context.Context, userId int64, toUserId int64) (err erro
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
-	if _, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (interface{}, error) {
+	if _, err = session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (interface{}, error) {
 		_, err = updateFollowNum(ctx, tx, userId, -1)
 		if err != nil {
 			return nil, err
@@ -73,10 +79,13 @@ func FollowList(ctx context.Context, userId int64) (users []*user.User, err erro
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		users, err := queryUserFollow(ctx, tx, userId)
+		users, err = queryUserFollow(ctx, tx, userId)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +107,7 @@ func FollowerList(ctx context.Context, userId int64) (users []*user.User, err er
 		err = session.Close(ctx)
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		users, err := queryUserFollower(ctx, tx, userId)
+		users, err = queryUserFollower(ctx, tx, userId)
 		if err != nil {
 			return nil, err
 		}
@@ -117,10 +126,13 @@ func FriendList(ctx context.Context, userId int64) (users []*relation.FriendUser
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		users, err := queryUserFriend(ctx, tx, userId)
+		users, err = queryUserFriend(ctx, tx, userId)
 		if err != nil {
 			return nil, err
 		}

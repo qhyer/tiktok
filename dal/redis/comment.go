@@ -14,16 +14,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment, videoId int64) error {
-	// 判断评论列表是否存在，不存在则创建列表
-	err := updateCommentList(ctx, videoId)
-	if err != nil {
-		return err
-	}
-
+func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment) error {
 	if comment == nil {
 		return nil
 	}
+	videoId := comment.VideoId
+
+	// 判断评论列表是否存在，不存在则创建列表
+	err := updateCommentList(ctx, videoId)
+	if err != nil {
+		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
+		return err
+	}
+
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
 	videoKey := fmt.Sprintf(constants.RedisVideoKey, videoId)
 	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
@@ -43,7 +46,7 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment, vid
 					return false
 					`)
 		keys := []string{videoKey}
-		if ret, err := incrBy.Run(ctx, RDB, keys).Result(); err != nil || ret != true {
+		if err := incrBy.Run(ctx, RDB, keys).Err(); err != nil {
 			return err
 		}
 		return nil
@@ -51,15 +54,17 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment, vid
 	return err
 }
 
-func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment, videoId int64) error {
+func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment) error {
+	if comment == nil {
+		return nil
+	}
+	videoId := comment.VideoId
+
 	// 判断评论列表是否存在，不存在则创建列表
 	err := updateCommentList(ctx, videoId)
 	if err != nil {
+		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
 		return err
-	}
-
-	if comment == nil {
-		return nil
 	}
 
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
@@ -79,7 +84,7 @@ func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment, v
 					return false
 					`)
 		keys := []string{videoKey}
-		if ret, err := incrBy.Run(ctx, RDB, keys).Result(); err != nil || ret != true {
+		if err := incrBy.Run(ctx, RDB, keys).Err(); err != nil {
 			return err
 		}
 		return nil
@@ -91,6 +96,7 @@ func MAddCommentIdToCommentList(ctx context.Context, comments []*mysql.Comment, 
 	// 判断评论列表是否存在，不存在则创建列表
 	err := updateCommentList(ctx, videoId)
 	if err != nil {
+		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
 		return err
 	}
 

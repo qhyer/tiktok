@@ -19,7 +19,7 @@ type Video struct {
 	CommentCount     int64          `gorm:"column:comment_count;default:0" redis:"comment_count"`
 	Title            string         `gorm:"column:title" redis:"title"`
 	CreatedAt        time.Time      `gorm:"column:created_at;index:idx_created_at" redis:"created_at"`
-	CreatedTimestamp int64          `redis:"created_at"` // go-redis目前还不支持scan time.Time 因此新增这个字段
+	CreatedTimestamp int64          `gorm:"-" redis:"created_at"` // go-redis目前还不支持scan time.Time 因此新增这个字段
 	UpdatedAt        time.Time      `gorm:"column:updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"column:deleted_at"`
 }

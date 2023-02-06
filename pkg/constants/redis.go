@@ -11,12 +11,13 @@ const (
 // 缓存key
 
 const (
-	RedisUserKey        = "USER:%d"
-	RedisVideoKey       = "VIDEO:%d"
-	RedisFeedKey        = "FEED"
-	RedisCommentKey     = "COMMENT:%d"
-	RedisCommentListKey = "COMMENT_LIST:%d"
-	RedisPublishListKey = "PUBLISH_LIST:%d"
+	RedisUserKey         = "USER:%d"
+	RedisVideoKey        = "VIDEO:%d"
+	RedisFeedKey         = "FEED"
+	RedisCommentKey      = "COMMENT:%d"
+	RedisCommentListKey  = "COMMENT_LIST:%d"
+	RedisPublishListKey  = "PUBLISH_LIST:%d"
+	RedisFavoriteListKey = "FAVORITE_LIST:%d"
 )
 
 // 超时时间
@@ -28,4 +29,5 @@ const (
 	CommentExpiry       = 30 * time.Minute
 	CommentListExpiry   = 5 * time.Minute
 	PublishListExpiry   = 15 * time.Minute
+	FavoriteListExpiry  = 10 * time.Minute
 )
