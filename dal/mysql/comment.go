@@ -34,6 +34,15 @@ func GetCommentListByVideoId(ctx context.Context, videoId int64) ([]*Comment, er
 	return res, nil
 }
 
+// MGetCommentListByCommentId get list of video comment
+func MGetCommentListByCommentId(ctx context.Context, commentIds []int64) ([]*Comment, error) {
+	res := make([]*Comment, 0)
+	if err := DB.WithContext(ctx).Where("id in ?", commentIds).Order("created_at desc").Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 // CreateComment user comment video
 func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 	return comment, DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"tiktok/cmd/rpc"
-	"tiktok/dal/neo4j"
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
@@ -30,35 +29,16 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 	}
 
 	userMap := make(map[int64]*user.User, 0)
-	// 先从redis中读
-	redisUsers, notInRedisUserIds := redis.MGetUserInfoByUserId(s.ctx, toUserIds)
-	for _, u := range redisUsers {
+	// 读取用户
+	us, err := redis.MGetUserInfoByUserId(s.ctx, toUserIds)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis get userinfo failed %v", err)
+	}
+	for _, u := range us {
 		if u == nil {
 			continue
 		}
 		userMap[u.Id] = u
-	}
-
-	// 缓存没找到 查库
-	if len(notInRedisUserIds) > 0 {
-		us, err := neo4j.MGetUserByUserIds(s.ctx, notInRedisUserIds)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "neo4j get user failed %v", err)
-			return nil, err
-		}
-		// 查库结果加入缓存
-		err = redis.MSetUserInfo(s.ctx, us)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "redis set userinfo failed %v", err)
-		}
-
-		// 结果加入map
-		for _, u := range us {
-			if u == nil {
-				continue
-			}
-			userMap[u.Id] = u
-		}
 	}
 
 	// 返回所有用户

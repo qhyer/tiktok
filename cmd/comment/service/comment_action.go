@@ -47,12 +47,14 @@ func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionReq
 	err = redis.SetComment(s.ctx, c)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis set comment failed %v", err)
+		return nil, err
 	}
 
 	// 更新缓存评论列表
 	err = redis.AddNewCommentToCommentList(s.ctx, c)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis add new comment failed %v", err)
+		return nil, err
 	}
 
 	return com, nil
@@ -77,6 +79,7 @@ func (s *CommentActionService) DeleteComment(req *comment.DouyinCommentActionReq
 	err = redis.DeleteCommentFromCommentList(s.ctx, com)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis delete comment from comment list failed %v", err)
+		return err
 	}
 
 	return nil

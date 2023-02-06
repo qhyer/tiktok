@@ -6,14 +6,16 @@ import (
 	"time"
 
 	"tiktok/dal/mysql"
+	"tiktok/dal/neo4j"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"github.com/u2takey/go-utils/rand"
 )
 
-func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.User, notInCacheUserIds []int64) {
+func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.User, err error) {
 	res, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
 		for _, uid := range userIds {
 			userKey := fmt.Sprintf(constants.RedisUserKey, uid)
@@ -23,8 +25,9 @@ func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.U
 		return nil
 	})
 	if err != nil {
-		return nil, userIds
+		return users, err
 	}
+	notInCacheUserIds := make([]int64, 0)
 
 	// 处理getall结果
 	for i, l := range res {
@@ -45,6 +48,24 @@ func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.U
 		}
 	}
 
+	// 缓存没找到 查库
+	if len(notInCacheUserIds) > 0 {
+		us, err := neo4j.MGetUserByUserIds(ctx, notInCacheUserIds)
+		if err != nil {
+			klog.CtxErrorf(ctx, "neo4j get user failed %v", err)
+			return users, err
+		}
+
+		// 查库结果加入缓存
+		err = MSetUserInfo(ctx, us)
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis set userinfo failed %v", err)
+			return users, err
+		}
+
+		// 添加查库结果
+		users = append(users, us...)
+	}
 	return
 }
 

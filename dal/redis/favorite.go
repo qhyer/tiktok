@@ -167,10 +167,9 @@ func updateFavoriteList(ctx context.Context, userId int64) error {
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, favoriteListKey, constants.FavoriteListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
-			klog.CtxErrorf(ctx, "redis set favorite list expire failed %v", err)
+			klog.CtxErrorf(ctx, "redis set favorite list expiry failed %v", err)
 			return err
 		}
-		return nil
 	}
 	return nil
 }

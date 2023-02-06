@@ -18,6 +18,7 @@ func MAddVideoIdToFeed(ctx context.Context, videos []*mysql.Video) error {
 	err := updateFeed(ctx)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update feed failed %v", err)
+		return err
 	}
 
 	if len(videos) == 0 {
@@ -115,7 +116,6 @@ func updateFeed(ctx context.Context) error {
 			klog.CtxErrorf(ctx, "redis add video ids to feed failed %v", err)
 			return err
 		}
-		return nil
 	}
 	return nil
 }

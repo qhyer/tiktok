@@ -29,6 +29,7 @@ func GetPublishedVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, e
 	res, err := RDB.ZRevRange(ctx, publishListKey, 0, -1).Result()
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis get publish list failed %v", err)
+		return videoIds, err
 	}
 	for _, v := range res {
 		vid, err := strconv.ParseInt(v, 10, 64)
@@ -110,10 +111,9 @@ func updatePublishList(ctx context.Context, userId int64) error {
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, publishListKey, constants.PublishListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
-			klog.CtxErrorf(ctx, "redis set publish list expire failed %v", err)
+			klog.CtxErrorf(ctx, "redis set publish list expiry failed %v", err)
 			return err
 		}
-		return nil
 	}
 	return nil
 }

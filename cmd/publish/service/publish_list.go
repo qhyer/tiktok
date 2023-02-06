@@ -42,6 +42,7 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 	})
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get video failed %v", err)
+		return nil, err
 	}
 
 	return videoResponse.GetVideoList(), nil

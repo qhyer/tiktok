@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/neo4j"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
 
@@ -25,9 +25,9 @@ func (s *FollowListService) FollowList(req *relation.DouyinRelationFollowListReq
 	toUserId := req.GetToUserId()
 
 	// 获取目标用户的关注
-	users, err := neo4j.FollowList(s.ctx, toUserId)
+	users, err := redis.GetFollowListByUserId(s.ctx, toUserId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
+		klog.CtxErrorf(s.ctx, "redis get follow list failed %v", err)
 		return nil, err
 	}
 
@@ -37,9 +37,9 @@ func (s *FollowListService) FollowList(req *relation.DouyinRelationFollowListReq
 	}
 
 	// 获取当前用户的关注
-	followList, err := neo4j.FollowList(s.ctx, userId)
+	followList, err := redis.GetFollowListByUserId(s.ctx, userId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "neo4j get follow list failed %v", err)
+		klog.CtxErrorf(s.ctx, "redis get follow list failed %v", err)
 		return nil, err
 	}
 	userFollowMap := make(map[int64]bool, 0)

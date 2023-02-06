@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"tiktok/dal/neo4j"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/message"
 	"tiktok/kitex_gen/relation"
 	"tiktok/pkg/constants"
@@ -24,9 +25,9 @@ func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListReq
 	userId := req.GetUserId()
 
 	// 获取当前用户的朋友
-	friends, err := neo4j.FriendList(s.ctx, userId)
+	friends, err := redis.GetFriendListByUserId(s.ctx, userId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "neo4j get friend list failed %v", err)
+		klog.CtxErrorf(s.ctx, "redis get friend list failed %v", err)
 		return nil, err
 	}
 

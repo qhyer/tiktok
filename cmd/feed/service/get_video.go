@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"tiktok/cmd/rpc"
-	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
@@ -35,37 +34,17 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 	videoMap := make(map[int64]*feed.Video, 0)
 	videos := make([]*feed.Video, 0, len(videoIds))
 	// 缓存中查视频详情
-	vs, notInCacheVideoIds := redis.MGetVideoInfoByVideoId(s.ctx, videoIds)
+	vs, err := redis.MGetVideoInfoByVideoId(s.ctx, videoIds)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis get video info failed %v", err)
+		return videos, err
+	}
 	redisVideos, _ := pack.Videos(vs)
 	for _, v := range redisVideos {
 		if v == nil {
 			continue
 		}
 		videoMap[v.Id] = v
-	}
-
-	// 缓存没找到 查库
-	if len(notInCacheVideoIds) > 0 {
-		vs, err := mysql.MGetVideosByVideoIds(s.ctx, videoIds)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
-			return nil, err
-		}
-
-		// 把视频加入缓存
-		err = redis.MSetVideoInfo(s.ctx, vs)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "redis set video list failed %v", err)
-		}
-
-		// 把视频放入map中
-		vds, _ := pack.Videos(vs)
-		for _, v := range vds {
-			if v == nil {
-				continue
-			}
-			videoMap[v.Id] = v
-		}
 	}
 
 	// 合并视频
@@ -78,7 +57,7 @@ func (s *GetVideoService) GetVideosByVideoIdsAndCurrUserId(req *feed.DouyinGetVi
 	}
 
 	// 给链接签名
-	videos, err := minio.SignFeed(s.ctx, videos)
+	videos, err = minio.SignFeed(s.ctx, videos)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "minio sign feed failed %v", err)
 		return nil, err

@@ -154,7 +154,8 @@ func MSetComment(ctx context.Context, comments []*mysql.Comment) error {
 	return err
 }
 
-func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment) (comments []*mysql.Comment, notInCacheCommentIds []int64) {
+func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment) (comments []*mysql.Comment, err error) {
+	notInCacheCommentIds := make([]int64, 0)
 	res, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
 		for _, c := range redisComments {
 			commentKey := fmt.Sprintf(constants.RedisCommentKey, c.Id)
@@ -168,7 +169,7 @@ func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment)
 		for _, c := range redisComments {
 			notInCacheCommentIds = append(notInCacheCommentIds, c.Id)
 		}
-		return nil, notInCacheCommentIds
+		return comments, err
 	}
 
 	// 处理getall结果
@@ -188,6 +189,24 @@ func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment)
 			}
 			comments = append(comments, com)
 		}
+	}
+
+	// 缓存没查到 查库
+	if len(notInCacheCommentIds) > 0 {
+		cs, err := mysql.MGetCommentListByCommentId(ctx, notInCacheCommentIds)
+		if err != nil {
+			klog.CtxErrorf(ctx, "mysql get comment list failed %v", err)
+			return nil, err
+		}
+
+		// 把评论加入缓存
+		err = MSetComment(ctx, cs)
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis set comment failed %v", err)
+		}
+
+		// 把评论加入结果
+		comments = append(comments, cs...)
 	}
 
 	return
@@ -277,10 +296,9 @@ func updateCommentList(ctx context.Context, videoId int64) error {
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, commentListKey, constants.CommentListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
-			klog.CtxErrorf(ctx, "redis set comment list expire failed %v", err)
+			klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
 			return err
 		}
-		return nil
 	}
 	return nil
 }

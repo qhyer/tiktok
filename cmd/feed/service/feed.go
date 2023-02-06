@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"tiktok/cmd/rpc"
-	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
@@ -42,7 +41,11 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 	nextTime := latestTime
 
 	// 缓存中查视频详情
-	rvs, notInCacheVideoIds := redis.MGetVideoInfoByVideoId(s.ctx, videoIds)
+	rvs, err := redis.MGetVideoInfoByVideoId(s.ctx, videoIds)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis get video info failed %v", err)
+		return videos, 0, err
+	}
 	redisVideos, nts := pack.Videos(rvs)
 	if nts < nextTime {
 		nextTime = nts
@@ -52,39 +55,6 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 			continue
 		}
 		videoMap[v.Id] = v
-	}
-
-	// 缓存没找到 查库
-	if len(videoIds) == 0 || len(notInCacheVideoIds) > 0 {
-		vs, err := mysql.MGetVideosByVideoIds(s.ctx, notInCacheVideoIds)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "mysql get video failed %v", err)
-			return nil, 0, err
-		}
-
-		// 把视频加入缓存
-		err = redis.MSetVideoInfo(s.ctx, vs)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "redis set video list failed %v", err)
-		}
-
-		// 把视频id加入缓存
-		err = redis.MAddVideoIdToFeed(s.ctx, vs)
-		if err != nil {
-			klog.CtxErrorf(s.ctx, "redis add video id to feed failed %v", err)
-		}
-
-		// 把视频放入map中
-		vds, nts := pack.Videos(vs)
-		if nts < nextTime {
-			nextTime = nts
-		}
-		for _, v := range vds {
-			if v == nil {
-				continue
-			}
-			videoMap[v.Id] = v
-		}
 	}
 
 	// 合并视频
