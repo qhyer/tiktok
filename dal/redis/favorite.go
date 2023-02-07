@@ -108,7 +108,7 @@ func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, er
 
 	// 把视频id加入结果
 	res, err := RDB.ZRevRangeByScore(ctx, favoriteListKey, &redis.ZRangeBy{
-		Min: "0",
+		Min: "1", // 这里是时间戳 0的位置可能有为了避免缓存穿透放的空视频 因此置1
 		Max: fmt.Sprintf("%d", time.Now().UnixMilli()),
 	}).Result()
 	if err != nil {
@@ -140,8 +140,16 @@ func updateFavoriteList(ctx context.Context, userId int64) error {
 			return err
 		}
 
-		// 数据库没数据
+		// 数据库没数据 避免缓存穿透 放入空数据
 		if len(videos) == 0 {
+			err = RDB.ZAdd(ctx, favoriteListKey, redis.Z{
+				Score:  0,
+				Member: 0,
+			}).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add favorite list failed %v", err)
+				return err
+			}
 			return nil
 		}
 

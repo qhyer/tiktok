@@ -41,7 +41,8 @@ func GetFollowListByUserId(ctx context.Context, userId int64) ([]*user.User, err
 	followIds := make([]int64, 0, len(followIdStrs))
 	for _, f := range followIdStrs {
 		uid, err := strconv.ParseInt(f, 10, 64)
-		if err != nil {
+		// 避免缓存穿透放的空用户要跳过
+		if err != nil || uid == 0 {
 			continue
 		}
 		followIds = append(followIds, uid)
@@ -81,7 +82,8 @@ func GetFollowerListByUserId(ctx context.Context, userId int64) ([]*user.User, e
 	followerIds := make([]int64, 0, len(followerIdStrs))
 	for _, f := range followerIdStrs {
 		uid, err := strconv.ParseInt(f, 10, 64)
-		if err != nil {
+		// 避免缓存穿透放的空用户要跳过
+		if err != nil || uid == 0 {
 			continue
 		}
 		followerIds = append(followerIds, uid)
@@ -121,7 +123,8 @@ func GetFriendListByUserId(ctx context.Context, userId int64) ([]*relation.Frien
 	friendIds := make([]int64, 0, len(friendIdStrs))
 	for _, f := range friendIdStrs {
 		uid, err := strconv.ParseInt(f, 10, 64)
-		if err != nil {
+		// 避免缓存穿透放的空用户要跳过
+		if err != nil || uid == 0 {
 			continue
 		}
 		friendIds = append(friendIds, uid)
@@ -167,8 +170,13 @@ func updateFollowList(ctx context.Context, userId int64) error {
 			return err
 		}
 
-		// 数据库中无关注
+		// 数据库中无关注 避免缓存穿透放入空用户
 		if len(followList) == 0 {
+			err = RDB.SAdd(ctx, followListKey, 0).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add follow id list failed %v", err)
+				return err
+			}
 			return nil
 		}
 
@@ -217,8 +225,13 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 			return err
 		}
 
-		// 数据库中无粉丝
+		// 数据库中无粉丝 避免缓存穿透 放入空用户
 		if len(followerList) == 0 {
+			err = RDB.SAdd(ctx, followerListKey, 0).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add follower id list failed %v", err)
+				return err
+			}
 			return nil
 		}
 
@@ -371,8 +384,13 @@ func updateFriendList(ctx context.Context, userId int64) error {
 			return err
 		}
 
-		// 数据库中无好友
+		// 数据库中无好友 避免缓存穿透 放入空用户
 		if len(friendList) == 0 {
+			err = RDB.SAdd(ctx, friendListKey, 0).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add friend id list failed %v", err)
+				return err
+			}
 			return nil
 		}
 

@@ -26,7 +26,10 @@ func GetPublishedVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, e
 	}
 
 	// 查询视频列表
-	res, err := RDB.ZRevRange(ctx, publishListKey, 0, -1).Result()
+	res, err := RDB.ZRevRangeByScore(ctx, publishListKey, &redis.ZRangeBy{
+		Min: "1", // 这是时间戳 0的时候可能会碰到避免缓存穿透放的空视频 因此置1
+		Max: fmt.Sprintf("%d", time.Now().UnixMilli()),
+	}).Result()
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis get publish list failed %v", err)
 		return videoIds, err
@@ -79,8 +82,16 @@ func updatePublishList(ctx context.Context, userId int64) error {
 			return err
 		}
 
-		// 数据库也没有视频列表
+		// 数据库也没有视频 避免缓存穿透 放入空视频
 		if len(publishList) == 0 {
+			err = RDB.ZAdd(ctx, publishListKey, redis.Z{
+				Score:  0,
+				Member: 0,
+			}).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add publish list failed %v", err)
+				return err
+			}
 			return nil
 		}
 

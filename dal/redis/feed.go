@@ -53,7 +53,7 @@ func GetVideoIdsByLatestTime(ctx context.Context, latestTime int64, limit int64)
 
 	// 查询视频列表
 	res, err := RDB.ZRevRangeByScore(ctx, feedKey, &redis.ZRangeBy{
-		Min:   "0",
+		Min:   "1", // 这里是时间戳 为0可能有为了避免缓存穿透放的空视频 因此置1
 		Max:   fmt.Sprintf("%d", latestTime-1),
 		Count: limit,
 	}).Result()
@@ -86,8 +86,16 @@ func updateFeed(ctx context.Context) error {
 			return err
 		}
 
-		// 库里也没视频
+		// 库里也没视频 避免缓存穿透 放入空数据
 		if len(videoList) == 0 {
+			err = RDB.ZAdd(ctx, constants.RedisFeedKey, redis.Z{
+				Score:  0,
+				Member: 0,
+			}).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add video ids to feed failed %v", err)
+				return err
+			}
 			return nil
 		}
 

@@ -56,6 +56,9 @@ func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.U
 			return users, err
 		}
 
+		// 添加查库结果
+		users = append(users, us...)
+
 		// 查库结果加入缓存
 		err = MSetUserInfo(ctx, us)
 		if err != nil {
@@ -63,8 +66,29 @@ func MGetUserInfoByUserId(ctx context.Context, userIds []int64) (users []*user.U
 			return users, err
 		}
 
-		// 添加查库结果
-		users = append(users, us...)
+		// 防止缓存穿透 这里没查到的放空用户
+		if len(us) != len(notInCacheUserIds) {
+			existUserIds := make(map[int64]bool)
+			for _, u := range us {
+				if u == nil {
+					continue
+				}
+				existUserIds[u.Id] = true
+			}
+			emptyUsers := make([]*user.User, 0)
+			for _, uid := range notInCacheUserIds {
+				if !existUserIds[uid] {
+					emptyUsers = append(emptyUsers, &user.User{
+						Id: uid,
+					})
+				}
+			}
+			err = MSetUserInfo(ctx, emptyUsers)
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis set userinfo failed %v", err)
+				return users, err
+			}
+		}
 	}
 	return
 }

@@ -92,34 +92,6 @@ func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment) e
 	return err
 }
 
-func MAddCommentIdToCommentList(ctx context.Context, comments []*mysql.Comment, videoId int64) error {
-	// 判断评论列表是否存在，不存在则创建列表
-	err := updateCommentList(ctx, videoId)
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
-		return err
-	}
-
-	if len(comments) == 0 {
-		return nil
-	}
-
-	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
-	commentIds := make([]redis.Z, 0, len(comments))
-	for _, c := range comments {
-		if c == nil {
-			continue
-		}
-		commentIds = append(commentIds, redis.Z{
-			Score:  float64(c.CreatedAt.UnixMilli()),
-			Member: c.Id,
-		})
-	}
-	err = RDB.ZAdd(ctx, commentListKey, commentIds...).Err()
-
-	return err
-}
-
 func SetComment(ctx context.Context, comment *mysql.Comment) error {
 	if comment == nil {
 		return nil
@@ -224,7 +196,7 @@ func GetCommentIdListByVideoId(ctx context.Context, videoId int64) ([]*mysql.Com
 
 	// 查询评论id列表
 	res, err := RDB.ZRevRangeByScoreWithScores(ctx, commentListKey, &redis.ZRangeBy{
-		Min: "0",
+		Min: "1", // 这是时间戳 0的时候可能会碰到避免缓存穿透放的空评论 因此置1
 		Max: fmt.Sprintf("%d", time.Now().UnixMilli()),
 	}).Result()
 	if err != nil {
@@ -262,8 +234,16 @@ func updateCommentList(ctx context.Context, videoId int64) error {
 			return err
 		}
 
-		// 数据库也没评论
+		// 数据库也没评论 避免缓存穿透 放入空数据
 		if len(commentList) == 0 {
+			err = RDB.ZAdd(ctx, commentListKey, redis.Z{
+				Score:  0,
+				Member: 0,
+			}).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis add comment id to list failed %v", err)
+				return err
+			}
 			return nil
 		}
 
