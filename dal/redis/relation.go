@@ -41,7 +41,7 @@ func GetFollowListByUserId(ctx context.Context, userId int64) ([]*user.User, err
 	followIds := make([]int64, 0, len(followIdStrs))
 	for _, f := range followIdStrs {
 		uid, err := strconv.ParseInt(f, 10, 64)
-		if err == nil {
+		if err != nil {
 			continue
 		}
 		followIds = append(followIds, uid)
@@ -81,7 +81,7 @@ func GetFollowerListByUserId(ctx context.Context, userId int64) ([]*user.User, e
 	followerIds := make([]int64, 0, len(followerIdStrs))
 	for _, f := range followerIdStrs {
 		uid, err := strconv.ParseInt(f, 10, 64)
-		if err == nil {
+		if err != nil {
 			continue
 		}
 		followerIds = append(followerIds, uid)
@@ -121,7 +121,7 @@ func GetFriendListByUserId(ctx context.Context, userId int64) ([]*relation.Frien
 	friendIds := make([]int64, 0, len(friendIdStrs))
 	for _, f := range friendIdStrs {
 		uid, err := strconv.ParseInt(f, 10, 64)
-		if err == nil {
+		if err != nil {
 			continue
 		}
 		friendIds = append(friendIds, uid)
@@ -173,7 +173,7 @@ func updateFollowList(ctx context.Context, userId int64) error {
 		}
 
 		// 读取关注用户id
-		followIds := make([]int64, 0, len(followList))
+		followIds := make([]any, 0, len(followList))
 		for _, f := range followList {
 			followIds = append(followIds, f.Id)
 		}
@@ -186,7 +186,7 @@ func updateFollowList(ctx context.Context, userId int64) error {
 		}
 
 		// 把被关注的用户id加入缓存
-		err = RDB.SAdd(ctx, followListKey, followIds).Err()
+		err = RDB.SAdd(ctx, followListKey, followIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add follow id list failed %v", err)
 			return err
@@ -223,7 +223,7 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 		}
 
 		// 读取粉丝用户id
-		followerIds := make([]int64, 0, len(followerList))
+		followerIds := make([]any, 0, len(followerList))
 		for _, f := range followerList {
 			followerIds = append(followerIds, f.Id)
 		}
@@ -236,7 +236,7 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 		}
 
 		// 把粉丝用户id加入缓存
-		err = RDB.SAdd(ctx, followerListKey, followerIds).Err()
+		err = RDB.SAdd(ctx, followerListKey, followerIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add follower id list failed %v", err)
 			return err
@@ -282,23 +282,24 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 						redis.call("HIncrBy", KEYS[2], "follower_count", 1)
 					end
 					if redis.call("Exists", KEYS[3]) > 0 then
-						redis.call("SAdd", KEYS[3], KEYS[8])
+						redis.call("SAdd", KEYS[3], ARGV[2])
 					end
 					if redis.call("Exists", KEYS[4]) > 0 then
-						redis.call("SAdd", KEYS[4], KEYS[7])
+						redis.call("SAdd", KEYS[4], ARGV[1])
 					end
-					if redis.call("Exists", KEYS[3]) > 0 and redis.call("Exists", KEYS[4]) > 0 and redis.call("Sismember", KEYS[3], KEYS[8]) > 0 and redis.call("Sismenber", KEYS[4], KEYS[7]) > 0 then 
+					if redis.call("Exists", KEYS[3]) > 0 and redis.call("Exists", KEYS[4]) > 0 and redis.call("SIsMember", KEYS[3], ARGV[2]) > 0 and redis.call("SIsMember", KEYS[4], ARGV[1]) > 0 then 
 						if redis.call("Exists", KEYS[5]) > 0 then
-							redis.call("SAdd", KEYS[5], KEYS[8])
+							redis.call("SAdd", KEYS[5], ARGV[2])
 						end
 						if redis.call("Exists", KEYS[6]) > 0 then
-							redis.call("SAdd", KEYS[6], KEYS[7])
+							redis.call("SAdd", KEYS[6], ARGV[1])
 						end
 					end
 					return true
 					`)
-	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey, fmt.Sprintf("%d", userId), fmt.Sprintf("%d", toUserId)}
-	if err := lua.Run(ctx, RDB, keys).Err(); err != nil {
+	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey}
+	args := []interface{}{userId, toUserId}
+	if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
 		return err
 	}
 	return nil
@@ -334,23 +335,22 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 						redis.call("HIncrBy", KEYS[2], "follower_count", -1)
 					end
 					if redis.call("Exists", KEYS[3]) > 0 then
-						redis.call("SRem", KEYS[3], KEYS[8])
+						redis.call("SRem", KEYS[3], ARGV[2])
 					end
 					if redis.call("Exists", KEYS[4]) > 0 then
-						redis.call("SRem", KEYS[4], KEYS[7])
+						redis.call("SRem", KEYS[4], ARGV[1])
 					end
-					if redis.call("Exists", KEYS[3]) > 0 and redis.call("Exists", KEYS[4]) > 0 and redis.call("Sismember", KEYS[3], KEYS[8]) > 0 and redis.call("Sismenber", KEYS[4], KEYS[7]) > 0 then 
-						if redis.call("Exists", KEYS[5]) > 0 then
-							redis.call("SRem", KEYS[5], KEYS[8])
-						end
-						if redis.call("Exists", KEYS[6]) > 0 then
-							redis.call("SRem", KEYS[6], KEYS[7])
-						end
+					if redis.call("Exists", KEYS[5]) > 0 then
+						redis.call("SRem", KEYS[5], ARGV[2])
+					end
+					if redis.call("Exists", KEYS[6]) > 0 then
+						redis.call("SRem", KEYS[6], ARGV[1])
 					end
 					return true
 					`)
-	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey, fmt.Sprintf("%d", userId), fmt.Sprintf("%d", toUserId)}
-	if err := lua.Run(ctx, RDB, keys).Err(); err != nil {
+	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey}
+	args := []interface{}{userId, toUserId}
+	if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
 		return err
 	}
 	return nil
@@ -377,7 +377,7 @@ func updateFriendList(ctx context.Context, userId int64) error {
 		}
 
 		// 读取好友用户id
-		friendIds := make([]int64, 0, len(friendList))
+		friendIds := make([]any, 0, len(friendList))
 		for _, f := range friendList {
 			friendIds = append(friendIds, f.Id)
 		}
@@ -402,7 +402,7 @@ func updateFriendList(ctx context.Context, userId int64) error {
 		}
 
 		// 把好友的用户id加入缓存
-		err = RDB.SAdd(ctx, friendListKey, friendIds).Err()
+		err = RDB.SAdd(ctx, friendListKey, friendIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add friend id list failed %v", err)
 			return err

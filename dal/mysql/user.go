@@ -14,8 +14,8 @@ type User struct {
 	Id            int64          `gorm:"column:id;primaryKey'" redis:"id"`
 	UserName      string         `gorm:"column:username;unique_index:tk_username" redis:"name"`
 	Password      string         `gorm:"column:password"`
-	FollowCount   int64          `redis:"follow_count"`
-	FollowerCount int64          `redis:"follower_count"`
+	FollowCount   int64          `gorm:"-" redis:"follow_count"`
+	FollowerCount int64          `gorm:"-" redis:"follower_count"`
 	CreatedAt     time.Time      `gorm:"column:created_at"`
 	UpdatedAt     time.Time      `gorm:"column:updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"column:deleted_at"`

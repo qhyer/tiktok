@@ -28,7 +28,7 @@ func TestFollowListService_FollowList(t *testing.T) {
 		{
 			name:    "ok",
 			fields:  fields{ctx: context.Background()},
-			args:    args{req: &relation.DouyinRelationFollowListRequest{UserId: 1, ToUserId: 10}},
+			args:    args{req: &relation.DouyinRelationFollowListRequest{UserId: 11, ToUserId: 11}},
 			wantErr: false,
 		},
 		{
