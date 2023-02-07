@@ -13,6 +13,7 @@ import (
 	"tiktok/pkg/constants"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/redis/go-redis/v9"
 )
 
 func GetFollowListByUserId(ctx context.Context, userId int64) ([]*user.User, error) {
@@ -195,6 +196,7 @@ func updateFollowList(ctx context.Context, userId int64) error {
 		err = RDB.Expire(ctx, followListKey, constants.FollowListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set follow list expiry failed %v", err)
+			return err
 		}
 	}
 	return nil
@@ -244,7 +246,112 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 		err = RDB.Expire(ctx, followerListKey, constants.FollowerListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set follower list expiry failed %v", err)
+			return err
 		}
+	}
+	return nil
+}
+
+func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
+	// 更新操作者的的关注列表
+	err := updateFollowList(ctx, userId)
+	if err != nil {
+		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
+		return err
+	}
+	// 更新被关注者的粉丝列表
+	err = updateFollowerList(ctx, toUserId)
+	if err != nil {
+		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
+		return err
+	}
+
+	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
+	toUserKey := fmt.Sprintf(constants.RedisUserKey, toUserId)
+	userFollowListKey := fmt.Sprintf(constants.RedisFollowListKey, userId)
+	toUserFollowerListKey := fmt.Sprintf(constants.RedisFollowerListKey, toUserId)
+	userFriendListKey := fmt.Sprintf(constants.RedisFriendListKey, userId)
+	toUserFriendListKey := fmt.Sprintf(constants.RedisFriendListKey, toUserId)
+
+	// lua操作 操作者关注数+1 被关注者粉丝数+1
+	lua := redis.NewScript(`
+					if redis.call("Exists", KEYS[1]) > 0 then
+						redis.call("HIncrBy", KEYS[1], "follow_count", 1)
+					end
+					if redis.call("Exists", KEYS[2]) > 0 then
+						redis.call("HIncrBy", KEYS[2], "follower_count", 1)
+					end
+					if redis.call("Exists", KEYS[3]) > 0 then
+						redis.call("SAdd", KEYS[3], KEYS[8])
+					end
+					if redis.call("Exists", KEYS[4]) > 0 then
+						redis.call("SAdd", KEYS[4], KEYS[7])
+					end
+					if redis.call("Exists", KEYS[3]) > 0 and redis.call("Exists", KEYS[4]) > 0 and redis.call("Sismember", KEYS[3], KEYS[8]) > 0 and redis.call("Sismenber", KEYS[4], KEYS[7]) > 0 then 
+						if redis.call("Exists", KEYS[5]) > 0 then
+							redis.call("SAdd", KEYS[5], KEYS[8])
+						end
+						if redis.call("Exists", KEYS[6]) > 0 then
+							redis.call("SAdd", KEYS[6], KEYS[7])
+						end
+					end
+					return true
+					`)
+	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey, fmt.Sprintf("%d", userId), fmt.Sprintf("%d", toUserId)}
+	if err := lua.Run(ctx, RDB, keys).Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
+	// 更新操作者的的关注列表
+	err := updateFollowList(ctx, userId)
+	if err != nil {
+		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
+		return err
+	}
+	// 更新被关注者的粉丝列表
+	err = updateFollowerList(ctx, toUserId)
+	if err != nil {
+		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
+		return err
+	}
+
+	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
+	toUserKey := fmt.Sprintf(constants.RedisUserKey, toUserId)
+	userFollowListKey := fmt.Sprintf(constants.RedisFollowListKey, userId)
+	toUserFollowerListKey := fmt.Sprintf(constants.RedisFollowerListKey, toUserId)
+	userFriendListKey := fmt.Sprintf(constants.RedisFriendListKey, userId)
+	toUserFriendListKey := fmt.Sprintf(constants.RedisFriendListKey, toUserId)
+
+	// lua操作 操作者关注数+1 被关注者粉丝数+1
+	lua := redis.NewScript(`
+					if redis.call("Exists", KEYS[1]) > 0 then
+						redis.call("HIncrBy", KEYS[1], "follow_count", -1)
+					end
+					if redis.call("Exists", KEYS[2]) > 0 then
+						redis.call("HIncrBy", KEYS[2], "follower_count", -1)
+					end
+					if redis.call("Exists", KEYS[3]) > 0 then
+						redis.call("SRem", KEYS[3], KEYS[8])
+					end
+					if redis.call("Exists", KEYS[4]) > 0 then
+						redis.call("SRem", KEYS[4], KEYS[7])
+					end
+					if redis.call("Exists", KEYS[3]) > 0 and redis.call("Exists", KEYS[4]) > 0 and redis.call("Sismember", KEYS[3], KEYS[8]) > 0 and redis.call("Sismenber", KEYS[4], KEYS[7]) > 0 then 
+						if redis.call("Exists", KEYS[5]) > 0 then
+							redis.call("SRem", KEYS[5], KEYS[8])
+						end
+						if redis.call("Exists", KEYS[6]) > 0 then
+							redis.call("SRem", KEYS[6], KEYS[7])
+						end
+					end
+					return true
+					`)
+	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey, fmt.Sprintf("%d", userId), fmt.Sprintf("%d", toUserId)}
+	if err := lua.Run(ctx, RDB, keys).Err(); err != nil {
+		return err
 	}
 	return nil
 }
