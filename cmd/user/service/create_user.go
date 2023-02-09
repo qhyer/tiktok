@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"tiktok/dal/mysql"
+	"tiktok/dal/neo4j"
 	"tiktok/dal/pack"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/errno"
@@ -40,6 +41,8 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 	// 对密码加盐
 	password = hashPassword(username, password)
 
+	// TODO 延时队列check是否在neo4j中创建用户成功
+
 	// 创建用户
 	us, err := mysql.CreateUser(s.ctx, []*mysql.User{{
 		UserName: username,
@@ -55,6 +58,12 @@ func (s *CreateUserService) CreateUser(req *user.DouyinUserRegisterRequest) (int
 	}
 
 	usrs := pack.Users(us)
+
+	// 在neo4j中创建用户节点
+	err = neo4j.CreateUser(s.ctx, usrs[0])
+	if err != nil {
+		return 0, err
+	}
 
 	// 获取创建成功后的用户id
 	userId := usrs[0].Id

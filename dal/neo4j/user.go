@@ -3,13 +3,12 @@ package neo4j
 import (
 	"context"
 
-	"tiktok/dal/mysql"
 	"tiktok/kitex_gen/user"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func CreateUser(ctx context.Context, user []*mysql.User) (err error) {
+func CreateUser(ctx context.Context, user *user.User) (err error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{
 		AccessMode: neo4j.AccessModeWrite,
 	})
@@ -20,16 +19,14 @@ func CreateUser(ctx context.Context, user []*mysql.User) (err error) {
 		}
 	}()
 	if _, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (interface{}, error) {
-		for _, u := range user {
-			query := "CREATE (:User {id: $id, username: $username, follow_count: 0, follower_count: 0})"
-			parameters := map[string]interface{}{
-				"id":       u.Id,
-				"username": u.UserName,
-			}
-			_, err = tx.Run(ctx, query, parameters)
-			if err != nil {
-				return nil, err
-			}
+		query := "CREATE (:User {id: $id, username: $username, follow_count: 0, follower_count: 0})"
+		parameters := map[string]interface{}{
+			"id":       user.Id,
+			"username": user.Name,
+		}
+		_, err = tx.Run(ctx, query, parameters)
+		if err != nil {
+			return nil, err
 		}
 		return nil, nil
 	}); err != nil {

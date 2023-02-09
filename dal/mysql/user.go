@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"tiktok/dal/neo4j"
 	"tiktok/pkg/constants"
 
 	"gorm.io/gorm"
@@ -28,21 +27,10 @@ func (u *User) TableName() string {
 
 // CreateUser create user info
 func CreateUser(ctx context.Context, users []*User) ([]*User, error) {
-	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// mysql创建节点
-		if err := tx.WithContext(ctx).Create(&users).Error; err != nil {
-			return err
-		}
-
-		// 在neo4j中创建用户节点
-		if err := neo4j.CreateUser(ctx, users); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return users, err
+	if err := DB.WithContext(ctx).Create(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // QueryUser query list of user info
