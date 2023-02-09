@@ -104,7 +104,10 @@ func FollowerList(ctx context.Context, userId int64) (users []*user.User, err er
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		users, err = queryUserFollower(ctx, tx, userId)

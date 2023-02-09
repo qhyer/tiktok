@@ -15,7 +15,10 @@ func UpsertLastMessage(ctx context.Context, userId int64, toUserId int64, conten
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		res, err := isFriendRelation(ctx, tx, userId, toUserId)
@@ -41,7 +44,10 @@ func MQueryLastMessage(ctx context.Context, userId int64, toUserIds []int64) (me
 		AccessMode: neo4j.AccessModeWrite,
 	})
 	defer func() {
-		err = session.Close(ctx)
+		err := session.Close(ctx)
+		if err != nil {
+			return
+		}
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		res, err := mQueryLastMessage(ctx, tx, userId, toUserIds)
