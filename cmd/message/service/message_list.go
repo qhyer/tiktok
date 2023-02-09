@@ -19,12 +19,13 @@ func NewMessageListService(ctx context.Context) *MessageListService {
 	return &MessageListService{ctx: ctx}
 }
 
+// MessageList get user unread message list
 func (s *MessageListService) MessageList(req *message.DouyinMessageListRequest) ([]*message.Message, error) {
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 
-	// 获取聊天消息记录
-	msgs, err := mysql.MessageList(s.ctx, userId, toUserId)
+	// 获取最早未读至今的聊天记录
+	msgs, err := mysql.GetUnreadMessageListByUserId(s.ctx, userId, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "db get message list failed %v", err)
 		return nil, err
