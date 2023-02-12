@@ -80,7 +80,7 @@ func updateFeed(ctx context.Context) error {
 
 	// 不存在feed
 	if res == 0 {
-		videoList, err := mysql.GetVideosByLatestTime(ctx, 100, time.Now().UnixMilli())
+		videoList, err := mysql.GetVideosByLatestTime(ctx, -1, time.Now().UnixMilli())
 		if err != nil {
 			klog.CtxErrorf(ctx, "mysql get latest videos failed %v", err)
 			return err

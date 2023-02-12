@@ -24,8 +24,8 @@ func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([
 		return res, err
 	}
 
-	// 查询id列表
-	msgs, err := RDB.ZRevRangeByScoreWithScores(ctx, msgListKey, &redis.ZRangeBy{
+	// 查询id列表 按时间正序
+	msgs, err := RDB.ZRangeByScoreWithScores(ctx, msgListKey, &redis.ZRangeBy{
 		Min: "1", // 这里是时间戳 避免缓存穿透 因此置1
 		Max: fmt.Sprintf("%d", time.Now().UnixMilli()),
 	}).Result()
@@ -34,9 +34,11 @@ func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([
 		return res, err
 	}
 
+	rmMsgIds := make([]interface{}, 0)
 	// 把消息id加入到列表
 	for _, m := range msgs {
 		mid, err := strconv.ParseInt(m.Member.(string), 10, 64)
+		rmMsgIds = append(rmMsgIds, mid)
 		if err != nil {
 			continue
 		}
@@ -47,10 +49,19 @@ func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([
 	}
 
 	// 读完后要清空redis中的已读消息
-	err = RDB.ZRem(ctx, msgListKey, msgs).Err()
+	if len(rmMsgIds) > 0 {
+		err = RDB.ZRem(ctx, msgListKey, rmMsgIds...).Err()
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis remove read messages failed %v", err)
+			return res, err
+		}
+	}
+
+	// 更新list的过期时间
+	err = RDB.Expire(ctx, msgListKey, constants.MessageListExpiry).Err()
 	if err != nil {
-		klog.CtxErrorf(ctx, "redis remove read messages failed %v", err)
-		return res, nil
+		klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
+		return res, err
 	}
 
 	return res, nil
@@ -112,6 +123,20 @@ func MGetMessageByMessageId(ctx context.Context, redisMsgs []*mysql.Message) (me
 	return
 }
 
+func SetMessage(ctx context.Context, message *mysql.Message) error {
+	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+		messageKey := fmt.Sprintf(constants.RedisMessageKey, message.Id)
+		pipeliner.HMSet(ctx, messageKey,
+			"user_id", message.UserId,
+			"to_user_id", message.ToUserId,
+			"content", message.Content,
+		)
+		pipeliner.Expire(ctx, messageKey, constants.MessageExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second)
+		return nil
+	})
+	return err
+}
+
 func MSetMessage(ctx context.Context, messages []*mysql.Message) error {
 	_, err := RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
 		for _, c := range messages {
@@ -131,31 +156,44 @@ func MSetMessage(ctx context.Context, messages []*mysql.Message) error {
 	return err
 }
 
-func MAddMessageToMessageList(ctx context.Context, messages []*mysql.Message) error {
-	for _, message := range messages {
-		msgId := message.Id
-		userId := message.UserId
-		toUserId := message.ToUserId
+func AddNewMessageToMessageList(ctx context.Context, message *mysql.Message) error {
+	msgId := message.Id
+	userId := message.UserId
+	toUserId := message.ToUserId
 
-		// 如果key存在 则加入聊天记录中
-		myMsgListKey := fmt.Sprintf(constants.RedisMessageListKey, userId, toUserId)
-		hisMsgListKey := fmt.Sprintf(constants.RedisMessageListKey, toUserId, userId)
-		lua := redis.NewScript(`
-					if redis.call("Exists", KEYS[1]) > 0 then
-						redis.call("ZAdd", KEYS[1], "id", ARGV[1], "user_id", ARGV[2], "to_user_id", ARGV[3], "content", ARGV[4], "created_at", ARGV[5])
-					end
-					if redis.call("Exists", KEYS[2]) > 0 then
-						redis.call("ZAdd", KEYS[1], "id", ARGV[1], "user_id", ARGV[3], "to_user_id", ARGV[2], "content", ARGV[4], "created_at", ARGV[5])
-					end
-					return true
-					`)
-		msgContent := message.Content
-		curTime := message.CreatedAt.UnixMilli()
-		keys := []string{myMsgListKey, hisMsgListKey}
-		args := []interface{}{msgId, userId, toUserId, msgContent, curTime}
-		if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
-			return err
-		}
+	// 把评论加入缓存
+	err := SetMessage(ctx, message)
+	if err != nil {
+		klog.CtxErrorf(ctx, "redis set message failed %v", err)
+		return err
+	}
+
+	// 如果key存在 则把评论id加入聊天记录中
+	myMsgListKey := fmt.Sprintf(constants.RedisMessageListKey, userId, toUserId)
+	hisMsgListKey := fmt.Sprintf(constants.RedisMessageListKey, toUserId, userId)
+	exists, err := RDB.Exists(ctx, myMsgListKey).Result()
+	if err != nil {
+		return err
+	}
+
+	// 把消息id加入当前用户的消息列表
+	if exists == 1 {
+		RDB.ZAdd(ctx, myMsgListKey, redis.Z{
+			Score:  float64(message.CreatedAt.UnixMilli()),
+			Member: msgId,
+		})
+	}
+
+	// 把消息id加入对方的消息列表
+	exists, err = RDB.Exists(ctx, hisMsgListKey).Result()
+	if err != nil {
+		return err
+	}
+	if exists == 1 {
+		RDB.ZAdd(ctx, hisMsgListKey, redis.Z{
+			Score:  float64(message.CreatedAt.UnixMilli()),
+			Member: msgId,
+		})
 	}
 	return nil
 }

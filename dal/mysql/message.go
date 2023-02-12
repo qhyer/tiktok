@@ -43,9 +43,9 @@ func MGetMessageListByMessageId(ctx context.Context, msgIds []int64) ([]*Message
 }
 
 // CreateMessage insert user message
-func CreateMessage(ctx context.Context, message []*Message) ([]*Message, error) {
-	if err := DB.WithContext(ctx).Create(&message).Error; err != nil {
+func CreateMessage(ctx context.Context, messages []*Message) ([]*Message, error) {
+	if err := DB.WithContext(ctx).Create(&messages).Error; err != nil {
 		return nil, err
 	}
-	return message, nil
+	return messages, nil
 }

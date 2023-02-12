@@ -40,7 +40,7 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 
 	if ok {
 		// 把消息加入数据库
-		msg, err := mysql.CreateMessage(s.ctx, []*mysql.Message{{
+		msgs, err := mysql.CreateMessage(s.ctx, []*mysql.Message{{
 			UserId:   userId,
 			ToUserId: toUserId,
 			Content:  content,
@@ -51,7 +51,7 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 		}
 
 		// 把消息加入缓存
-		err = redis.MAddMessageToMessageList(s.ctx, msg)
+		err = redis.AddNewMessageToMessageList(s.ctx, msgs[0])
 		if err != nil {
 			klog.CtxErrorf(s.ctx, "redis add message to list failed %v", err)
 			return err

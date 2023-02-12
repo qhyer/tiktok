@@ -38,6 +38,6 @@ const (
 	FollowListExpiry    = 5 * time.Minute
 	FollowerListExpiry  = 5 * time.Minute
 	FriendListExpiry    = 5 * time.Minute
-	MessageListExpiry   = 5 * time.Second
+	MessageListExpiry   = 10 * time.Second
 	MessageExpiry       = 10 * time.Minute
 )

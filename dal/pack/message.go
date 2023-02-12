@@ -15,7 +15,7 @@ func Message(msg *mysql.Message) *message.Message {
 		ToUserId:   msg.ToUserId,
 		FromUserId: msg.UserId,
 		Content:    msg.Content,
-		CreateTime: msg.CreatedAt.UnixMicro(),
+		CreateTime: msg.CreatedAt.UnixMilli(),
 	}
 }
 

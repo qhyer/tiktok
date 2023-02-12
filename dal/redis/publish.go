@@ -92,6 +92,13 @@ func updatePublishList(ctx context.Context, userId int64) error {
 				klog.CtxErrorf(ctx, "redis add publish list failed %v", err)
 				return err
 			}
+
+			// 设置list的过期时间
+			err = RDB.Expire(ctx, publishListKey, constants.PublishListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis set publish list expiry failed %v", err)
+				return err
+			}
 			return nil
 		}
 

@@ -177,6 +177,13 @@ func updateFollowList(ctx context.Context, userId int64) error {
 				klog.CtxErrorf(ctx, "redis add follow id list failed %v", err)
 				return err
 			}
+
+			// 设置list的过期时间
+			err = RDB.Expire(ctx, followListKey, constants.FollowListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis set follow list expiry failed %v", err)
+				return err
+			}
 			return nil
 		}
 
@@ -230,6 +237,13 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 			err = RDB.SAdd(ctx, followerListKey, 0).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis add follower id list failed %v", err)
+				return err
+			}
+
+			// 设置list的过期时间
+			err = RDB.Expire(ctx, followerListKey, constants.FollowerListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis set follower list expiry failed %v", err)
 				return err
 			}
 			return nil
@@ -389,6 +403,13 @@ func updateFriendList(ctx context.Context, userId int64) error {
 			err = RDB.SAdd(ctx, friendListKey, 0).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis add friend id list failed %v", err)
+				return err
+			}
+
+			// 设置list的过期时间
+			err = RDB.Expire(ctx, friendListKey, constants.FriendListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis set friend list expiry failed %v", err)
 				return err
 			}
 			return nil

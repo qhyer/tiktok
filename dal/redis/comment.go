@@ -242,6 +242,13 @@ func updateCommentList(ctx context.Context, videoId int64) error {
 				klog.CtxErrorf(ctx, "redis add comment id to list failed %v", err)
 				return err
 			}
+
+			// 设置list的过期时间
+			err = RDB.Expire(ctx, commentListKey, constants.CommentListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+			if err != nil {
+				klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
+				return err
+			}
 			return nil
 		}
 
