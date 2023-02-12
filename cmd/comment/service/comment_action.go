@@ -37,7 +37,7 @@ func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionReq
 		Content: content,
 	})
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db create comment failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql create comment failed %v", err)
 		return nil, err
 	}
 
@@ -71,7 +71,7 @@ func (s *CommentActionService) DeleteComment(req *comment.DouyinCommentActionReq
 		Id:     commentId,
 	})
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db delete comment failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql delete comment failed %v", err)
 		return err
 	}
 

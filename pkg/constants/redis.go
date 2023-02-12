@@ -21,6 +21,8 @@ const (
 	RedisFollowListKey   = "FOLLOW_LIST:%d"
 	RedisFollowerListKey = "FOLLOWER_LIST:%d"
 	RedisFriendListKey   = "FRIEND_LIST:%d"
+	RedisMessageListKey  = "MESSAGE_LIST:%d:%d"
+	RedisMessageKey      = "MESSAGE:%d"
 )
 
 // 超时时间
@@ -36,4 +38,6 @@ const (
 	FollowListExpiry    = 5 * time.Minute
 	FollowerListExpiry  = 5 * time.Minute
 	FriendListExpiry    = 5 * time.Minute
+	MessageListExpiry   = 5 * time.Second
+	MessageExpiry       = 10 * time.Minute
 )

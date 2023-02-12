@@ -137,11 +137,8 @@ func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment)
 		return nil
 	})
 	if err != nil {
-		// 出错 把所有id都加入未找到
-		for _, c := range redisComments {
-			notInCacheCommentIds = append(notInCacheCommentIds, c.Id)
-		}
-		return comments, err
+		klog.CtxErrorf(ctx, "redis get comment failed %v", err)
+		return nil, err
 	}
 
 	// 处理getall结果
@@ -175,6 +172,7 @@ func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment)
 		err = MSetComment(ctx, cs)
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set comment failed %v", err)
+			return nil, err
 		}
 
 		// 把评论加入结果

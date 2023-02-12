@@ -5,6 +5,7 @@ import (
 
 	"tiktok/dal/mysql"
 	"tiktok/dal/neo4j"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/message"
 	"tiktok/pkg/censor"
 	"tiktok/pkg/errno"
@@ -38,17 +39,26 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 	}
 
 	if ok {
-		err := mysql.CreateMessage(s.ctx, []*mysql.Message{{
+		// 把消息加入数据库
+		msg, err := mysql.CreateMessage(s.ctx, []*mysql.Message{{
 			UserId:   userId,
 			ToUserId: toUserId,
 			Content:  content,
 		}})
 		if err != nil {
+			klog.CtxErrorf(s.ctx, "mysql create message failed %v", err)
 			return errno.DatabaseOperationFailedErr
 		}
-		return nil
+
+		// 把消息加入缓存
+		err = redis.MAddMessageToMessageList(s.ctx, msg)
+		if err != nil {
+			klog.CtxErrorf(s.ctx, "redis add message to list failed %v", err)
+			return err
+		}
 	} else {
 		klog.CtxWarnf(s.ctx, "not friend relation %v", req)
 		return errno.ParamErr
 	}
+	return nil
 }

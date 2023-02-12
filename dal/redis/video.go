@@ -24,6 +24,7 @@ func MGetVideoInfoByVideoId(ctx context.Context, videoIds []int64) (videos []*my
 		return nil
 	})
 	if err != nil {
+		klog.CtxErrorf(ctx, "redis get video failed %v", err)
 		return videos, err
 	}
 	// 处理getall结果

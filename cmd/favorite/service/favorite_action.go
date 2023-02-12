@@ -30,7 +30,7 @@ func (s *FavoriteActionService) CreateFavorite(req *favorite.DouyinFavoriteActio
 		VideoId: videoId,
 	})
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db create favorite failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql create favorite failed %v", err)
 		return err
 	}
 
@@ -55,7 +55,7 @@ func (s *FavoriteActionService) CancelFavorite(req *favorite.DouyinFavoriteActio
 		VideoId: videoId,
 	})
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db delete favorite failed %v", err)
+		klog.CtxErrorf(s.ctx, "mysql delete favorite failed %v", err)
 		return err
 	}
 

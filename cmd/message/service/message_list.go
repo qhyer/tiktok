@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
+	"tiktok/dal/redis"
 	"tiktok/kitex_gen/message"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -24,10 +24,17 @@ func (s *MessageListService) MessageList(req *message.DouyinMessageListRequest) 
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
 
-	// 获取最早未读至今的聊天记录
-	msgs, err := mysql.GetUnreadMessageListByUserId(s.ctx, userId, toUserId)
+	// 获取消息id
+	msgIds, err := redis.GetMessageIdsByUserId(s.ctx, userId, toUserId)
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "db get message list failed %v", err)
+		klog.CtxErrorf(s.ctx, "reids get message id list failed %v", err)
+		return nil, err
+	}
+
+	// 获取消息记录
+	msgs, err := redis.MGetMessageByMessageId(s.ctx, msgIds)
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "redis get message list failed %v", err)
 		return nil, err
 	}
 
