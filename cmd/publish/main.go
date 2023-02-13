@@ -6,6 +6,7 @@ import (
 	"tiktok/cmd/rpc"
 	"tiktok/dal"
 	publish "tiktok/kitex_gen/publish/publishsrv"
+	"tiktok/pkg/bound"
 	"tiktok/pkg/censor"
 	"tiktok/pkg/constants"
 	"tiktok/pkg/middleware"
@@ -13,6 +14,7 @@ import (
 	"tiktok/pkg/tracer"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	"github.com/kitex-contrib/registry-nacos/registry"
@@ -59,12 +61,12 @@ func main() {
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: constants.PublishServiceName}), // server name
 		server.WithMiddleware(middleware.CommonMiddleware),                                                // middleware
 		server.WithMiddleware(middleware.ServerMiddleware),
-		server.WithServiceAddr(addr), // address
-		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(),                       // Multiplex
-		server.WithSuite(trace.NewDefaultServerSuite()), // tracer
-		//server.WithBoundHandler(bound.NewCpuLimitHandler()), // BoundHandler
-		server.WithRegistry(registry.NewNacosRegistry(cli)), // registry
+		server.WithServiceAddr(addr),                                       // address
+		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
+		server.WithMuxTransport(),                                          // Multiplex
+		server.WithSuite(trace.NewDefaultServerSuite()),                    // tracer
+		server.WithBoundHandler(bound.NewCpuLimitHandler()),                // BoundHandler
+		server.WithRegistry(registry.NewNacosRegistry(cli)),                // registry
 	)
 	err = svr.Run()
 	if err != nil {
