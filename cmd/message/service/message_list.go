@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/message"
@@ -32,10 +33,31 @@ func (s *MessageListService) MessageList(req *message.DouyinMessageListRequest) 
 	}
 
 	// 获取消息记录
-	msgs, err := redis.MGetMessageByMessageId(s.ctx, msgIds)
+	rmsgs, err := redis.MGetMessageByMessageId(s.ctx, msgIds)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis get message list failed %v", err)
 		return nil, err
+	}
+
+	// 合并消息
+	msgMap := make(map[int64]*mysql.Message, 0)
+	msgs := make([]*mysql.Message, 0)
+	for _, m := range rmsgs {
+		if m == nil {
+			continue
+		}
+		msgMap[m.Id] = m
+	}
+
+	for _, m := range msgIds {
+		if m == nil {
+			continue
+		}
+		res := msgMap[m.Id]
+		if res == nil {
+			continue
+		}
+		msgs = append(msgs, res)
 	}
 
 	messages := pack.Messages(msgs)
