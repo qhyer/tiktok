@@ -226,7 +226,7 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 
 	// 不存在粉丝列表 查库
 	if res == 0 {
-		followerList, err := neo4j.FollowerList(ctx, userId)
+		followerList, err := neo4j.FollowerList(ctx, userId, constants.FollowerQueryLimit)
 		if err != nil {
 			klog.CtxErrorf(ctx, "neo4j get follower list failed %v", err)
 			return err

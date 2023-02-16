@@ -99,7 +99,7 @@ func FollowList(ctx context.Context, userId int64) (users []*user.User, err erro
 }
 
 // FollowerList get user follower list
-func FollowerList(ctx context.Context, userId int64) (users []*user.User, err error) {
+func FollowerList(ctx context.Context, userId int64, limit int64) (users []*user.User, err error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{
 		AccessMode: neo4j.AccessModeWrite,
 	})
@@ -110,7 +110,7 @@ func FollowerList(ctx context.Context, userId int64) (users []*user.User, err er
 		}
 	}()
 	res, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		users, err = queryUserFollower(ctx, tx, userId)
+		users, err = queryUserFollower(ctx, tx, userId, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -287,12 +287,13 @@ func queryUserFollow(ctx context.Context, tx neo4j.ManagedTransaction, userId in
 	return users, nil
 }
 
-func queryUserFollower(ctx context.Context, tx neo4j.ManagedTransaction, userId int64) ([]*user.User, error) {
+func queryUserFollower(ctx context.Context, tx neo4j.ManagedTransaction, userId int64, limit int64) ([]*user.User, error) {
 	result, err := tx.Run(ctx,
-		"MATCH (User)-[r:Follow]->(:User{id: $userId}) "+
+		"MATCH (User)-[r:Follow]->(:User{id: $userId}) LIMIT $limit"+
 			"RETURN User;",
 		map[string]interface{}{
 			"userId": userId,
+			"limit":  limit,
 		},
 	)
 	if err != nil {
