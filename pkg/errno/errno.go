@@ -18,6 +18,7 @@ const (
 	CommentNotExistErrCode     = 10009
 	FavoriteExistErrCode       = 10010
 	FavoriteNotExistErrCode    = 10011
+	VideoNotExistsErrCode      = 10012
 )
 
 type ErrNo struct {
@@ -51,6 +52,7 @@ var (
 	CommentNotExistErr         = NewErrNo(CommentNotExistErrCode, "Comment not exists")
 	FavoriteExistErr           = NewErrNo(FavoriteExistErrCode, "Favorite already exists")
 	FavoriteNotExistErr        = NewErrNo(FavoriteNotExistErrCode, "Favorite not exists")
+	VideoNotExistErr           = NewErrNo(VideoNotExistsErrCode, "Video not exists")
 )
 
 // ConvertErr convert error to Errno

@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 
+	"tiktok/cmd/rpc"
 	"tiktok/dal/mysql"
 	"tiktok/dal/pack"
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/comment"
+	"tiktok/kitex_gen/user"
 	"tiktok/pkg/censor"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -42,6 +44,17 @@ func (s *CommentActionService) CreateComment(req *comment.DouyinCommentActionReq
 	}
 
 	com := pack.Comment(c)
+
+	// 获取发布者信息
+	userResp, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
+		UserId:    userId,
+		ToUserIds: []int64{userId},
+	})
+	if err != nil {
+		klog.CtxErrorf(s.ctx, "rpc get userinfo failed %v", err)
+		return nil, err
+	}
+	com.User = userResp.User[0]
 
 	// 在缓存中加入评论数据
 	err = redis.SetComment(s.ctx, c)

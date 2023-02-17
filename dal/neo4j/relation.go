@@ -289,8 +289,8 @@ func queryUserFollow(ctx context.Context, tx neo4j.ManagedTransaction, userId in
 
 func queryUserFollower(ctx context.Context, tx neo4j.ManagedTransaction, userId int64, limit int64) ([]*user.User, error) {
 	result, err := tx.Run(ctx,
-		"MATCH (User)-[r:Follow]->(:User{id: $userId}) LIMIT $limit"+
-			"RETURN User;",
+		"MATCH (User)-[r:Follow]->(:User{id: $userId}) "+
+			"RETURN User LIMIT $limit;",
 		map[string]interface{}{
 			"userId": userId,
 			"limit":  limit,

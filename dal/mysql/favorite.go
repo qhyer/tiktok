@@ -59,7 +59,7 @@ func CreateFavorite(ctx context.Context, favorite *Favorite) (*Favorite, error) 
 
 		// 更新喜欢数失败
 		if res.RowsAffected != 1 {
-			return errno.DatabaseOperationFailedErr
+			return errno.VideoNotExistErr
 		}
 
 		return nil
@@ -73,12 +73,12 @@ func DeleteFavorite(ctx context.Context, favorite *Favorite) (*Favorite, error) 
 		// 用户取消喜欢
 		res := tx.Where("video_id = ? and user_id = ?", favorite.VideoId, favorite.UserId).Delete(&favorite)
 		if res.Error != nil {
-			return errno.FavoriteNotExistErr
+			return errno.DatabaseOperationFailedErr
 		}
 
 		// 删除失败
 		if res.RowsAffected != 1 {
-			return errno.DatabaseOperationFailedErr
+			return errno.FavoriteNotExistErr
 		}
 
 		// video 喜欢数-1

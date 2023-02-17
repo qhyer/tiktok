@@ -6,6 +6,7 @@ import (
 	"tiktok/dal/neo4j"
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/relation"
+	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -28,7 +29,7 @@ func (s *RelationActionService) Follow(req *relation.DouyinRelationActionRequest
 	err := neo4j.FollowAction(s.ctx, userId, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j follow action failed %v", err)
-		return err
+		return errno.DatabaseOperationFailedErr
 	}
 
 	// 缓存中 操作用户关注数+1 被关注者粉丝+1 同时修改列表
@@ -50,7 +51,7 @@ func (s *RelationActionService) Unfollow(req *relation.DouyinRelationActionReque
 	err := neo4j.UnfollowAction(s.ctx, userId, toUserId)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j unfollow action failed %v", err)
-		return err
+		return errno.DatabaseOperationFailedErr
 	}
 
 	// 缓存中 操作用户关注数-1 被关注者粉丝-1 同时修改列表

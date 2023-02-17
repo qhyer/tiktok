@@ -35,7 +35,7 @@ func (s *MessageActionService) SendMessage(req *message.DouyinMessageActionReque
 	ok, err := neo4j.UpsertLastMessage(s.ctx, userId, toUserId, content)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "neo4j upsert last message failed %v", err)
-		return err
+		return errno.DatabaseOperationFailedErr
 	}
 
 	if ok {

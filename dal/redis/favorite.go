@@ -44,9 +44,8 @@ func AddNewFavoriteToFavoriteList(ctx context.Context, favorite *mysql.Favorite)
 		incrBy := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
 						redis.call("HIncrBy", KEYS[1], "favorite_count", 1)
-						return true
 					end
-					return false
+					return true 
 					`)
 		keys := []string{videoKey}
 		if err := incrBy.Run(ctx, RDB, keys).Err(); err != nil {
@@ -83,9 +82,8 @@ func DeleteFavoriteFromFavoriteList(ctx context.Context, favorite *mysql.Favorit
 		incrBy := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
 						redis.call("HIncrBy", KEYS[1], "favorite_count", -1)
-						return true
 					end
-					return false
+					return true
 					`)
 		keys := []string{videoKey}
 		if err := incrBy.Run(ctx, RDB, keys).Err(); err != nil {

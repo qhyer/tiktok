@@ -55,7 +55,7 @@ message FriendUser {
   bool is_follow = 5; // true-已关注，false-未关注
   string avatar = 6; // 用户头像Url
   optional string message = 7; // 和好友的最新聊天信息
-  int64 msgType = 8; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
+  int64 msg_type = 8; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 service RelationSrv {

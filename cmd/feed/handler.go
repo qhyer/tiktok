@@ -19,7 +19,7 @@ func (s *FeedSrvImpl) Feed(ctx context.Context, req *feed.DouyinFeedRequest) (re
 	videos, nextTime, err := service.NewFeedService(ctx).Feed(req)
 	if err != nil {
 		resp = pack.BuildFeedResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildFeedResp(errno.Success)
@@ -35,7 +35,7 @@ func (s *FeedSrvImpl) GetVideosByVideoIdsAndCurrentUserId(ctx context.Context, r
 	videos, err := service.NewGetVideoService(ctx).GetVideosByVideoIdsAndCurrUserId(req)
 	if err != nil {
 		resp = pack.BuildGetVideosByVideoIdsAndCurrentUserIdResponse(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildGetVideosByVideoIdsAndCurrentUserIdResponse(errno.Success)

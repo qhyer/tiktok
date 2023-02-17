@@ -41,9 +41,8 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment) err
 		incrBy := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
 						redis.call("HIncrBy", KEYS[1], "comment_count", 1)
-						return true
 					end
-					return false
+					return true
 					`)
 		keys := []string{videoKey}
 		if err := incrBy.Run(ctx, RDB, keys).Err(); err != nil {
@@ -79,9 +78,8 @@ func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment) e
 		incrBy := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
 						redis.call("HIncrBy", KEYS[1], "comment_count", -1)
-						return true
 					end
-					return false
+					return true	
 					`)
 		keys := []string{videoKey}
 		if err := incrBy.Run(ctx, RDB, keys).Err(); err != nil {

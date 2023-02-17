@@ -19,7 +19,7 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 	err = service.NewPublishActionService(ctx).PublishVideo(req)
 	if err != nil {
 		resp = pack.BuildPublishActionResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildPublishActionResp(errno.Success)
@@ -33,7 +33,7 @@ func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPub
 	videos, err := service.NewPublishListService(ctx).PublishList(req)
 	if err != nil {
 		resp = pack.BuildPublishListResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildPublishListResp(errno.Success)

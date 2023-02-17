@@ -33,7 +33,7 @@ func (s *CheckUserService) CheckUser(req *user.DouyinUserLoginRequest) (int64, e
 		return 0, err
 	}
 	if len(users) == 0 {
-		return 0, errno.AuthorizationFailedErr
+		return 0, errno.UserNotExistErr
 	}
 	u := users[0]
 	// 校验密码

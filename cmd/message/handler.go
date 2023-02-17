@@ -25,7 +25,7 @@ func (s *MessageSrvImpl) MessageAction(ctx context.Context, req *message.DouyinM
 	}
 	if err != nil {
 		resp = pack.BuildMessageActionResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildMessageActionResp(errno.Success)
@@ -39,7 +39,7 @@ func (s *MessageSrvImpl) MessageList(ctx context.Context, req *message.DouyinMes
 	messages, err := service.NewMessageListService(ctx).MessageList(req)
 	if err != nil {
 		resp = pack.BuildMessageListResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildMessageListResp(errno.Success)

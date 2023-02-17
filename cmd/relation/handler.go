@@ -26,7 +26,7 @@ func (s *RelationSrvImpl) RelationAction(ctx context.Context, req *relation.Douy
 	}
 	if err != nil {
 		resp = pack.BuildRelationActionResp(err)
-		return resp, err
+		return resp, nil
 	}
 	resp = pack.BuildRelationActionResp(errno.Success)
 	return resp, nil
@@ -39,7 +39,7 @@ func (s *RelationSrvImpl) RelationFollowList(ctx context.Context, req *relation.
 	users, err := service.NewFollowListService(ctx).FollowList(req)
 	if err != nil {
 		resp = pack.BuildFollowListResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildFollowListResp(errno.Success)
@@ -54,7 +54,7 @@ func (s *RelationSrvImpl) RelationFollowerList(ctx context.Context, req *relatio
 	users, err := service.NewFollowerListService(ctx).FollowerList(req)
 	if err != nil {
 		resp = pack.BuildFollowerListResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildFollowerListResp(errno.Success)
@@ -69,7 +69,7 @@ func (s *RelationSrvImpl) RelationFriendList(ctx context.Context, req *relation.
 	users, err := service.NewFriendListService(ctx).FriendList(req)
 	if err != nil {
 		resp = pack.BuildFriendListResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildFriendListResp(errno.Success)

@@ -49,7 +49,7 @@ func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 		// 新增评论
 		res := tx.Create(comment)
 		if res.Error != nil {
-			return res.Error
+			return errno.DatabaseOperationFailedErr
 		}
 
 		// 创建失败
@@ -60,12 +60,12 @@ func CreateComment(ctx context.Context, comment *Comment) (*Comment, error) {
 		// video 评论数+1
 		res = tx.Model(&Video{}).Where("id = ?", comment.VideoId).Update("comment_count", gorm.Expr("comment_count + ?", 1))
 		if res.Error != nil {
-			return res.Error
+			return errno.DatabaseOperationFailedErr
 		}
 
 		// 更新评论数失败
 		if res.RowsAffected != 1 {
-			return errno.DatabaseOperationFailedErr
+			return errno.VideoNotExistErr
 		}
 
 		return nil

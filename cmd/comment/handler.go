@@ -28,7 +28,7 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	}
 	if err != nil {
 		resp = pack.BuildCommentActionResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildCommentActionResp(errno.Success)
@@ -43,7 +43,7 @@ func (s *CommentSrvImpl) CommentList(ctx context.Context, req *comment.DouyinCom
 	comments, err := service.NewCommentListService(ctx).CommentList(req)
 	if err != nil {
 		resp = pack.BuildCommentListResp(err)
-		return resp, err
+		return resp, nil
 	}
 
 	resp = pack.BuildCommentListResp(errno.Success)
