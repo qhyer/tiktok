@@ -46,13 +46,6 @@ func GetMessageIdsByUserIdAndPreMsgTime(ctx context.Context, userId int64, toUse
 		})
 	}
 
-	// 更新list的过期时间
-	err = RDB.Expire(ctx, msgListKey, constants.MessageListExpiry).Err()
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
-		return res, err
-	}
-
 	return res, nil
 }
 
@@ -235,7 +228,7 @@ func updateMessageList(ctx context.Context, userId int64, toUserId int64) error 
 		}
 
 		// 设置list的过期时间
-		err = RDB.Expire(ctx, msgListKey, constants.MessageListExpiry).Err()
+		err = RDB.Expire(ctx, msgListKey, constants.MessageListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
 			return err
