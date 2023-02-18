@@ -14,6 +14,7 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/h2non/filetype"
 )
 
@@ -65,7 +66,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	_, err = rpc.PublishAction(ctx, &publish.DouyinPublishActionRequest{
+	publishActionResp, err := rpc.PublishAction(context.Background(), &publish.DouyinPublishActionRequest{
 		Data:   videoData.Bytes(),
 		Title:  req.Title,
 		UserId: userId,
@@ -77,7 +78,10 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	SendResponse(c, errno.Success)
+	c.JSON(consts.StatusOK, Response{
+		StatusCode: publishActionResp.GetStatusCode(),
+		StatusMsg:  publishActionResp.GetStatusMsg(),
+	})
 }
 
 // PublishList 获取用户发布的视频列表
@@ -95,7 +99,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	toUserId := req.UserId
 
 	// rpc通信
-	publishListResponse, err := rpc.PublishList(ctx, &publish.DouyinPublishListRequest{
+	publishListResponse, err := rpc.PublishList(context.Background(), &publish.DouyinPublishListRequest{
 		UserId:   userId,
 		ToUserId: toUserId,
 	})

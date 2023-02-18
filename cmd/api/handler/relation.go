@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 type RelationActionParam struct {
@@ -55,7 +56,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	_, err = rpc.RelationAction(ctx, &relation.DouyinRelationActionRequest{
+	relationActionResponse, err := rpc.RelationAction(context.Background(), &relation.DouyinRelationActionRequest{
 		UserId:     userId,
 		ToUserId:   req.ToUserId,
 		ActionType: req.ActionType,
@@ -66,7 +67,10 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	SendResponse(c, errno.Success)
+	c.JSON(consts.StatusOK, Response{
+		StatusCode: relationActionResponse.GetStatusCode(),
+		StatusMsg:  relationActionResponse.GetStatusMsg(),
+	})
 }
 
 // FollowList 关注列表
@@ -83,7 +87,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	relationResponse, err := rpc.FollowList(ctx, &relation.DouyinRelationFollowListRequest{
+	relationResponse, err := rpc.FollowList(context.Background(), &relation.DouyinRelationFollowListRequest{
 		UserId:   userId,
 		ToUserId: req.ToUserId,
 	})
@@ -114,7 +118,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	relationResponse, err := rpc.FollowerList(ctx, &relation.DouyinRelationFollowerListRequest{
+	relationResponse, err := rpc.FollowerList(context.Background(), &relation.DouyinRelationFollowerListRequest{
 		UserId:   userId,
 		ToUserId: req.ToUserId,
 	})
@@ -141,7 +145,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	relationResponse, err := rpc.FriendList(ctx, &relation.DouyinRelationFriendListRequest{
+	relationResponse, err := rpc.FriendList(context.Background(), &relation.DouyinRelationFriendListRequest{
 		UserId: userId,
 	})
 	if err != nil {

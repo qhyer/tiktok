@@ -60,7 +60,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	registerResponse, err := rpc.Register(ctx, &user.DouyinUserRegisterRequest{
+	registerResponse, err := rpc.Register(context.Background(), &user.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -97,7 +97,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// rpc通信
-	loginResponse, err := rpc.Login(ctx, &user.DouyinUserLoginRequest{
+	loginResponse, err := rpc.Login(context.Background(), &user.DouyinUserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -138,7 +138,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	// rpc通信
 	var userIds []int64
 	userIds = append(userIds, req.UserId)
-	getUserInfoResponse, err := rpc.UserInfo(ctx, &user.DouyinUserInfoRequest{
+	getUserInfoResponse, err := rpc.UserInfo(context.Background(), &user.DouyinUserInfoRequest{
 		UserId:    userId,
 		ToUserIds: userIds,
 	})

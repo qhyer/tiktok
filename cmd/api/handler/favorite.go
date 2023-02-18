@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 type FavoriteActionParam struct {
@@ -41,7 +42,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	_, err = rpc.FavoriteAction(ctx, &favorite.DouyinFavoriteActionRequest{
+	favoriteActionResponse, err := rpc.FavoriteAction(context.Background(), &favorite.DouyinFavoriteActionRequest{
 		UserId:     userId,
 		VideoId:    req.VideoId,
 		ActionType: req.ActionType,
@@ -52,7 +53,10 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	SendResponse(c, errno.Success)
+	c.JSON(consts.StatusOK, Response{
+		StatusCode: favoriteActionResponse.GetStatusCode(),
+		StatusMsg:  favoriteActionResponse.GetStatusMsg(),
+	})
 }
 
 // FavoriteList 获取个人点赞列表
@@ -69,7 +73,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	favoriteResponse, err := rpc.FavoriteList(ctx, &favorite.DouyinFavoriteListRequest{
+	favoriteResponse, err := rpc.FavoriteList(context.Background(), &favorite.DouyinFavoriteListRequest{
 		UserId:   userId,
 		ToUserId: req.userId,
 	})

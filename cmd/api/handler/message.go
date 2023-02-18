@@ -10,6 +10,7 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 type MessageActionParam struct {
@@ -45,7 +46,7 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 	actionType := req.ActionType
 	content := req.Content
 
-	_, err = rpc.MessageAction(ctx, &message.DouyinMessageActionRequest{
+	messageActionResp, err := rpc.MessageAction(context.Background(), &message.DouyinMessageActionRequest{
 		UserId:     userId,
 		ToUserId:   toUserId,
 		ActionType: actionType,
@@ -57,7 +58,10 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	SendResponse(c, errno.Success)
+	c.JSON(consts.StatusOK, Response{
+		StatusCode: messageActionResp.GetStatusCode(),
+		StatusMsg:  messageActionResp.GetStatusMsg(),
+	})
 }
 
 // MessageList 消息列表
@@ -75,7 +79,7 @@ func MessageList(ctx context.Context, c *app.RequestContext) {
 	toUserId := req.ToUserId
 	preMsgTime := req.PreMessageTime
 
-	messageResponse, err := rpc.MessageList(ctx, &message.DouyinMessageListRequest{
+	messageResponse, err := rpc.MessageList(context.Background(), &message.DouyinMessageListRequest{
 		UserId:     userId,
 		ToUserId:   toUserId,
 		PreMsgTime: preMsgTime,

@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 type CommentActionParam struct {
@@ -64,7 +65,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	commentResponse, err := rpc.CommentAction(ctx, &comment.DouyinCommentActionRequest{
+	commentActionResponse, err := rpc.CommentAction(context.Background(), &comment.DouyinCommentActionRequest{
 		UserId:      userId,
 		VideoId:     req.VideoId,
 		ActionType:  req.ActionType,
@@ -77,10 +78,9 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	c.JSON(http.StatusOK, CommentActionResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
-		Comment:    commentResponse.GetComment(),
+	c.JSON(consts.StatusOK, Response{
+		StatusCode: commentActionResponse.GetStatusCode(),
+		StatusMsg:  commentActionResponse.GetStatusMsg(),
 	})
 }
 
@@ -97,7 +97,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	userId := c.GetInt64("UserID")
 
 	// rpc通信
-	commentResponse, err := rpc.CommentList(ctx, &comment.DouyinCommentListRequest{
+	commentResponse, err := rpc.CommentList(context.Background(), &comment.DouyinCommentListRequest{
 		UserId:  userId,
 		VideoId: req.VideoId,
 	})
