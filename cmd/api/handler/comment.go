@@ -108,8 +108,8 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, CommentListResponse{
-		StatusCode:  errno.Success.ErrCode,
-		StatusMsg:   errno.Success.ErrMsg,
+		StatusCode:  commentResponse.GetStatusCode(),
+		StatusMsg:   commentResponse.GetStatusMsg(),
 		CommentList: commentResponse.GetCommentList(),
 	})
 }

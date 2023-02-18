@@ -98,8 +98,8 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, RelationListResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: relationResponse.GetStatusCode(),
+		StatusMsg:  relationResponse.GetStatusMsg(),
 		UserList:   relationResponse.GetUserList(),
 	})
 }
@@ -129,8 +129,8 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, RelationListResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: relationResponse.GetStatusCode(),
+		StatusMsg:  relationResponse.GetStatusMsg(),
 		UserList:   relationResponse.GetUserList(),
 	})
 }
@@ -155,8 +155,8 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, FriendListResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: relationResponse.GetStatusCode(),
+		StatusMsg:  relationResponse.GetStatusMsg(),
 		UserList:   relationResponse.GetUserList(),
 	})
 }

@@ -84,8 +84,8 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, FavoriteListResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: favoriteResponse.GetStatusCode(),
+		StatusMsg:  favoriteResponse.GetStatusMsg(),
 		VideoList:  favoriteResponse.GetVideoList(),
 	})
 }

@@ -98,8 +98,8 @@ func MessageList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, &MessageListResponse{
-		StatusCode:  errno.Success.ErrCode,
-		StatusMsg:   errno.Success.ErrMsg,
+		StatusCode:  messageResponse.GetStatusCode(),
+		StatusMsg:   messageResponse.GetStatusMsg(),
 		MessageList: messageResponse.GetMessageList(),
 	})
 }

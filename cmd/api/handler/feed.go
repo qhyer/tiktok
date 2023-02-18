@@ -66,8 +66,8 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, FeedResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: feedResponse.GetStatusCode(),
+		StatusMsg:  feedResponse.GetStatusMsg(),
 		VideoList:  feedResponse.GetVideoList(),
 		NextTime:   feedResponse.GetNextTime(),
 	})

@@ -78,8 +78,8 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, RegisterResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: registerResponse.GetStatusCode(),
+		StatusMsg:  registerResponse.GetStatusMsg(),
 		UserId:     registerResponse.GetUserId(),
 		Token:      token,
 	})
@@ -116,8 +116,8 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(http.StatusOK, LoginResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: loginResponse.GetStatusCode(),
+		StatusMsg:  loginResponse.GetStatusMsg(),
 		UserId:     loginResponse.GetUserId(),
 		Token:      token,
 	})
@@ -157,8 +157,8 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	usr := getUserInfoResponse.GetUser()[0]
 
 	c.JSON(http.StatusOK, GetUserInfoResponse{
-		StatusCode: errno.Success.ErrCode,
-		StatusMsg:  errno.Success.ErrMsg,
+		StatusCode: getUserInfoResponse.GetStatusCode(),
+		StatusMsg:  getUserInfoResponse.GetStatusMsg(),
 		User:       usr,
 	})
 }
