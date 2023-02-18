@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -80,7 +81,7 @@ func updateFeed(ctx context.Context) error {
 
 	// 不存在feed
 	if res == 0 {
-		videoList, err := mysql.GetVideosByLatestTime(ctx, -1, time.Now().UnixMilli())
+		videoList, err := mysql.GetVideosByLatestTime(ctx, 1000, time.Now().UnixMilli())
 		if err != nil {
 			klog.CtxErrorf(ctx, "mysql get latest videos failed %v", err)
 			return err
@@ -122,6 +123,13 @@ func updateFeed(ctx context.Context) error {
 		err = RDB.ZAdd(ctx, constants.RedisFeedKey, videoIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add video ids to feed failed %v", err)
+			return err
+		}
+
+		// 设置list的过期时间
+		err = RDB.Expire(ctx, constants.RedisFeedKey, constants.FeedExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
+		if err != nil {
+			klog.CtxErrorf(ctx, "redis set feed expiry failed %v", err)
 			return err
 		}
 	}

@@ -40,4 +40,5 @@ const (
 	FriendListExpiry    = 5 * time.Minute
 	MessageListExpiry   = 10 * time.Minute
 	MessageExpiry       = 10 * time.Minute
+	FeedExpiry          = 10 * time.Minute
 )
