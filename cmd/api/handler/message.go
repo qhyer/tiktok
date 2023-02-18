@@ -48,7 +48,7 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 
 	// 两个用户不能相同
 	if userId == toUserId {
-		hlog.CtxWarnf(ctx, "param error %v", err)
+		hlog.CtxWarnf(ctx, "param error userId == toUserId")
 		SendResponse(c, errno.ParamErr)
 		return
 	}
