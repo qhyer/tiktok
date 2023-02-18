@@ -46,6 +46,13 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 	actionType := req.ActionType
 	content := req.Content
 
+	// 两个用户不能相同
+	if userId == toUserId {
+		hlog.CtxWarnf(ctx, "param error %v", err)
+		SendResponse(c, errno.ParamErr)
+		return
+	}
+
 	messageActionResp, err := rpc.MessageAction(context.Background(), &message.DouyinMessageActionRequest{
 		UserId:     userId,
 		ToUserId:   toUserId,
