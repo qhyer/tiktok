@@ -24,6 +24,11 @@ func (x *DouyinMessageListRequest) FastRead(buf []byte, _type int8, number int32
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 3:
+		offset, err = x.fastReadField3(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -44,6 +49,11 @@ func (x *DouyinMessageListRequest) fastReadField1(buf []byte, _type int8) (offse
 
 func (x *DouyinMessageListRequest) fastReadField2(buf []byte, _type int8) (offset int, err error) {
 	x.ToUserId, offset, err = fastpb.ReadInt64(buf, _type)
+	return offset, err
+}
+
+func (x *DouyinMessageListRequest) fastReadField3(buf []byte, _type int8) (offset int, err error) {
+	x.PreMsgTime, offset, err = fastpb.ReadInt64(buf, _type)
 	return offset, err
 }
 
@@ -260,6 +270,7 @@ func (x *DouyinMessageListRequest) FastWrite(buf []byte) (offset int) {
 	}
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
+	offset += x.fastWriteField3(buf[offset:])
 	return offset
 }
 
@@ -276,6 +287,14 @@ func (x *DouyinMessageListRequest) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteInt64(buf[offset:], 2, x.ToUserId)
+	return offset
+}
+
+func (x *DouyinMessageListRequest) fastWriteField3(buf []byte) (offset int) {
+	if x.PreMsgTime == 0 {
+		return offset
+	}
+	offset += fastpb.WriteInt64(buf[offset:], 3, x.PreMsgTime)
 	return offset
 }
 
@@ -441,6 +460,7 @@ func (x *DouyinMessageListRequest) Size() (n int) {
 	}
 	n += x.sizeField1()
 	n += x.sizeField2()
+	n += x.sizeField3()
 	return n
 }
 
@@ -457,6 +477,14 @@ func (x *DouyinMessageListRequest) sizeField2() (n int) {
 		return n
 	}
 	n += fastpb.SizeInt64(2, x.ToUserId)
+	return n
+}
+
+func (x *DouyinMessageListRequest) sizeField3() (n int) {
+	if x.PreMsgTime == 0 {
+		return n
+	}
+	n += fastpb.SizeInt64(3, x.PreMsgTime)
 	return n
 }
 
@@ -619,6 +647,7 @@ func (x *Message) sizeField5() (n int) {
 var fieldIDToName_DouyinMessageListRequest = map[int32]string{
 	1: "UserId",
 	2: "ToUserId",
+	3: "PreMsgTime",
 }
 
 var fieldIDToName_DouyinMessageListResponse = map[int32]string{

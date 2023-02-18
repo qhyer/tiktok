@@ -24,9 +24,10 @@ func NewMessageListService(ctx context.Context) *MessageListService {
 func (s *MessageListService) MessageList(req *message.DouyinMessageListRequest) ([]*message.Message, error) {
 	userId := req.GetUserId()
 	toUserId := req.GetToUserId()
+	preMsgTime := req.GetPreMsgTime()
 
 	// 获取消息id
-	msgIds, err := redis.GetMessageIdsByUserId(s.ctx, userId, toUserId)
+	msgIds, err := redis.GetMessageIdsByUserIdAndPreMsgTime(s.ctx, userId, toUserId, preMsgTime)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "reids get message id list failed %v", err)
 		return nil, err

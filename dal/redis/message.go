@@ -14,7 +14,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([]*mysql.Message, error) {
+func GetMessageIdsByUserIdAndPreMsgTime(ctx context.Context, userId int64, toUserId int64, preMsgTime int64) ([]*mysql.Message, error) {
 	msgListKey := fmt.Sprintf(constants.RedisMessageListKey, userId, toUserId)
 	res := make([]*mysql.Message, 0)
 	// 判断消息列表是否存在，不存在则创建列表
@@ -26,7 +26,7 @@ func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([
 
 	// 查询id列表 按时间正序
 	msgs, err := RDB.ZRangeByScoreWithScores(ctx, msgListKey, &redis.ZRangeBy{
-		Min: "1", // 这里是时间戳 避免缓存穿透 因此置1
+		Min: fmt.Sprintf("%d", preMsgTime+1), // 上一条消息的时间戳 +1一方面是避免获取到空值 另一方面是要获取大于这条消息时间的新消息
 		Max: fmt.Sprintf("%d", time.Now().UnixMilli()),
 	}).Result()
 	if err != nil {
@@ -34,11 +34,9 @@ func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([
 		return res, err
 	}
 
-	rmMsgIds := make([]interface{}, 0)
 	// 把消息id加入到列表
 	for _, m := range msgs {
 		mid, err := strconv.ParseInt(m.Member.(string), 10, 64)
-		rmMsgIds = append(rmMsgIds, mid)
 		if err != nil {
 			continue
 		}
@@ -46,15 +44,6 @@ func GetMessageIdsByUserId(ctx context.Context, userId int64, toUserId int64) ([
 			Id:        mid,
 			CreatedAt: time.UnixMilli(int64(m.Score)),
 		})
-	}
-
-	// 读完后要清空redis中的已读消息
-	if len(rmMsgIds) > 0 {
-		err = RDB.ZRem(ctx, msgListKey, rmMsgIds...).Err()
-		if err != nil {
-			klog.CtxErrorf(ctx, "redis remove read messages failed %v", err)
-			return res, err
-		}
 	}
 
 	// 更新list的过期时间

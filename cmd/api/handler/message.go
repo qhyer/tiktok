@@ -19,7 +19,8 @@ type MessageActionParam struct {
 }
 
 type MessageListParam struct {
-	ToUserId int64 `query:"to_user_id" vd:"$>0"`
+	ToUserId       int64 `query:"to_user_id" vd:"$>0"`
+	PreMessageTime int64 `query:"pre_msg_time" vd:"$>=0"`
 }
 
 type MessageListResponse struct {
@@ -72,10 +73,12 @@ func MessageList(ctx context.Context, c *app.RequestContext) {
 
 	userId := c.GetInt64("UserID")
 	toUserId := req.ToUserId
+	preMsgTime := req.PreMessageTime
 
 	messageResponse, err := rpc.MessageList(ctx, &message.DouyinMessageListRequest{
-		UserId:   userId,
-		ToUserId: toUserId,
+		UserId:     userId,
+		ToUserId:   toUserId,
+		PreMsgTime: preMsgTime,
 	})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "rpc get message list error %v", err)
