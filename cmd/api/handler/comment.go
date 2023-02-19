@@ -78,9 +78,10 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	c.JSON(consts.StatusOK, Response{
+	c.JSON(consts.StatusOK, CommentActionResponse{
 		StatusCode: commentActionResponse.GetStatusCode(),
 		StatusMsg:  commentActionResponse.GetStatusMsg(),
+		Comment:    commentActionResponse.GetComment(),
 	})
 }
 
