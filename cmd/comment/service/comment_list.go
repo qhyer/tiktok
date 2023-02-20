@@ -8,6 +8,7 @@ import (
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/comment"
 	"tiktok/kitex_gen/user"
+	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -81,6 +82,10 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest) 
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get userinfo failed %v", err)
 		return nil, err
+	}
+	if users.GetStatusCode() != errno.SuccessCode {
+		klog.CtxErrorf(s.ctx, "rpc get userinfo failed %v", users.GetStatusMsg())
+		return nil, errno.NewErrNo(users.GetStatusCode(), users.GetStatusMsg())
 	}
 
 	// 加入用户信息

@@ -7,6 +7,7 @@ import (
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/relation"
 	"tiktok/kitex_gen/user"
+	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -33,6 +34,7 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 	us, err := redis.MGetUserInfoByUserId(s.ctx, toUserIds)
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "redis get userinfo failed %v", err)
+		return nil, err
 	}
 	for _, u := range us {
 		if u == nil {
@@ -56,6 +58,10 @@ func (s *MGetUserService) MGetUser(req *user.DouyinUserInfoRequest) ([]*user.Use
 	if err != nil {
 		klog.CtxErrorf(s.ctx, "rpc get follow list failed %v", err)
 		return nil, err
+	}
+	if followResp.GetStatusCode() != errno.SuccessCode {
+		klog.CtxErrorf(s.ctx, "rpc get follow list failed %v", followResp.GetStatusMsg())
+		return nil, errno.NewErrNo(followResp.GetStatusCode(), followResp.GetStatusMsg())
 	}
 	followList := followResp.GetUserList()
 	for _, u := range followList {

@@ -55,7 +55,7 @@ func (s *FriendListService) FriendList(req *relation.DouyinRelationFriendListReq
 			if c == nil {
 				continue
 			}
-			// 是发送者
+			// 当前用户是发送者
 			if c.FromUserId == userId {
 				chatMap[c.ToUserId] = c
 			} else {

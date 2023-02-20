@@ -7,6 +7,7 @@ import (
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/favorite"
 	"tiktok/kitex_gen/feed"
+	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -32,8 +33,9 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 		return nil, err
 	}
 
+	videoList := make([]*feed.Video, 0)
 	if len(fl) == 0 {
-		return nil, nil
+		return videoList, nil
 	}
 
 	// rpc通信
@@ -45,8 +47,13 @@ func (s *FavoriteListService) FavoriteList(req *favorite.DouyinFavoriteListReque
 		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", err)
 		return nil, err
 	}
+	if feedResponse.GetStatusCode() != errno.SuccessCode {
+		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", feedResponse.GetStatusMsg())
+		return nil, errno.NewErrNo(feedResponse.GetStatusCode(), feedResponse.GetStatusMsg())
+	}
+	videoList = feedResponse.GetVideoList()
 
-	return feedResponse.GetVideoList(), nil
+	return videoList, nil
 }
 
 func (s *FavoriteListService) GetUserFavoriteVideoIds(req *favorite.DouyinGetUserFavoriteVideoIdsRequest) ([]int64, error) {

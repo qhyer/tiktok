@@ -10,6 +10,7 @@ import (
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/user"
 	"tiktok/pkg/constants"
+	"tiktok/pkg/errno"
 	"tiktok/pkg/minio"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -85,7 +86,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		userIds = append(userIds, v.Author.Id)
 	}
 
-	users, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
+	userResp, err := rpc.UserInfo(s.ctx, &user.DouyinUserInfoRequest{
 		UserId:    userId,
 		ToUserIds: userIds,
 	})
@@ -93,8 +94,12 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		klog.CtxErrorf(s.ctx, "rpc get userinfo failed %v", err)
 		return nil, 0, err
 	}
+	if userResp.GetStatusCode() != errno.SuccessCode {
+		klog.CtxErrorf(s.ctx, "rpc get userinfo failed %v", userResp.GetStatusMsg())
+		return nil, 0, errno.NewErrNo(userResp.GetStatusCode(), userResp.GetStatusMsg())
+	}
 
-	us := users.GetUser()
+	us := userResp.GetUser()
 	// 加入用户信息
 	for i := range videos {
 		res := us[i]
@@ -113,6 +118,7 @@ func (s *FeedService) Feed(req *feed.DouyinFeedRequest) ([]*feed.Video, int64, e
 		klog.CtxErrorf(s.ctx, "rpc get user favorite list failed %v", err)
 		return nil, 0, err
 	}
+
 	favoriteMap := make(map[int64]bool, 0)
 	vids := favoriteResp.GetVideoIds()
 	for _, f := range vids {

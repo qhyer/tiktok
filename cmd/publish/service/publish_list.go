@@ -7,6 +7,7 @@ import (
 	"tiktok/dal/redis"
 	"tiktok/kitex_gen/feed"
 	"tiktok/kitex_gen/publish"
+	"tiktok/pkg/errno"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -32,8 +33,9 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 		return nil, err
 	}
 
+	videoList := make([]*feed.Video, 0)
 	if len(videoIds) == 0 {
-		return nil, nil
+		return videoList, nil
 	}
 
 	videoResponse, err := rpc.GetVideosByVideoIdsAndCurrentUserId(s.ctx, &feed.DouyinGetVideosByVideoIdsAndCurrentUserIdRequest{
@@ -41,9 +43,14 @@ func (s *PublishListService) PublishList(req *publish.DouyinPublishListRequest) 
 		VideoIds: videoIds,
 	})
 	if err != nil {
-		klog.CtxErrorf(s.ctx, "rpc get video failed %v", err)
+		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", err)
 		return nil, err
 	}
+	if videoResponse.GetStatusCode() != errno.SuccessCode {
+		klog.CtxErrorf(s.ctx, "rpc get video list failed %v", videoResponse.GetStatusMsg())
+		return nil, errno.NewErrNo(videoResponse.GetStatusCode(), videoResponse.GetStatusMsg())
+	}
+	videoList = videoResponse.GetVideoList()
 
-	return videoResponse.GetVideoList(), nil
+	return videoList, nil
 }

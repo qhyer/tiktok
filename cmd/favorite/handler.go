@@ -55,7 +55,7 @@ func (s *FavoriteSrvImpl) GetUserFavoriteVideoIds(ctx context.Context, req *favo
 
 	videoIds, err := service.NewFavoriteListService(ctx).GetUserFavoriteVideoIds(req)
 	if err != nil {
-		return resp, nil
+		return resp, err
 	}
 
 	resp.VideoIds = videoIds
