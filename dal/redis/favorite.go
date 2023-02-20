@@ -23,7 +23,7 @@ func AddNewFavoriteToFavoriteList(ctx context.Context, favorite *mysql.Favorite)
 	videoId := favorite.VideoId
 
 	// 判断喜欢列表是否存在，不存在则创建列表
-	updateOk, err := updateFavoriteList(ctx, userId)
+	err := updateFavoriteList(ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update favorite list failed %v", err)
 		return err
@@ -32,15 +32,12 @@ func AddNewFavoriteToFavoriteList(ctx context.Context, favorite *mysql.Favorite)
 	favoriteListKey := fmt.Sprintf(constants.RedisFavoriteListKey, userId)
 	videoKey := fmt.Sprintf(constants.RedisVideoKey, videoId)
 	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-		// 如果喜欢列表不是刚更新的 说明不是最新数据 把视频加入喜欢列表
-		if !updateOk {
-			if err := RDB.ZAdd(ctx, favoriteListKey, redis.Z{
-				Score:  float64(favorite.CreatedAt.UnixMilli()),
-				Member: videoId,
-			}).Err(); err != nil {
-				return err
-			}
-
+		// 把视频加入喜欢列表
+		if err := RDB.ZAdd(ctx, favoriteListKey, redis.Z{
+			Score:  float64(favorite.CreatedAt.UnixMilli()),
+			Member: videoId,
+		}).Err(); err != nil {
+			return err
 		}
 
 		// 喜欢数+1
@@ -67,7 +64,7 @@ func DeleteFavoriteFromFavoriteList(ctx context.Context, favorite *mysql.Favorit
 	userId := favorite.UserId
 
 	// 判断喜欢列表是否存在，不存在则创建列表
-	_, err := updateFavoriteList(ctx, videoId)
+	err := updateFavoriteList(ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update favorite list failed %v", err)
 		return err
@@ -101,7 +98,7 @@ func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, er
 	favoriteListKey := fmt.Sprintf(constants.RedisFavoriteListKey, userId)
 	videoIds := make([]int64, 0)
 
-	_, err := updateFavoriteList(ctx, userId)
+	err := updateFavoriteList(ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update favorite list failed %v", err)
 		return videoIds, err
@@ -126,11 +123,11 @@ func GetFavoriteVideoIdsByUserId(ctx context.Context, userId int64) ([]int64, er
 	return videoIds, nil
 }
 
-func updateFavoriteList(ctx context.Context, userId int64) (bool, error) {
+func updateFavoriteList(ctx context.Context, userId int64) error {
 	favoriteListKey := fmt.Sprintf(constants.RedisFavoriteListKey, userId)
 	exist, err := RDB.Exists(ctx, favoriteListKey).Result()
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	// 不存在列表 更新
@@ -138,7 +135,7 @@ func updateFavoriteList(ctx context.Context, userId int64) (bool, error) {
 		videos, err := mysql.GetFavoriteVideoIdsByUserId(ctx, userId)
 		if err != nil {
 			klog.CtxErrorf(ctx, "mysql get favorite list failed %v", err)
-			return false, err
+			return err
 		}
 
 		// 数据库没数据 避免缓存穿透 放入空数据
@@ -149,16 +146,16 @@ func updateFavoriteList(ctx context.Context, userId int64) (bool, error) {
 			}).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis add favorite list failed %v", err)
-				return false, err
+				return err
 			}
 
 			// 设置list的过期时间
 			err = RDB.Expire(ctx, favoriteListKey, constants.FavoriteListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis set favorite list expiry failed %v", err)
-				return false, err
+				return err
 			}
-			return true, nil
+			return nil
 		}
 
 		// 从列表中读视频id
@@ -177,17 +174,17 @@ func updateFavoriteList(ctx context.Context, userId int64) (bool, error) {
 		err = RDB.ZAdd(ctx, favoriteListKey, videoZs...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add favorite list failed %v", err)
-			return false, err
+			return err
 		}
 
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, favoriteListKey, constants.FavoriteListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set favorite list expiry failed %v", err)
-			return false, err
+			return err
 		}
 
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return nil
 }

@@ -284,29 +284,6 @@ func updateFollowerList(ctx context.Context, userId int64) (bool, error) {
 }
 
 func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
-	// 更新操作者的的关注列表
-	ok, err := updateFollowList(ctx, userId)
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
-		return err
-	}
-	userAddNum := 1
-	// 如果是刚更新成功 说明缓存是最新数据 不用再+1
-	if ok {
-		userAddNum = 0
-	}
-	// 更新被关注者的粉丝列表
-	ok, err = updateFollowerList(ctx, toUserId)
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
-		return err
-	}
-	toUserAddNum := 1
-	// 如果是刚更新成功 说明缓存是最新数据 不用再+1
-	if ok {
-		toUserAddNum = 0
-	}
-
 	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
 	toUserKey := fmt.Sprintf(constants.RedisUserKey, toUserId)
 	userFollowListKey := fmt.Sprintf(constants.RedisFollowListKey, userId)
@@ -317,10 +294,10 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 	// lua操作 操作者关注数+1 被关注者粉丝数+1
 	lua := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
-						redis.call("HIncrBy", KEYS[1], "follow_count", ARGV[3])
+						redis.call("HIncrBy", KEYS[1], "follow_count", 1)
 					end
 					if redis.call("Exists", KEYS[2]) > 0 then
-						redis.call("HIncrBy", KEYS[2], "follower_count", ARGV[4])
+						redis.call("HIncrBy", KEYS[2], "follower_count", 1)
 					end
 					if redis.call("Exists", KEYS[3]) > 0 then
 						redis.call("SAdd", KEYS[3], ARGV[2])
@@ -339,7 +316,7 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 					return true
 					`)
 	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey}
-	args := []interface{}{userId, toUserId, userAddNum, toUserAddNum}
+	args := []interface{}{userId, toUserId}
 	if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
 		return err
 	}
@@ -347,29 +324,6 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 }
 
 func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
-	// 更新操作者的的关注列表
-	ok, err := updateFollowList(ctx, userId)
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
-		return err
-	}
-	userAddNum := -1
-	// 如果是刚更新成功 说明缓存是最新数据 不用再-1
-	if ok {
-		userAddNum = 0
-	}
-	// 更新被关注者的粉丝列表
-	ok, err = updateFollowerList(ctx, toUserId)
-	if err != nil {
-		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
-		return err
-	}
-	toUserAddNum := -1
-	// 如果是刚更新成功 说明缓存是最新数据 不用再-1
-	if ok {
-		toUserAddNum = 0
-	}
-
 	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
 	toUserKey := fmt.Sprintf(constants.RedisUserKey, toUserId)
 	userFollowListKey := fmt.Sprintf(constants.RedisFollowListKey, userId)
@@ -380,10 +334,10 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 	// lua操作 操作者关注数-1 被关注者粉丝数-1
 	lua := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
-						redis.call("HIncrBy", KEYS[1], "follow_count", ARGV[3])
+						redis.call("HIncrBy", KEYS[1], "follow_count", -1)
 					end
 					if redis.call("Exists", KEYS[2]) > 0 then
-						redis.call("HIncrBy", KEYS[2], "follower_count", ARGV[4])
+						redis.call("HIncrBy", KEYS[2], "follower_count", -1)
 					end
 					if redis.call("Exists", KEYS[3]) > 0 then
 						redis.call("SRem", KEYS[3], ARGV[2])
@@ -400,7 +354,7 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 					return true
 					`)
 	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey}
-	args := []interface{}{userId, toUserId, userAddNum, toUserAddNum}
+	args := []interface{}{userId, toUserId}
 	if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
 		return err
 	}

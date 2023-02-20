@@ -21,7 +21,7 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment) err
 	videoId := comment.VideoId
 
 	// 判断评论列表是否存在，不存在则创建列表
-	ok, err := updateCommentList(ctx, videoId)
+	err := updateCommentList(ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
 		return err
@@ -30,14 +30,12 @@ func AddNewCommentToCommentList(ctx context.Context, comment *mysql.Comment) err
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
 	videoKey := fmt.Sprintf(constants.RedisVideoKey, videoId)
 	_, err = RDB.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-		// 如果评论列表不是刚更新的 说明不是最新数据 把评论加入list
-		if !ok {
-			if err := RDB.ZAdd(ctx, commentListKey, redis.Z{
-				Score:  float64(comment.CreatedAt.UnixMilli()),
-				Member: comment.Id,
-			}).Err(); err != nil {
-				return err
-			}
+		// 把评论加入list
+		if err := RDB.ZAdd(ctx, commentListKey, redis.Z{
+			Score:  float64(comment.CreatedAt.UnixMilli()),
+			Member: comment.Id,
+		}).Err(); err != nil {
+			return err
 		}
 		// 评论数+1
 		incrBy := redis.NewScript(`
@@ -62,7 +60,7 @@ func DeleteCommentFromCommentList(ctx context.Context, comment *mysql.Comment) e
 	videoId := comment.VideoId
 
 	// 判断评论列表是否存在，不存在则创建列表
-	_, err := updateCommentList(ctx, videoId)
+	err := updateCommentList(ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
 		return err
@@ -184,7 +182,7 @@ func MGetCommentByCommentId(ctx context.Context, redisComments []*mysql.Comment)
 
 func GetCommentIdListByVideoId(ctx context.Context, videoId int64) ([]*mysql.Comment, error) {
 	// 判断commentList是否存在 不存在则读库创建列表
-	_, err := updateCommentList(ctx, videoId)
+	err := updateCommentList(ctx, videoId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update comment list failed %v", err)
 		return nil, err
@@ -217,11 +215,11 @@ func GetCommentIdListByVideoId(ctx context.Context, videoId int64) ([]*mysql.Com
 	return commentList, nil
 }
 
-func updateCommentList(ctx context.Context, videoId int64) (bool, error) {
+func updateCommentList(ctx context.Context, videoId int64) error {
 	commentListKey := fmt.Sprintf(constants.RedisCommentListKey, videoId)
 	res, err := RDB.Exists(ctx, commentListKey).Result()
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	// 不存在评论列表 查库
@@ -229,7 +227,7 @@ func updateCommentList(ctx context.Context, videoId int64) (bool, error) {
 		commentList, err := mysql.GetCommentListByVideoId(ctx, videoId)
 		if err != nil {
 			klog.CtxErrorf(ctx, "mysql get comment list failed %v", err)
-			return false, err
+			return err
 		}
 
 		// 数据库也没评论 避免缓存穿透 放入空数据
@@ -240,16 +238,16 @@ func updateCommentList(ctx context.Context, videoId int64) (bool, error) {
 			}).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis add comment id to list failed %v", err)
-				return false, err
+				return err
 			}
 
 			// 设置list的过期时间
 			err = RDB.Expire(ctx, commentListKey, constants.CommentListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
-				return false, err
+				return err
 			}
-			return true, nil
+			return nil
 		}
 
 		// 从列表中读评论id
@@ -268,24 +266,24 @@ func updateCommentList(ctx context.Context, videoId int64) (bool, error) {
 		err = MSetComment(ctx, commentList)
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set comment failed %v", err)
-			return false, err
+			return err
 		}
 
 		// 把评论id加入缓存
 		err = RDB.ZAdd(ctx, commentListKey, commentIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add comment id to list failed %v", err)
-			return false, err
+			return err
 		}
 
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, commentListKey, constants.CommentListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set comment list expiry failed %v", err)
-			return false, err
+			return err
 		}
 
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return nil
 }
