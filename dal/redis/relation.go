@@ -21,7 +21,7 @@ func GetFollowListByUserId(ctx context.Context, userId int64) ([]*user.User, err
 	followListKey := fmt.Sprintf(constants.RedisFollowListKey, userId)
 
 	// 判断关注列表是否存在，不存在则读库
-	err := updateFollowList(ctx, userId)
+	_, err := updateFollowList(ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
 		return follows, err
@@ -62,7 +62,7 @@ func GetFollowerListByUserId(ctx context.Context, userId int64) ([]*user.User, e
 	followerListKey := fmt.Sprintf(constants.RedisFollowerListKey, userId)
 
 	// 判断粉丝列表是否存在，不存在则读库
-	err := updateFollowerList(ctx, userId)
+	_, err := updateFollowerList(ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
 		return followers, err
@@ -155,11 +155,11 @@ func GetFriendListByUserId(ctx context.Context, userId int64) ([]*relation.Frien
 	return friends, nil
 }
 
-func updateFollowList(ctx context.Context, userId int64) error {
+func updateFollowList(ctx context.Context, userId int64) (bool, error) {
 	followListKey := fmt.Sprintf(constants.RedisFollowListKey, userId)
 	res, err := RDB.Exists(ctx, followListKey).Result()
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	// 不存在关注列表 查库
@@ -167,7 +167,7 @@ func updateFollowList(ctx context.Context, userId int64) error {
 		followList, err := neo4j.FollowList(ctx, userId)
 		if err != nil {
 			klog.CtxErrorf(ctx, "neo4j get follow list failed %v", err)
-			return err
+			return false, err
 		}
 
 		// 数据库中无关注 避免缓存穿透放入空用户
@@ -175,16 +175,16 @@ func updateFollowList(ctx context.Context, userId int64) error {
 			err = RDB.SAdd(ctx, followListKey, 0).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis add follow id list failed %v", err)
-				return err
+				return false, err
 			}
 
 			// 设置list的过期时间
 			err = RDB.Expire(ctx, followListKey, constants.FollowListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis set follow list expiry failed %v", err)
-				return err
+				return false, err
 			}
-			return nil
+			return true, nil
 		}
 
 		// 读取关注用户id
@@ -197,31 +197,33 @@ func updateFollowList(ctx context.Context, userId int64) error {
 		err = MSetUserInfo(ctx, followList)
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set follow userinfo failed %v", err)
-			return err
+			return false, err
 		}
 
 		// 把被关注的用户id加入缓存
 		err = RDB.SAdd(ctx, followListKey, followIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add follow id list failed %v", err)
-			return err
+			return false, err
 		}
 
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, followListKey, constants.FollowListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set follow list expiry failed %v", err)
-			return err
+			return false, err
 		}
+
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
-func updateFollowerList(ctx context.Context, userId int64) error {
+func updateFollowerList(ctx context.Context, userId int64) (bool, error) {
 	followerListKey := fmt.Sprintf(constants.RedisFollowerListKey, userId)
 	res, err := RDB.Exists(ctx, followerListKey).Result()
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	// 不存在粉丝列表 查库
@@ -229,7 +231,7 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 		followerList, err := neo4j.FollowerList(ctx, userId, constants.FollowerQueryLimit)
 		if err != nil {
 			klog.CtxErrorf(ctx, "neo4j get follower list failed %v", err)
-			return err
+			return false, err
 		}
 
 		// 数据库中无粉丝 避免缓存穿透 放入空用户
@@ -237,16 +239,16 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 			err = RDB.SAdd(ctx, followerListKey, 0).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis add follower id list failed %v", err)
-				return err
+				return false, err
 			}
 
 			// 设置list的过期时间
 			err = RDB.Expire(ctx, followerListKey, constants.FollowerListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 			if err != nil {
 				klog.CtxErrorf(ctx, "redis set follower list expiry failed %v", err)
-				return err
+				return false, err
 			}
-			return nil
+			return true, nil
 		}
 
 		// 读取粉丝用户id
@@ -259,38 +261,50 @@ func updateFollowerList(ctx context.Context, userId int64) error {
 		err = MSetUserInfo(ctx, followerList)
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set follower userinfo failed %v", err)
-			return err
+			return false, err
 		}
 
 		// 把粉丝用户id加入缓存
 		err = RDB.SAdd(ctx, followerListKey, followerIds...).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis add follower id list failed %v", err)
-			return err
+			return false, err
 		}
 
 		// 设置list的过期时间
 		err = RDB.Expire(ctx, followerListKey, constants.FollowerListExpiry+time.Duration(rand.Intn(constants.MaxRandExpireSecond))*time.Second).Err()
 		if err != nil {
 			klog.CtxErrorf(ctx, "redis set follower list expiry failed %v", err)
-			return err
+			return false, err
 		}
+
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
 func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 	// 更新操作者的的关注列表
-	err := updateFollowList(ctx, userId)
+	ok, err := updateFollowList(ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
 		return err
 	}
+	userAddNum := 1
+	// 如果是刚更新成功 说明缓存是最新数据 不用再+1
+	if !ok {
+		userAddNum = 0
+	}
 	// 更新被关注者的粉丝列表
-	err = updateFollowerList(ctx, toUserId)
+	ok, err = updateFollowerList(ctx, toUserId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
 		return err
+	}
+	toUserAddNum := 1
+	// 如果是刚更新成功 说明缓存是最新数据 不用再+1
+	if !ok {
+		toUserAddNum = 0
 	}
 
 	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
@@ -303,10 +317,10 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 	// lua操作 操作者关注数+1 被关注者粉丝数+1
 	lua := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
-						redis.call("HIncrBy", KEYS[1], "follow_count", 1)
+						redis.call("HIncrBy", KEYS[1], "follow_count", ARGV[3])
 					end
 					if redis.call("Exists", KEYS[2]) > 0 then
-						redis.call("HIncrBy", KEYS[2], "follower_count", 1)
+						redis.call("HIncrBy", KEYS[2], "follower_count", ARGV[4])
 					end
 					if redis.call("Exists", KEYS[3]) > 0 then
 						redis.call("SAdd", KEYS[3], ARGV[2])
@@ -325,7 +339,7 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 					return true
 					`)
 	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey}
-	args := []interface{}{userId, toUserId}
+	args := []interface{}{userId, toUserId, userAddNum, toUserAddNum}
 	if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
 		return err
 	}
@@ -334,16 +348,26 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 
 func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 	// 更新操作者的的关注列表
-	err := updateFollowList(ctx, userId)
+	ok, err := updateFollowList(ctx, userId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update follow list failed %v", err)
 		return err
 	}
+	userAddNum := -1
+	// 如果是刚更新成功 说明缓存是最新数据 不用再-1
+	if !ok {
+		userAddNum = 0
+	}
 	// 更新被关注者的粉丝列表
-	err = updateFollowerList(ctx, toUserId)
+	ok, err = updateFollowerList(ctx, toUserId)
 	if err != nil {
 		klog.CtxErrorf(ctx, "redis update follower list failed %v", err)
 		return err
+	}
+	toUserAddNum := -1
+	// 如果是刚更新成功 说明缓存是最新数据 不用再-1
+	if !ok {
+		toUserAddNum = 0
 	}
 
 	userKey := fmt.Sprintf(constants.RedisUserKey, userId)
@@ -353,13 +377,13 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 	userFriendListKey := fmt.Sprintf(constants.RedisFriendListKey, userId)
 	toUserFriendListKey := fmt.Sprintf(constants.RedisFriendListKey, toUserId)
 
-	// lua操作 操作者关注数+1 被关注者粉丝数+1
+	// lua操作 操作者关注数-1 被关注者粉丝数-1
 	lua := redis.NewScript(`
 					if redis.call("Exists", KEYS[1]) > 0 then
-						redis.call("HIncrBy", KEYS[1], "follow_count", -1)
+						redis.call("HIncrBy", KEYS[1], "follow_count", ARGV[3])
 					end
 					if redis.call("Exists", KEYS[2]) > 0 then
-						redis.call("HIncrBy", KEYS[2], "follower_count", -1)
+						redis.call("HIncrBy", KEYS[2], "follower_count", ARGV[4])
 					end
 					if redis.call("Exists", KEYS[3]) > 0 then
 						redis.call("SRem", KEYS[3], ARGV[2])
@@ -376,7 +400,7 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 					return true
 					`)
 	keys := []string{userKey, toUserKey, userFollowListKey, toUserFollowerListKey, userFriendListKey, toUserFriendListKey}
-	args := []interface{}{userId, toUserId}
+	args := []interface{}{userId, toUserId, userAddNum, toUserAddNum}
 	if err := lua.Run(ctx, RDB, keys, args).Err(); err != nil {
 		return err
 	}
