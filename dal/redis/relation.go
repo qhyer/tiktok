@@ -292,7 +292,7 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 	}
 	userAddNum := 1
 	// 如果是刚更新成功 说明缓存是最新数据 不用再+1
-	if !ok {
+	if ok {
 		userAddNum = 0
 	}
 	// 更新被关注者的粉丝列表
@@ -303,7 +303,7 @@ func AddNewFollow(ctx context.Context, userId int64, toUserId int64) error {
 	}
 	toUserAddNum := 1
 	// 如果是刚更新成功 说明缓存是最新数据 不用再+1
-	if !ok {
+	if ok {
 		toUserAddNum = 0
 	}
 
@@ -355,7 +355,7 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 	}
 	userAddNum := -1
 	// 如果是刚更新成功 说明缓存是最新数据 不用再-1
-	if !ok {
+	if ok {
 		userAddNum = 0
 	}
 	// 更新被关注者的粉丝列表
@@ -366,7 +366,7 @@ func Unfollow(ctx context.Context, userId int64, toUserId int64) error {
 	}
 	toUserAddNum := -1
 	// 如果是刚更新成功 说明缓存是最新数据 不用再-1
-	if !ok {
+	if ok {
 		toUserAddNum = 0
 	}
 
